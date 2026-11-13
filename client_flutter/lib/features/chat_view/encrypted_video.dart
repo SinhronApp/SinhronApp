@@ -16,7 +16,7 @@ import '../../core/services/ram_media_server.dart';
 import '../../src/rust/api/simple.dart' as core;
 import '../voice/waveform.dart' show formatVoiceDuration;
 import 'encrypted_media_bubbles.dart' show formatBytes;
-import 'encrypted_photo.dart' show EncryptedThumbnail, photoBubbleWidth;
+import 'encrypted_photo.dart' show EncryptedThumbnail, mediaJsonSize, photoBubbleWidth;
 import '../../l10n/l10n.dart';
 
 class EncryptedVideo extends ConsumerStatefulWidget {
@@ -31,6 +31,7 @@ class EncryptedVideo extends ConsumerStatefulWidget {
 
 class _EncryptedVideoState extends ConsumerState<EncryptedVideo> {
   late final Future<core.MediaInfo> _info = ref.read(mediaLoaderProvider).info(widget.mediaJson);
+  late final (int, int) _size = mediaJsonSize(widget.mediaJson);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,9 @@ class _EncryptedVideoState extends ConsumerState<EncryptedVideo> {
       future: _info,
       builder: (context, snap) {
         final info = snap.data;
-        final aspect = info == null || info.width == 0 || info.height == 0 ? 16 / 9 : info.width / info.height;
+        // Before info() answers: the size written in the JSON (no jump).
+        final (iw, ih) = info == null ? _size : (info.width, info.height);
+        final aspect = iw == 0 || ih == 0 ? 16 / 9 : iw / ih;
         final w = photoBubbleWidth(context);
         final h = (w / aspect).clamp(140.0, 380.0);
         return GestureDetector(

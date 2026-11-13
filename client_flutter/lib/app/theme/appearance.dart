@@ -19,7 +19,7 @@ enum ThemeChoice { system, light, dark, oled }
 /// tone so contrast on dark surfaces holds). All pass WCAG AA (4.5:1)
 /// under white text — test/design/contrast_test.dart.
 const kAccents = <String, Color>{
-  'blue': Color(0xFF2864DE),
+  'blue': Color(0xFF2F5DC4),
   'violet': Color(0xFF7C3AED),
   'green': Color(0xFF128558),
   'orange': Color(0xFFBA5A08),
@@ -56,33 +56,46 @@ const DsTokens oledTokens = DsTokens(
   elevated: Color(0xFF18191D),
   divider: Color(0x14FFFFFF),
   dividerStrong: Color(0x22FFFFFF),
-  text: Color(0xFFECEEF1),
-  text2: Color(0xFFA6AFBD),
-  text3: Color(0xFF7A8496),
-  text4: Color(0xFF4A5365),
-  accent: Color(0xFF4F8AFF),
-  accentSoft: Color(0x294F8AFF),
-  accentText: Color(0xFFFFFFFF),
-  danger: Color(0xFFFF5A5A),
+  text: Color(0xFFEDEEF0),
+  text2: Color(0xFFB1B5BC),
+  text3: Color(0xFF8B9099),
+  text4: Color(0xFF50545C),
+  accent: Color(0xFF7CA4F8),
+  accentSoft: Color(0x297CA4F8),
+  accentText: Color(0xFF0C1424),
+  danger: Color(0xFFF2776F),
   dangerSoft: Color(0x29FF5A5A),
-  success: Color(0xFF2BC58A),
-  avatarShadeStops: [Color(0x1AFFFFFF), Color(0x00FFFFFF), Color(0x2E000000)],
-  avatarShadeOffsets: [0.0, 0.4, 1.0],
-  shadowRow: [],
-  shadowSoft: [],
-  shadowFab: [BoxShadow(color: Color(0x594F8AFF), offset: Offset(0, 6), blurRadius: 16)],
-  radiusCard: 18,
+  success: Color(0xFF3FCB8F),
+  bubbleIn: Color(0xFF18191D),
+  bubbleOut: Color(0xFF2F5DC4),
+  bubbleOutText: Color(0xFFFFFFFF),
+  bubbleOutMeta: Color(0xFFD5DFF3),
+  chipActive: Color(0xFF232327),
+  radiusCard: 20,
   radiusPill: 999,
-  radiusBubble: 14,
+  radiusBubble: 20,
 );
 
 Color _mix(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+
+Color _bubbleMeta(Color bubble) => _mix(bubble, const Color(0xFFFFFFFF), 0.8);
+
+double _contrast(Color a, Color b) {
+  final la = a.computeLuminance(), lb = b.computeLuminance();
+  return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
+}
 
 /// [base] with the user's accent. Dark themes get a lighter tone of it.
 DsTokens withAccent(DsTokens base, String accentName, {required bool dark}) {
   final c = kAccents[accentName];
   if (c == null || accentName == 'blue') return base;
-  final accent = dark ? _mix(c, const Color(0xFFFFFFFF), 0.18) : c;
+  final accent = dark ? _mix(c, const Color(0xFFFFFFFF), 0.45) : c;
+  // My bubble: the accent itself under white text, in every theme; a
+  // shade darker where the time line would not reach 4.5:1 on it.
+  var bubble = c;
+  while (_contrast(_bubbleMeta(bubble), bubble) < 4.5) {
+    bubble = _mix(bubble, const Color(0xFF000000), 0.05);
+  }
   return DsTokens(
     bg: base.bg,
     bgSoft: base.bgSoft,
@@ -100,11 +113,11 @@ DsTokens withAccent(DsTokens base, String accentName, {required bool dark}) {
     danger: base.danger,
     dangerSoft: base.dangerSoft,
     success: base.success,
-    avatarShadeStops: base.avatarShadeStops,
-    avatarShadeOffsets: base.avatarShadeOffsets,
-    shadowRow: base.shadowRow,
-    shadowSoft: base.shadowSoft,
-    shadowFab: [BoxShadow(color: accent.withValues(alpha: 0.3), offset: const Offset(0, 6), blurRadius: 16)],
+    bubbleIn: base.bubbleIn,
+    bubbleOut: bubble,
+    bubbleOutText: base.bubbleOutText,
+    bubbleOutMeta: _bubbleMeta(bubble),
+    chipActive: base.chipActive,
     radiusCard: base.radiusCard,
     radiusPill: base.radiusPill,
     radiusBubble: base.radiusBubble,
@@ -181,7 +194,7 @@ class ChatWallpaper extends ConsumerWidget {
       case Wallpaper.dawn || Wallpaper.mist || Wallpaper.dusk:
         final colors = switch (w) {
           Wallpaper.dawn =>
-            dark ? const [Color(0xFF1B1530), Color(0xFF2A1B2E)] : const [Color(0xFFFFF1E6), Color(0xFFF7E4F2)],
+            dark ? const [Color(0xFF121C2C), Color(0xFF1D1B2B)] : const [Color(0xFFDDEAF6), Color(0xFFF3F1F7)],
           Wallpaper.mist =>
             dark ? const [Color(0xFF0E1B24), Color(0xFF12222A)] : const [Color(0xFFE8F3F7), Color(0xFFEFF5EA)],
           _ => dark ? const [Color(0xFF151A2E), Color(0xFF0E1320)] : const [Color(0xFFE9ECFB), Color(0xFFF6EEF9)],
@@ -204,10 +217,21 @@ class ChatWallpaper extends ConsumerWidget {
         Positioned.fill(
           child: ColoredBox(color: tokens.bg, child: bg),
         ),
-        child,
+        OnWallpaper(child: child),
       ],
     );
   }
+}
+
+/// Marks what is drawn over a chat wallpaper: there an incoming bubble is
+/// white with a hairline, so it does not dissolve into the picture.
+class OnWallpaper extends InheritedWidget {
+  const OnWallpaper({super.key, required super.child});
+
+  static bool of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<OnWallpaper>() != null;
+
+  @override
+  bool updateShouldNotify(OnWallpaper oldWidget) => false;
 }
 
 class _PatternPainter extends CustomPainter {

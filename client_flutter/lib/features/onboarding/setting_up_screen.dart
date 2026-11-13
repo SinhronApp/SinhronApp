@@ -5,15 +5,16 @@
 //
 // Source: design/app/entry.jsx SnSettingUp.
 //
-// In production each step is wired to a real Core stream — for now we just
-// drive a timer so the screen feels alive on the device.
+// No work happens here — the account is already made on the previous step
+// (SaveAccess), so this is a short confirmation: 4 steps x 300 ms + 300 ms
+// = 1.5 s (ADR-108; was 5.3 s).
 
 import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import '../../app/theme/palette.dart';
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_icon.dart';
 import '../../widgets/sinhron_mark.dart';
@@ -39,7 +40,7 @@ class SettingUpScreen extends StatefulWidget {
     // Real flows pass the chosen server (`serverHostOf(serverUrlProvider)`);
     // the default only feeds the design previews.
     this.serverHost = 'cabin.sinhron.app',
-    this.stepDuration = const Duration(milliseconds: 1200),
+    this.stepDuration = DsMotion.slow,
   });
 
   @override
@@ -54,7 +55,7 @@ class _SettingUpScreenState extends State<SettingUpScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _spin = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
+    _spin = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
 
     _steps = [
       _Step((l) => l.setupConnecting(widget.serverHost), _StepState.active),
@@ -64,6 +65,17 @@ class _SettingUpScreenState extends State<SettingUpScreen> with SingleTickerProv
     ];
 
     _scheduleNextStep();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The arc stands still under Reduce Motion; the steps still tick.
+    if (DsMotion.reduced(context)) {
+      _spin.stop();
+    } else if (!_spin.isAnimating) {
+      _spin.repeat();
+    }
   }
 
   @override
@@ -85,7 +97,7 @@ class _SettingUpScreenState extends State<SettingUpScreen> with SingleTickerProv
           _scheduleNextStep();
         } else {
           // All done — short pause then notify parent
-          Timer(const Duration(milliseconds: 500), () {
+          Timer(DsMotion.slow, () {
             if (!mounted) return;
             widget.onFinished?.call();
           });
@@ -193,7 +205,7 @@ class _StepIndicator extends StatelessWidget {
             child: SizedBox(
               width: 14,
               height: 14,
-              child: CustomPaint(painter: DsGlyphPainter(DsGlyph.check, color: DsPalette.white)),
+              child: CustomPaint(painter: DsGlyphPainter(DsGlyph.check, color: tokens.accentText)),
             ),
           ),
         ),

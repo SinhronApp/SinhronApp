@@ -432,7 +432,7 @@ class AppL10nRu extends AppL10n {
 
   @override
   String get chatEmptyHint =>
-      'Поздоровайтесь 👋 — этот чат можете прочитать только вы двое.';
+      'Поздоровайтесь — этот чат можете прочитать только вы двое.';
 
   @override
   String get errLoadMessages =>
@@ -1352,7 +1352,7 @@ class AppL10nRu extends AppL10n {
   String get linkDevice => 'Подключить устройство';
 
   @override
-  String get restoreFromKey => 'Войти по секретным словам →';
+  String get restoreFromKey => 'Войти по секретным словам';
 
   @override
   String get pickServer => 'Выберите сервер';

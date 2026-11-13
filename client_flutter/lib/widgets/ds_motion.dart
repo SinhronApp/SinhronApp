@@ -4,16 +4,15 @@
 // Motion (DsMotion.reduced). None of them delays a tap: the child is
 // there and hit-testable from the first frame.
 
-import 'dart:math' as math;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../app/theme/motion.dart';
 
-/// Fades in and rises a few points the first time it is built. [index]
-/// staggers a list (30 ms a step, capped at [maxStagger] steps, so a long
-/// list never waits).
+/// Fades in and rises a few points the first time it is built. No stagger:
+/// the rows of a list arrive together ([index] / [maxStagger] are kept for
+/// the callers and ignored). List rows ([DsAppearScope], the chat list)
+/// play it once per app launch — see [rowsPlayed].
 class DsAppear extends StatefulWidget {
   const DsAppear({
     super.key,
@@ -37,19 +36,32 @@ class DsAppear extends StatefulWidget {
   final Duration duration;
   final int maxStagger;
 
-  static const step = Duration(milliseconds: 30);
+  /// The list rows have had their one entrance of this launch: later lists
+  /// (another tab, a return to this one) are simply there.
+  static bool get rowsPlayed => _rowsPlayed;
+  static bool _rowsPlayed = false;
+  static bool _rowsClosing = false;
+
+  /// The rows mounting in this frame are the entrance; after it, no more.
+  static void markRowsPlayed() {
+    if (_rowsPlayed || _rowsClosing) return;
+    _rowsClosing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _rowsPlayed = true;
+      _rowsClosing = false;
+    });
+  }
+
+  @visibleForTesting
+  static void resetRowsPlayed() => _rowsPlayed = _rowsClosing = false;
 
   @override
   State<DsAppear> createState() => _DsAppearState();
 }
 
 class _DsAppearState extends State<DsAppear> with SingleTickerProviderStateMixin {
-  late final Duration _delay = DsAppear.step * math.min(math.max(widget.index, 0), widget.maxStagger);
-  late final AnimationController _c = AnimationController(vsync: this, duration: _delay + widget.duration);
-  late final Animation<double> _t = CurvedAnimation(
-    parent: _c,
-    curve: Interval(_delay.inMicroseconds / (_delay + widget.duration).inMicroseconds, 1, curve: DsMotion.enter),
-  );
+  late final AnimationController _c = AnimationController(vsync: this, duration: widget.duration);
+  late final Animation<double> _t = CurvedAnimation(parent: _c, curve: DsMotion.enter);
   bool _started = false;
 
   @override
@@ -86,15 +98,16 @@ class _DsAppearState extends State<DsAppear> with SingleTickerProviderStateMixin
   }
 }
 
-/// [children] as a staggered entrance — for a `ListView(children: …)`
-/// under a [DsAppearScope].
+/// [children] with the list entrance (all together, no stagger) — for a
+/// `ListView(children: …)` under a [DsAppearScope].
 List<Widget> dsStaggered(List<Widget> children) => [
   for (var i = 0; i < children.length; i++) DsAppear(index: i, child: children[i]),
 ];
 
 /// Lets the rows under it animate in only while the screen arrives: rows
 /// that mount in the first frame play their [DsAppear]; rows that mount
-/// later (scrolled into view, a search result) are simply there.
+/// later (scrolled into view, a search result) are simply there. And only
+/// the first list of the app launch plays at all ([DsAppear.rowsPlayed]).
 class DsAppearScope extends StatefulWidget {
   const DsAppearScope({super.key, required this.child});
 
@@ -105,15 +118,10 @@ class DsAppearScope extends StatefulWidget {
 }
 
 class _DsAppearScopeState extends State<DsAppearScope> {
-  bool _open = true;
-  bool _closing = false;
-
   bool _query() {
-    if (_open && !_closing) {
-      _closing = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _open = false);
-    }
-    return _open;
+    final open = !DsAppear.rowsPlayed;
+    DsAppear.markRowsPlayed();
+    return open;
   }
 
   @override

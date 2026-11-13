@@ -1,6 +1,6 @@
 // Sheets — one look everywhere (owner, 2026-11-03: "modal windows … the
-// same everywhere, beautiful on iPad and iPhone"): the screen behind blurs
-// and dims, the sheet is a rounded card that slides up from the bottom of
+// same everywhere, beautiful on iPad and iPhone"): the screen behind
+// dims (no blur — it janked), the sheet is a rounded card that slides up from the bottom of
 // a phone (with a grabber) or fades in as a centred card on a wide screen
 // ([DsSheetPlacement]). Bare WidgetsApp has no showModalBottomSheet, so
 // [dsSheetRoute] is our own route; every sheet uses it.
@@ -9,7 +9,6 @@
 // confirmations): an optional [header] (a chat preview, a sticker pack)
 // above the actions.
 
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/physics.dart';
@@ -37,7 +36,7 @@ class DsSheetAction<T> {
   final IconData? icon;
 }
 
-/// The route every sheet is pushed with: a blurred, dimmed backdrop (a tap
+/// The route every sheet is pushed with: a dimmed backdrop (no blur) (a tap
 /// on it closes the sheet when [dismissible]), the sheet sliding up from
 /// the bottom — or fading in, a little scaled, when [centred] and on a
 /// wide screen, where it is a popup. [dragToDismiss]: pull it down to
@@ -68,10 +67,7 @@ Route<T> dsSheetRoute<T>(
               child: GestureDetector(
                 key: const ValueKey('sheet-backdrop'),
                 onTap: dismissible ? () => Navigator.of(ctx).maybePop() : null,
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 16 * curved.value, sigmaY: 16 * curved.value),
-                  child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 0.34 * curved.value)),
-                ),
+                child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 0.34 * curved.value)),
               ),
             ),
             if (popup)
@@ -80,7 +76,9 @@ Route<T> dsSheetRoute<T>(
                 child: Transform.scale(scale: 0.94 + 0.06 * curved.value, child: sheet),
               )
             else
-              FractionalTranslation(translation: Offset(0, 1 - curved.value), child: sheet),
+              // The slide is DsSheetPlacement's: the sheet rises by its own
+              // height, so it is on screen from the first frame.
+              sheet,
           ],
         ),
       );
@@ -88,7 +86,7 @@ Route<T> dsSheetRoute<T>(
   );
 }
 
-/// The sheet's card: the surface, rounded all round, lifted off the blur.
+/// The sheet's card: the surface, rounded all round, lifted off the dim.
 BoxDecoration dsSheetCard(DsTokens tokens) => BoxDecoration(
   color: tokens.surface,
   borderRadius: BorderRadius.circular(tokens.radiusCard),
@@ -218,7 +216,7 @@ class _DsMenuRowState extends State<DsMenuRow> {
 }
 
 /// Shows [actions] (and an optional [header], e.g. a chat preview) in a
-/// sheet over a blurred, dimmed backdrop. Resolves to the picked action's
+/// sheet over a dimmed backdrop. Resolves to the picked action's
 /// value, or null on Cancel / tap outside / pulled down. A menu (every
 /// action has its icon) has no Cancel — a tap outside closes it, as in iOS.
 Future<T?> showDsActionSheet<T>(

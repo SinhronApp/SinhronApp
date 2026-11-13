@@ -19,7 +19,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:flutter/gestures.dart' show LongPressGestureRecognizer, TapGestureRecognizer;
+import 'package:flutter/gestures.dart' show LongPressGestureRecognizer, TapGestureRecognizer, kDoubleTapTimeout;
 import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextCapitalization;
 import 'package:flutter/widgets.dart';
@@ -436,6 +436,7 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
 
   @override
   void dispose() {
+    _tapWindow?.cancel();
     final id = widget.chatId;
     if (id != null) {
       final text = encodeDraft(_draft.formatted);
@@ -586,7 +587,7 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients || _scroll.offset == 0) return;
-      _scroll.animateTo(0, duration: const Duration(milliseconds: 220), curve: Curves.easeOut);
+      _scroll.animateTo(0, duration: DsMotion.base, curve: Curves.easeOut);
     });
   }
 
@@ -717,12 +718,13 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
       if (!ok && mounted) setState(() => _mediaError = context.l10n.couldNotEdit);
       return;
     }
+    // Felt under the finger at the press, not after the network answers.
+    _haptics.play(Haptic.success);
     final reply = _reply.value;
     _reply.value = null;
     _draft.clear();
     try {
       await sendMessage(ref, chatId: id, body: pending.text, reply: reply, entities: pending.entities);
-      _haptics.play(Haptic.success);
       _sounds.play(UiSound.sent);
       if (_mediaError != null && mounted) setState(() => _mediaError = null);
       _scrollToBottom();
@@ -805,6 +807,24 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
 
   /// Double tap: ❤️ on / off.
   void _toggleHeart(_Msg m) => _react(m, _mine(m) == '❤️' ? null : '❤️');
+
+  // A second tap on the same bubble within the double-tap window is the
+  // heart. Counted here, not with onDoubleTap, which would hold every single
+  // tap (links, quotes, the link card) back by that window.
+  String? _tappedId;
+  Timer? _tapWindow;
+
+  void _tapBubble(_Msg m) {
+    _tapWindow?.cancel();
+    if (m.id != null && _tappedId == m.id) {
+      _tappedId = null;
+      _toggleHeart(m);
+      return;
+    }
+    _tappedId = m.id;
+    // A little over the system window: this one runs to the second finger's lift.
+    _tapWindow = Timer(kDoubleTapTimeout + const Duration(milliseconds: 100), () => _tappedId = null);
+  }
 
   /// Tap on a reaction chip: take it / drop it.
   void _toggleReaction(_Msg m, String emoji) => _react(m, _mine(m) == emoji ? null : emoji);
@@ -2059,7 +2079,8 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
                           typingText: () {
                             final id = widget.chatId;
                             if (id == null) return null;
-                            final who = ref.watch(typingPeopleProvider.select((m) => m[id]?.keys.toList()));
+                            // A string, not a list: equal values don't rebuild the screen on every ping.
+                            final who = ref.watch(typingPeopleProvider.select((m) => m[id]?.keys.join(' ')))?.split(' ');
                             final names = ref.watch(peerNamesProvider).value ?? const <String, String>{};
                             return typingLine(
                               context.l10n,
@@ -2359,9 +2380,14 @@ class _ChatViewScreenState extends ConsumerState<ChatViewScreen> {
             isFirstInChain: !(prev is _Msg && prev.side == item.side && prev.senderId == item.senderId),
             isLastInChain: !(next is _Msg && next.side == item.side && next.senderId == item.senderId),
             onLongPress: selecting ? null : (ctx) => _openMenu(item, ctx),
-            // Media opens on a single tap without waiting out a double tap.
+            // The a11y "react" action; by touch the heart is two quick taps
+            // counted in [_tapBubble], so a single tap never waits.
             onDoubleTap: canAct && item.kind == _MsgKind.text ? () => _toggleHeart(item) : null,
-            onTap: selecting ? () => _toggleSelected(item) : null,
+            onTap: selecting
+                ? () => _toggleSelected(item)
+                : canAct && item.kind == _MsgKind.text
+                ? () => _tapBubble(item)
+                : null,
             selected: selecting ? _selected.contains(item.id) : null,
             onReactionTap: canAct ? (e) => _toggleReaction(item, e) : null,
             onQuoteTap: _jumpTo,
@@ -3099,7 +3125,13 @@ class _Bubble extends StatelessWidget {
       _jumbo == 0 &&
       (msg.deleted || msg.kind == _MsgKind.text || msg.kind == _MsgKind.voice || msg.kind == _MsgKind.document);
 
-  Widget _senderName() => Padding(
+  /// What the sender's colour is picked by: their name, like their avatar,
+  /// so a name in a group has the colour of that person's circle. Members
+  /// without a name differ by key.
+  String _hueSeed(BuildContext context) =>
+      msg.senderId == null || msg.senderName != context.l10n.memberUnnamed ? msg.senderName! : msg.senderId!;
+
+  Widget _senderName(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: DsSpace.x0h5),
     child: ExcludeSemantics(
       child: Text(
@@ -3109,19 +3141,12 @@ class _Bubble extends StatelessWidget {
         style: DsText.subhead.copyWith(
           fontWeight: FontWeight.w600,
           height: 1.15,
-          color: dsAvatarAccent(msg.senderId ?? msg.senderName!),
+          color: dsAvatarAccent(_hueSeed(context), dark: DsTheme.isDarkOf(context)),
         ),
       ),
     ),
   );
 
-  /// The curl at the bottom of the last bubble in a run — text, voice, files
-  /// (photos and video keep a clean rounded frame).
-  bool get _hasTail =>
-      isLastInChain &&
-      _jumbo == 0 &&
-      !_isSticker &&
-      (msg.deleted || (msg.kind != _MsgKind.photo && msg.kind != _MsgKind.video));
   bool get _hasReactions => !msg.deleted && msg.reactions != null && msg.reactions!.isNotEmpty;
 
   /// Status 213 — a photo / video with nothing else (no caption, no quote):
@@ -3134,16 +3159,12 @@ class _Bubble extends StatelessWidget {
       (msg.text == null || msg.text!.isEmpty) &&
       msg.reply == null;
 
-  /// Telegram/iMessage chain radius logic:
-  ///   - Non-tail side corners: always 18 (smooth)
-  ///   - Tail side TOP corner: 18 if first-in-chain, else 4 (connects up)
-  ///   - Tail side BOTTOM corner: 6 if last-in-chain (the actual tail), else 4
-  BorderRadius _radius() {
-    const big = Radius.circular(18);
-    // The drawn tail covers this corner (owner, 2026-10-18: without a tail
-    // the bubbles read as a prototype next to Telegram / WhatsApp).
-    final tail = _hasTail ? Radius.zero : const Radius.circular(6);
-    const link = Radius.circular(4);
+  /// Chain radius logic: 20 everywhere; on my / their side the corners
+  /// between bubbles of one run are 6 (they read as one block).
+  BorderRadius _radius(DsTokens tokens) {
+    final big = Radius.circular(tokens.radiusBubble);
+    final tail = big;
+    const link = Radius.circular(6);
     if (_isOut) {
       return BorderRadius.only(
         topLeft: big,
@@ -3164,22 +3185,17 @@ class _Bubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
 
-    final fg = _isOut ? DsPalette.white : tokens.text;
-    final metaFg = _isOut ? DsPalette.white78 : tokens.text3; // 78% / text3
+    final fg = _isOut ? tokens.bubbleOutText : tokens.text;
+    final metaFg = _isOut ? tokens.bubbleOutMeta : tokens.text3;
 
-    // Out: subtle gradient accent → slightly violet for premium feel.
-    // In:  flat surface (gradient on light surface reads as noise).
-    final decoration = _isOut
-        ? BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [tokens.accent, _violetMix(tokens.accent)],
-            ),
-            borderRadius: _radius(),
-            boxShadow: DsShadow.bubbleOut,
-          )
-        : BoxDecoration(color: inBubbleColor(context), borderRadius: _radius());
+    // Over a wallpaper an incoming bubble is white (the card colour on
+    // dark) with a hairline, so it stays visible on any picture.
+    final onWallpaper = !_isOut && OnWallpaper.of(context);
+    final decoration = BoxDecoration(
+      color: _isOut ? tokens.bubbleOut : (onWallpaper ? tokens.surface : tokens.bubbleIn),
+      border: onWallpaper ? Border.all(color: tokens.dividerStrong, width: 0.5) : null,
+      borderRadius: _radius(tokens),
+    );
 
     final jumbo = _jumbo;
     Widget bubble = jumbo > 0
@@ -3195,14 +3211,14 @@ class _Bubble extends StatelessWidget {
               clipBehavior: (msg.kind == _MsgKind.photo || msg.kind == _MsgKind.video) && !msg.deleted
                   ? Clip.antiAlias
                   : Clip.none,
-              decoration: _bareMedia ? BoxDecoration(borderRadius: _radius()) : decoration,
+              decoration: _bareMedia ? BoxDecoration(borderRadius: _radius(tokens)) : decoration,
               child: () {
                 final body = msg.deleted ? _tombstone(context, tokens, metaFg) : _content(context, tokens, fg, metaFg);
                 if (!_nameInside) return body;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  children: [_senderName(), body],
+                  children: [_senderName(context), body],
                 );
               }(),
             ),
@@ -3235,28 +3251,6 @@ class _Bubble extends StatelessWidget {
         ],
       );
     }
-    if (_hasTail) {
-      bubble = Stack(
-        clipBehavior: Clip.none,
-        children: [
-          bubble,
-          Positioned(
-            bottom: 0,
-            right: _isOut ? -_BubbleTail.reach : null,
-            left: _isOut ? null : -_BubbleTail.reach,
-            child: ClipPath(
-              clipper: _BubbleTail(right: _isOut),
-              child: SizedBox(
-                width: _BubbleTail.width,
-                height: _BubbleTail.height,
-                // Outgoing: the gradient's end colour sits at that corner.
-                child: ColoredBox(color: _isOut ? _violetMix(tokens.accent) : inBubbleColor(context)),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
     if (bare) return bubble;
     if (onLongPress != null || onDoubleTap != null || onTap != null) {
       final inner = bubble;
@@ -3275,7 +3269,6 @@ class _Bubble extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
             onLongPress: onLongPress == null ? null : () => onLongPress!(bubbleContext),
-            onDoubleTap: onDoubleTap,
             child: inner,
           ),
         ),
@@ -3304,7 +3297,7 @@ class _Bubble extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: DsText.subhead.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: dsAvatarAccent(msg.senderId ?? msg.senderName!),
+                  color: dsAvatarAccent(_hueSeed(context), dark: DsTheme.isDarkOf(context)),
                 ),
               ),
             ),
@@ -3347,11 +3340,8 @@ class _Bubble extends StatelessWidget {
   Widget _timePill(DsTokens tokens) => Container(
     margin: const EdgeInsets.only(top: DsSpace.x0h5),
     padding: const EdgeInsets.fromLTRB(DsSpace.x2, DsSpace.nudge3, DsSpace.x2, DsSpace.nudge3),
-    decoration: BoxDecoration(
-      color: tokens.surface.withValues(alpha: 0.82),
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: DsShadow.bubbleIn,
-    ),
+    // No shadows in this look: the pill is the incoming-bubble grey.
+    decoration: BoxDecoration(color: tokens.bubbleIn, borderRadius: BorderRadius.circular(10)),
     child: _Meta(
       time: msg.time!,
       status: msg.status,
@@ -3399,14 +3389,10 @@ class _Bubble extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTap: reply.wireId == null || onQuoteTap == null ? null : () => onQuoteTap!(reply.wireId!),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 220),
+                constraints: const BoxConstraints(maxWidth: 260),
                 margin: const EdgeInsets.only(bottom: DsSpace.x1),
                 padding: const EdgeInsets.all(DsSpace.x1h5),
-                decoration: BoxDecoration(
-                  color: tokens.surface.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: DsShadow.bubbleIn,
-                ),
+                decoration: BoxDecoration(color: tokens.bubbleIn, borderRadius: BorderRadius.circular(12)),
                 child: _ReplyQuoteWidget(reply: reply, isOut: false),
               ),
             ),
@@ -3432,7 +3418,7 @@ class _Bubble extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: _isOut ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        if (_nameInside) _senderName(),
+        if (_nameInside) _senderName(context),
         if (reply != null)
           Container(
             margin: const EdgeInsets.only(bottom: DsSpace.x1),
@@ -3614,7 +3600,7 @@ class _Bubble extends StatelessWidget {
                 child: MessageText(
                   text: msg.text!,
                   entities: msg.entities,
-                  linkColor: _isOut ? DsPalette.white : tokens.accent,
+                  linkColor: _isOut ? fg : tokens.accent,
                   onOpenLink: onOpenLink,
                   style: DsText.body.copyWith(color: fg),
                 ),
@@ -3645,7 +3631,7 @@ class _Bubble extends StatelessWidget {
                 child: MessageText(
                   text: msg.text!,
                   entities: msg.entities,
-                  linkColor: _isOut ? DsPalette.white : tokens.accent,
+                  linkColor: _isOut ? fg : tokens.accent,
                   onOpenLink: onOpenLink,
                   style: DsText.body.copyWith(color: fg),
                 ),
@@ -3663,9 +3649,8 @@ class _Bubble extends StatelessWidget {
               ?quote,
               EncryptedVoice(
                 mediaJson: msg.mediaJson!,
-                // Telegram-like: the accent for theirs, white on my accent bubble.
-                color: _isOut ? DsPalette.white : tokens.accent,
-                glyph: _isOut ? _violetMix(tokens.accent) : DsPalette.white,
+                color: _isOut ? fg : tokens.accent,
+                glyph: _isOut ? tokens.bubbleOut : tokens.accentText,
                 following: voiceFollowing,
               ),
               _mediaMeta(metaFg),
@@ -3685,7 +3670,7 @@ class _Bubble extends StatelessWidget {
               MessageText(
                 text: msg.text!,
                 entities: msg.entities,
-                linkColor: _isOut ? DsPalette.white : tokens.accent,
+                linkColor: _isOut ? fg : tokens.accent,
                 onOpenLink: onOpenLink,
                 style: DsText.body.copyWith(color: fg),
               ),
@@ -3727,7 +3712,7 @@ class _ContactCard extends ConsumerWidget {
     final open = onOpen == null
         ? null
         : () => onOpen!(known.isEmpty ? contact : (identityHex: contact.identityHex, serverHost: contact.serverHost, name: known));
-    final accent = isOut ? DsPalette.white : tokens.accent;
+    final accent = isOut ? fg : tokens.accent;
     return GestureDetector(
       key: const ValueKey('contact-card'),
       behavior: HitTestBehavior.opaque,
@@ -3758,7 +3743,7 @@ class _ContactCard extends ConsumerWidget {
                         style: DsText.footnote.copyWith(color: metaFg),
                       ),
                       if (known.isEmpty)
-                        Text(l.contactCardNameUnverified, maxLines: 1, style: DsText.footnote.copyWith(color: metaFg)),
+                        Text(l.contactCardNameUnverified, style: DsText.footnote.copyWith(color: metaFg)),
                     ],
                   ),
                 ),
@@ -3773,7 +3758,7 @@ class _ContactCard extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: DsSpace.x2),
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: isOut ? 0.18 : 0.1),
+                  color: accent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -3822,54 +3807,6 @@ class _RenderMeasuredHeight extends RenderProxyBox {
   }
 }
 
-/// The curl at a bubble's bottom corner (Telegram / iMessage). Drawn over
-/// the bubble's square corner: [reach] sticks out sideways, the rest
-/// overlaps the bubble in its own colour.
-class _BubbleTail extends CustomClipper<Path> {
-  _BubbleTail({required this.right});
-  final bool right;
-
-  static const double width = 14;
-  static const double height = 20;
-  static const double reach = 7;
-
-  @override
-  Path getClip(Size size) {
-    const edge = width - reach; // the bubble's side, in the box
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(edge, 0)
-      ..cubicTo(edge, 10, edge + 2, 16, width, height - 0.3)
-      ..quadraticBezierTo(width - 4.5, height + 0.4, edge - 1.5, height - 2.2)
-      ..cubicTo(edge - 3, height - 0.8, edge - 5, height, 0, height)
-      ..close();
-    if (right) return path;
-    // Mirrored for their bubbles (tail on the left).
-    return path.transform((Matrix4.identity()..translateByDouble(size.width, 0, 0, 1)..scaleByDouble(-1, 1, 1, 1)).storage);
-  }
-
-  @override
-  bool shouldReclip(_BubbleTail old) => old.right != right;
-}
-
-/// Mix accent with a faint violet to produce the gradient end color.
-/// 22% blend toward #7C3AED, keeps accent identity but adds subtle depth.
-/// Incoming bubbles: Signal-grey on light themes (the chat is white), a
-/// step lighter than the background on dark ones.
-Color inBubbleColor(BuildContext context) =>
-    DsTheme.isDarkOf(context) ? DsTheme.of(context).surface : DsPalette.bubbleInLight;
-
-Color _violetMix(Color a) {
-  const violet = DsPalette.indigo;
-  const t = 0.22;
-  return Color.from(
-    alpha: a.a * (1 - t) + violet.a * t,
-    red: a.r * (1 - t) + violet.r * t,
-    green: a.g * (1 - t) + violet.g * t,
-    blue: a.b * (1 - t) + violet.b * t,
-  );
-}
-
 class _TextWithMeta extends StatelessWidget {
   final String text;
   final List<TextEntity>? entities;
@@ -3902,7 +3839,7 @@ class _TextWithMeta extends StatelessWidget {
     // 1-3 emoji alone → big, the way they're meant to be seen.
     final big = bigEmojiCount(text);
     final style = big > 0 ? textStyle.copyWith(fontSize: big == 1 ? 44 : 34, height: 1.15) : textStyle;
-    final linkColor = isOut ? DsPalette.white : DsTheme.of(context).accent;
+    final linkColor = isOut ? fg : DsTheme.of(context).accent;
     // Inline meta via WidgetSpan: time/tick floats to end of last text line.
     return MessageText(
       text: text,
@@ -3990,8 +3927,11 @@ class _Meta extends StatelessWidget {
               child: CustomPaint(
                 painter: _StatusPainter(
                   status: status,
+                  // Read: light blue on my bubble and on a photo's dark pill, the accent on a grey one.
                   color: status == MsgStatus.read
-                      ? DsPalette.artA8E6FF
+                      ? (color == DsPalette.white || color == DsTheme.of(context).bubbleOutMeta
+                            ? DsPalette.artA8E6FF
+                            : DsTheme.of(context).accent)
                       : status == MsgStatus.failed
                       ? DsPalette.alert
                       : color,
@@ -4053,17 +3993,10 @@ class _ReplyQuoteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
 
-    // Glass-like overlay on out-bubble (12% white), accent-soft on in-bubble.
-    final bg = isOut ? DsPalette.white12 : tokens.accentSoft;
-    final stripe = isOut
-        ? DsPalette
-              .white80 // 80% white
-        : tokens.accent;
-    final nameColor = isOut ? DsPalette.white : tokens.accent;
-    final bodyColor = isOut
-        ? DsPalette
-              .white85 // 85% white
-        : tokens.text2;
+    final bg = isOut ? tokens.bubbleOutText.withValues(alpha: 0.08) : tokens.accentSoft;
+    final stripe = tokens.accent;
+    final nameColor = isOut ? tokens.bubbleOutText : tokens.accent;
+    final bodyColor = isOut ? tokens.bubbleOutMeta : tokens.text2;
     return Container(
       margin: const EdgeInsets.only(bottom: DsSpace.x1h5),
       padding: const EdgeInsets.fromLTRB(DsSpace.x2h5, DsSpace.nudge5, DsSpace.x2h5, DsSpace.x1h5),
@@ -4081,7 +4014,7 @@ class _ReplyQuoteWidget extends StatelessWidget {
             style: DsText.footnote.copyWith(fontWeight: FontWeight.w600, color: nameColor),
           ),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
+            constraints: const BoxConstraints(maxWidth: 260),
             child: Text(
               reply.text,
               maxLines: 1,
@@ -4141,7 +4074,6 @@ class _ReactionChip extends StatelessWidget {
         color: fill,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: tokens.bg, width: 2),
-        boxShadow: DsShadow.float,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -4198,7 +4130,7 @@ class _SelectCheck extends StatelessWidget {
         border: Border.all(color: on ? tokens.accent : tokens.text4, width: 1.5),
       ),
       alignment: Alignment.center,
-      child: on ? const Icon(CupertinoIcons.checkmark_alt, size: 16, color: DsPalette.white) : null,
+      child: on ? Icon(CupertinoIcons.checkmark_alt, size: 16, color: tokens.accentText) : null,
     );
   }
 }
@@ -4256,19 +4188,10 @@ class _VoiceContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final playButtonBg = isOut
-        ? DsPalette
-              .white22 // rgba(255,255,255,0.22)
-        : tokens.accent;
-    final baseColor = isOut
-        ? DsPalette
-              .white45 // rgba(255,255,255,0.45)
-        : tokens.text4;
-    final playedColor = isOut ? DsPalette.white : tokens.accent;
-    final durationColor = isOut
-        ? DsPalette
-              .white78 // rgba(255,255,255,0.78)
-        : tokens.text3;
+    final playButtonBg = tokens.accent;
+    final baseColor = isOut ? tokens.bubbleOutMeta.withValues(alpha: 0.5) : tokens.text4;
+    final playedColor = tokens.accent;
+    final durationColor = isOut ? tokens.bubbleOutMeta : tokens.text3;
 
     final cut = (_samples.length * _playedAt).floor();
 
@@ -4281,7 +4204,11 @@ class _VoiceContent extends StatelessWidget {
           height: 32,
           decoration: BoxDecoration(color: playButtonBg, shape: BoxShape.circle),
           child: Center(
-            child: SizedBox(width: 11, height: 13, child: CustomPaint(painter: _PlayTrianglePainter(DsPalette.white))),
+            child: SizedBox(
+              width: 11,
+              height: 13,
+              child: CustomPaint(painter: _PlayTrianglePainter(tokens.accentText)),
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -4421,14 +4348,8 @@ class _TypingDotsState extends State<_TypingDots> with SingleTickerProviderState
         alignment: Alignment.centerLeft,
         child: Container(
           decoration: BoxDecoration(
-            color: tokens.surface,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(18),
-              topRight: Radius.circular(18),
-              bottomRight: Radius.circular(18),
-              bottomLeft: Radius.circular(6),
-            ),
-            boxShadow: DsShadow.bubbleIn,
+            color: tokens.bubbleIn,
+            borderRadius: BorderRadius.circular(tokens.radiusBubble),
           ),
           padding: const EdgeInsets.symmetric(horizontal: DsSpace.x3h5, vertical: DsSpace.x2h5),
           child: AnimatedBuilder(
@@ -4560,11 +4481,11 @@ class _Composer extends StatelessWidget {
                     color: attachOpen ? tokens.accentSoft : tokens.bgSoft,
                   ),
                   alignment: Alignment.center,
-                  // A quarter-and-a-half turn: + → ×, springing a little.
+                  // A quarter-and-a-half turn: + → ×.
                   child: AnimatedRotation(
                     turns: attachOpen ? 0.125 : 0,
                     duration: DsMotion.of(context, DsMotion.base),
-                    curve: DsMotion.springy,
+                    curve: DsMotion.enter,
                     child: SizedBox(
                       width: 20,
                       height: 20,
@@ -4581,7 +4502,11 @@ class _Composer extends StatelessWidget {
               child: Container(
                 constraints: const BoxConstraints(minHeight: 36),
                 padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, 0, DsSpace.x1h5, 0),
-                decoration: BoxDecoration(color: tokens.bgSoft, borderRadius: BorderRadius.circular(18)),
+                // The field is the incoming-bubble grey on light, a step lighter than the screen on dark.
+                decoration: BoxDecoration(
+                  color: DsTheme.isDarkOf(context) ? tokens.surface : tokens.bubbleIn,
+                  borderRadius: BorderRadius.circular(22),
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -4662,7 +4587,6 @@ class _Composer extends StatelessWidget {
                   child: _RoundButton(
                     size: 36,
                     bg: tokens.accent,
-                    shadow: const [DsShadow.art13],
                     child: AnimatedSwitcher(
                       duration: DsMotion.of(context, DsMotion.fast),
                       transitionBuilder: (c, a) => ScaleTransition(scale: a, child: FadeTransition(opacity: a, child: c)),
@@ -4677,7 +4601,7 @@ class _Composer extends StatelessWidget {
                                 : videoMode
                                 ? DsGlyph.video
                                 : DsGlyph.mic,
-                            color: DsPalette.white,
+                            color: tokens.accentText,
                           ),
                         ),
                       ),
@@ -4942,16 +4866,15 @@ class _RoundButton extends StatelessWidget {
   final double size;
   final Color bg;
   final Widget child;
-  final List<BoxShadow>? shadow;
 
-  const _RoundButton({required this.size, required this.bg, required this.child, this.shadow});
+  const _RoundButton({required this.size, required this.bg, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: bg, shape: BoxShape.circle, boxShadow: shadow),
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       child: Center(child: child),
     );
   }
@@ -4990,7 +4913,7 @@ class _PressScaleState extends State<_PressScale> {
     onPointerCancel: (_) => _set(false),
     child: AnimatedScale(
       scale: _down ? widget.pressed : 1,
-      duration: DsMotion.of(context, const Duration(milliseconds: 90)),
+      duration: DsMotion.of(context, DsMotion.fast),
       curve: DsMotion.enter,
       child: widget.child,
     ),
@@ -5471,11 +5394,10 @@ class _RecordingBarState extends State<_RecordingBar> {
                 child: _RoundButton(
                   size: 44,
                   bg: tokens.accent,
-                  shadow: const [DsShadow.art13],
                   child: SizedBox(
                     width: 22,
                     height: 22,
-                    child: CustomPaint(painter: DsGlyphPainter(widget.glyph, color: DsPalette.white)),
+                    child: CustomPaint(painter: DsGlyphPainter(widget.glyph, color: tokens.accentText)),
                   ),
                 ),
               ),
@@ -5499,7 +5421,7 @@ class _RecordingBarState extends State<_RecordingBar> {
                   child: SizedBox(
                     width: 20,
                     height: 20,
-                    child: CustomPaint(painter: DsGlyphPainter(DsGlyph.send, color: DsPalette.white)),
+                    child: CustomPaint(painter: DsGlyphPainter(DsGlyph.send, color: tokens.accentText)),
                   ),
                 ),
               ),
@@ -5716,7 +5638,7 @@ class _AppearInState extends State<_AppearIn> with SingleTickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
     if (DsMotion.reduced(context)) return widget.child;
-    final pos = CurvedAnimation(parent: _c, curve: DsMotion.springy);
+    final pos = CurvedAnimation(parent: _c, curve: DsMotion.enter);
     final fade = CurvedAnimation(
       parent: _c,
       curve: const Interval(0, 0.5, curve: Curves.easeOut),
@@ -6027,6 +5949,7 @@ class _RequestBar extends StatelessWidget {
             children: [
               if (canBlock) ...[
                 Expanded(
+                  flex: 3, // the longest word of the three
                   child: DsButton(
                     key: const ValueKey('request-block'),
                     label: l.chatInfoBlock,
@@ -6038,6 +5961,7 @@ class _RequestBar extends StatelessWidget {
                 const SizedBox(width: DsSpace.x2),
               ],
               Expanded(
+                flex: 2,
                 child: DsButton(
                   key: const ValueKey('request-delete'),
                   label: l.delete,
@@ -6048,6 +5972,7 @@ class _RequestBar extends StatelessWidget {
               ),
               const SizedBox(width: DsSpace.x2),
               Expanded(
+                flex: 2,
                 child: DsButton(
                   key: const ValueKey('request-accept'),
                   label: l.requestAccept,
@@ -6200,7 +6125,7 @@ class _DownButton extends StatelessWidget {
       child: AnimatedScale(
         scale: visible ? 1 : 0.6,
         duration: DsMotion.of(context, DsMotion.base),
-        curve: visible ? DsMotion.springy : DsMotion.exit,
+        curve: visible ? DsMotion.enter : DsMotion.exit,
         child: AnimatedOpacity(
           opacity: visible ? 1 : 0,
           duration: DsMotion.of(context, DsMotion.fast),
@@ -6233,7 +6158,7 @@ class _DownButton extends StatelessWidget {
                             key: const ValueKey('new-below-count'),
                             padding: const EdgeInsets.symmetric(horizontal: DsSpace.x1h5, vertical: DsSpace.x0h5),
                             decoration: BoxDecoration(color: tokens.accent, borderRadius: BorderRadius.circular(10)),
-                            child: Text('$n', style: DsTextArt.t11w700),
+                            child: Text('$n', style: DsTextArt.t11w700.copyWith(color: tokens.accentText)),
                           ),
                   ),
                 ),

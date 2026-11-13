@@ -583,7 +583,7 @@ class _FolderTabsState extends State<_FolderTabs> {
                       bottom: 0,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: tokens.text,
+                          color: tokens.chipActive,
                           borderRadius: BorderRadius.circular(tokens.radiusPill),
                         ),
                       ),
@@ -626,7 +626,7 @@ class _FolderTabsState extends State<_FolderTabs> {
     final f = widget.folders[k];
     final count = widget.counts[k];
     final lifted = k == _drag;
-    final fg = Color.lerp(tokens.text2, tokens.bg, c)!;
+    final fg = Color.lerp(tokens.text3, tokens.text, c)!;
     return AnimatedPositioned(
       key: ValueKey('folder-slot-${f.id}'),
       // Neighbours glide out of the way; the dragged tab sticks to the finger.
@@ -659,7 +659,7 @@ class _FolderTabsState extends State<_FolderTabs> {
                 alignment: Alignment.center,
                 decoration: lifted
                     ? BoxDecoration(
-                        color: Color.lerp(tokens.surface, tokens.text, c),
+                        color: Color.lerp(tokens.surface, tokens.chipActive, c),
                         borderRadius: BorderRadius.circular(tokens.radiusPill),
                         boxShadow: DsShadow.float,
                       )
@@ -673,12 +673,12 @@ class _FolderTabsState extends State<_FolderTabs> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: DsSpace.x1h5, vertical: DsSpace.nudge1),
                         decoration: BoxDecoration(
-                          color: Color.lerp(tokens.accentSoft, DsPalette.white20, c),
+                          color: Color.lerp(tokens.accentSoft, tokens.text.withValues(alpha: 0.2), c),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: DsAnimatedCount(
                           count: count,
-                          style: DsType.filterCount.copyWith(color: Color.lerp(tokens.accent, tokens.bg, c)),
+                          style: DsType.filterCount.copyWith(color: Color.lerp(tokens.accent, tokens.text, c)),
                         ),
                       ),
                     ],
@@ -764,10 +764,6 @@ class _FolderPageState extends ConsumerState<_FolderPage> {
   /// down reveals it. Short lists (nothing to scroll) keep it in view.
   bool _archiveTucked = false;
 
-  /// The rows have had their entrance — rows built later (scrolled into
-  /// view, a new chat) are simply there.
-  bool _appeared = false;
-
   @override
   void dispose() {
     _scroll.dispose();
@@ -823,10 +819,8 @@ class _FolderPageState extends ConsumerState<_FolderPage> {
       final extra = archive + (saved == null ? 0 : 1);
       // Only Saved so far: the "no chats yet" hint under it.
       final hint = saved != null && chats.isEmpty ? 1 : 0;
-      final typing = ref.watch(typingChatsProvider);
       final names = ref.watch(peerNamesProvider).value ?? const <String, String>{};
       final avatars = ref.watch(peerAvatarsProvider).value ?? const <String, Uint8List>{};
-      final presence = ref.watch(peerPresenceProvider);
       final verified =
           ref
               .watch(
@@ -845,8 +839,10 @@ class _FolderPageState extends ConsumerState<_FolderPage> {
         if (saved != null) 'chat-saved': archive,
         for (var i = 0; i < chats.length; i++) 'chat-${chats[i].id ?? '#${i + extra}'}': i + extra,
       };
-      final appeared = _appeared;
-      if (!appeared) WidgetsBinding.instance.addPostFrameCallback((_) => _appeared = true);
+      // One entrance per app launch; rows built later (scrolled into view,
+      // a new chat, a return to this tab) are simply there.
+      final appeared = DsAppear.rowsPlayed;
+      DsAppear.markRowsPlayed();
       Widget slot(String id, int i, Widget row) => DsReorderSlide(
         key: ValueKey('slot:$id'),
         child: DsAppear(index: i, animate: !appeared, child: row),
@@ -888,24 +884,35 @@ class _FolderPageState extends ConsumerState<_FolderPage> {
           }
           final stored = chats[i - extra];
           final photo = stored.peerId == null ? null : avatars[stored.peerId];
-          final row = stored
+          final shown = stored
               .withPreview(mentionsToDisplay(stored.preview, (k) => k == me ? context.l10n.you : displayNameOf(k, names)))
               .copyWith(
                 avatar: photo,
                 verified: stored.peerId != null && verified.contains(stored.peerId!.toLowerCase()),
-                // ADR-031 — the green dot, for contacts who share it.
-                online: !stored.group && !stored.request && stored.peerId != null && isOnlineNow(presence[stored.peerId]),
               );
-          final c = typing.containsKey(row.id) ? row.asTyping(context.l10n.typing) : row;
+          final showsPresence = !stored.group && !stored.request && stored.peerId != null;
           return slot(
             'chat-${stored.id ?? '#$i'}',
             i,
-            ChatRowWithActions(
-              key: ValueKey('chat-${c.id}'),
-              chat: c,
-              isLast: i == chats.length - 1 + extra,
-              pinnedIds: pinnedIds,
-              onTap: () => onChatTap?.call(c),
+            // "Typing" and the green dot are watched per row: a change for
+            // one chat rebuilds that row only, not every visible one.
+            Consumer(
+              builder: (context, ref, _) {
+                // ADR-031 — the green dot, for contacts who share it.
+                final online =
+                    showsPresence && ref.watch(peerPresenceProvider.select((m) => isOnlineNow(m[stored.peerId])));
+                final row = online ? shown.copyWith(online: true) : shown;
+                final c = ref.watch(typingChatsProvider.select((m) => m.containsKey(row.id)))
+                    ? row.asTyping(context.l10n.typing)
+                    : row;
+                return ChatRowWithActions(
+                  key: ValueKey('chat-${c.id}'),
+                  chat: c,
+                  isLast: i == chats.length - 1 + extra,
+                  pinnedIds: pinnedIds,
+                  onTap: () => onChatTap?.call(c),
+                );
+              },
             ),
           );
         },

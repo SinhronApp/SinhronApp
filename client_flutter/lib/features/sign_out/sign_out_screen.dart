@@ -266,7 +266,7 @@ class _RecoveryReminder extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: DsSpace.x3h5),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(DsSpace.x4, DsSpace.x3h5, DsSpace.x4, DsSpace.x3h5),
+        padding: const EdgeInsets.fromLTRB(DsSpace.x4, DsSpace.x3h5, DsSpace.x3, DsSpace.x3h5),
         decoration: BoxDecoration(
           color: _amberBg,
           borderRadius: BorderRadius.circular(tokens.radiusCard),
@@ -280,7 +280,7 @@ class _RecoveryReminder extends StatelessWidget {
               height: 22,
               child: CustomPaint(painter: _AlertTrianglePainter(color: _amber)),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

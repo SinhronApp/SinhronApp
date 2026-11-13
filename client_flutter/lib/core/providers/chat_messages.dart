@@ -91,7 +91,30 @@ class ChatMessagesNotifier extends Notifier<ChatMessagesState> {
   /// Re-read the newest page and merge it with what's loaded: anything
   /// older than that page stays, the page replaces the rest (so new,
   /// edited and media-attached rows all show up).
+  ///
+  /// One read at a time: a call while a read is in flight asks for exactly
+  /// one more when it finishes (a burst of N changes costs 2 reads, not N,
+  /// and the last change is never dropped).
   Future<void> refreshLatest() async {
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshOnce();
+      } while (_refreshAgain);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  Future<void> _refreshOnce() async {
     try {
       final page = await _fetch(chatId, limit: kMessagePageSize);
       final current = state;

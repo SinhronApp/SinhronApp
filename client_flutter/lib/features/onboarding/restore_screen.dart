@@ -247,6 +247,8 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
                     DsButton(
                       label: l.restoreUseQr,
                       variant: DsButtonVariant.ghost,
+                      // As the two links above: the whole phrase in one line.
+                      size: DsButtonSize.small,
                       onPressed: _busy ? null : widget.onUseQr,
                     ),
                   ],

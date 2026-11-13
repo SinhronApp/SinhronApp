@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../app/theme/motion.dart';
-import '../app/theme/palette.dart';
 import '../app/theme/tokens.dart';
 import '../core/haptics.dart';
 import 'ds_count_badge.dart';
@@ -19,12 +18,9 @@ class DsFilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
 
-    final bgColor = active ? tokens.text : tokens.bgSoft;
-    final fgColor = active ? tokens.bg : tokens.text2;
-    final countBg = active
-        ? DsPalette
-              .white20 // rgba(255,255,255,0.20)
-        : tokens.accentSoft;
+    final bgColor = active ? tokens.chipActive : tokens.bg;
+    final fgColor = active ? tokens.text : tokens.text3;
+    final countBg = active ? tokens.text.withValues(alpha: 0.2) : tokens.accentSoft;
     final countFg = active ? fgColor : tokens.accent;
 
     final pill = AnimatedContainer(

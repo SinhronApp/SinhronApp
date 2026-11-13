@@ -18,7 +18,6 @@ import '../../core/haptics.dart';
 import '../../widgets/ds_app_bar.dart';
 import '../../widgets/ds_icon.dart';
 import '../../widgets/ds_pressable.dart';
-import '../chat_view/chat_view_screen.dart' show inBubbleColor;
 import '_shared.dart';
 import '../../l10n/l10n.dart';
 
@@ -81,12 +80,17 @@ class AppearanceScreen extends ConsumerWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(0, DsSpace.x2, 0, pad.bottom + DsSpace.x6),
                 children: [
-                  // Live preview of a chat with the current choices.
+                  // Live preview of a chat with the current choices, on the
+                  // chat's own background (not this screen's grey), in a card
+                  // as wide as the ones below.
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: DsSpace.gutter),
+                    padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, 0, DsSpace.x3h5, DsSpace.x3h5),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(tokens.radiusCard),
-                      child: ChatWallpaper(child: _PreviewBubbles(tokens: tokens)),
+                      child: ColoredBox(
+                        color: tokens.bg,
+                        child: ChatWallpaper(child: _PreviewBubbles(tokens: tokens)),
+                      ),
                     ),
                   ),
                   SettingsSection(
@@ -233,24 +237,18 @@ class _PreviewBubbles extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     Widget bubble(String text, String time, {bool out = false, String? quote}) {
-      final fg = out ? DsPalette.white : tokens.text;
-      final meta = out ? DsPalette.white78 : tokens.text3;
+      final fg = out ? tokens.bubbleOutText : tokens.text;
+      final meta = out ? tokens.bubbleOutMeta : tokens.text3;
       return Align(
         alignment: out ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           constraints: const BoxConstraints(maxWidth: 270),
           margin: const EdgeInsets.fromLTRB(DsSpace.x3, DsSpace.x1, DsSpace.x3, DsSpace.x1),
           padding: const EdgeInsets.fromLTRB(DsSpace.x3, DsSpace.x1h5, DsSpace.x2h5, DsSpace.x1h5),
-          decoration: out
-              ? BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [tokens.accent, Color.lerp(tokens.accent, DsPalette.indigo, 0.22)!],
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                )
-              : BoxDecoration(color: inBubbleColor(context), borderRadius: BorderRadius.circular(18)),
+          decoration: BoxDecoration(
+            color: out ? tokens.bubbleOut : tokens.bubbleIn,
+            borderRadius: BorderRadius.circular(tokens.radiusBubble),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -289,10 +287,10 @@ class _PreviewBubbles extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(time, style: DsText.caption.copyWith(height: 1.0, color: meta)),
-                        // Read ticks, light blue as in the chat.
+                        // Read ticks, the accent as in the chat.
                         if (out) ...[
                           const SizedBox(width: 3),
-                          const DsIcon(shape: DsIconShape.doubleCheck, size: 14, color: DsPalette.artA8E6FF),
+                          DsIcon(shape: DsIconShape.doubleCheck, size: 14, color: tokens.accent),
                         ],
                       ],
                     ),

@@ -149,7 +149,7 @@ class InviteLandingScreen extends StatelessWidget {
                     leading: SizedBox(
                       width: 16,
                       height: 16,
-                      child: CustomPaint(painter: DsGlyphPainter(DsGlyph.check, color: DsPalette.white)),
+                      child: CustomPaint(painter: DsGlyphPainter(DsGlyph.check, color: DsTheme.of(context).accentText)),
                     ),
                   ),
                   if (onAlreadyHaveAccount != null) ...[
@@ -315,19 +315,12 @@ class _ServerCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [DsPalette.sky, DsPalette.blue],
-                  ),
-                ),
-                child: const Center(
+                decoration: BoxDecoration(color: tokens.bgSoft, borderRadius: BorderRadius.circular(12)),
+                child: Center(
                   child: SizedBox(
                     width: 24,
                     height: 24,
-                    child: CustomPaint(painter: DsServerStackGlyph(color: DsPalette.white)),
+                    child: CustomPaint(painter: DsServerStackGlyph(color: tokens.text2)),
                   ),
                 ),
               ),

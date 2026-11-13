@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 
 import '../app/theme/tokens.dart';
@@ -36,18 +37,25 @@ class DsTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Translucent: the list scrolls under it (backlog §5 item 41).
-    return DsBlurBar(
-      top: true,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(DsSpace.x2, DsSpace.x2, DsSpace.x2, 0).add(safeBottomPadding),
-        child: Row(
-          children: [
-            for (final t in items)
-              Expanded(
-                child: _Tab(item: t, active: t.id == active, onTap: onSelect),
-              ),
-          ],
+    // Translucent on iPhone / iPad: the list scrolls under it (backlog §5
+    // item 41). Opaque elsewhere (Android). The boundaries keep the bar and
+    // the list under it from repainting each other.
+    return RepaintBoundary(
+      child: DsBlurBar(
+        top: true,
+        glass: defaultTargetPlatform == TargetPlatform.iOS,
+        child: RepaintBoundary(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(DsSpace.x2, DsSpace.x2, DsSpace.x2, 0).add(safeBottomPadding),
+            child: Row(
+              children: [
+                for (final t in items)
+                  Expanded(
+                    child: _Tab(item: t, active: t.id == active, onTap: onSelect),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -64,7 +72,7 @@ class _Tab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final color = active ? tokens.accent : tokens.text3;
+    final color = active ? tokens.text : tokens.text3;
     // Labels come from the tab id, in the app's language (§7 item 53).
     final l = context.l10n;
     final label = switch (item.id) {
@@ -82,11 +90,8 @@ class _Tab extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          // The tab just opened greets you with a small spring.
-          if (active)
-            DsPopIn(from: 0.8, child: DsIcon(shape: item.icon, size: 22, color: color))
-          else
-            DsIcon(shape: item.icon, size: 22, color: color),
+          // No spring on the icon: bounce is for badges and reactions (ADR-108).
+          DsIcon(shape: item.icon, size: 22, color: color),
           // Nothing unread → no badge (a "0" bubble used to show).
           if ((item.badge ?? 0) > 0)
             Positioned(
@@ -140,7 +145,7 @@ class _TabBadge extends StatelessWidget {
         border: Border.all(color: bgColor, width: 2),
       ),
       alignment: Alignment.center,
-      child: DsAnimatedCount(count: count, style: DsTextArt.t10w700v2),
+      child: DsAnimatedCount(count: count, style: DsTextArt.t10w700v2.copyWith(color: tokens.accentText)),
     );
   }
 }

@@ -42,6 +42,33 @@ void main() {
     expect(taps, 1);
   });
 
+  testWidgets('a quick tap is seen: taps at once, stays pressed for minPress', (t) async {
+    var taps = 0;
+    await t.pumpWidget(app(Center(child: DsPressable(onTap: () => taps++, child: const SizedBox(width: 80, height: 40)))));
+    await t.tap(find.byType(DsPressable));
+    expect(taps, 1, reason: 'the tap is not delayed');
+    await t.pump();
+    expect(scaleOf(t), lessThan(1), reason: 'pressed although the finger is already up');
+    await t.pump(DsMotion.minPress - const Duration(milliseconds: 10));
+    expect(scaleOf(t), lessThan(1));
+    await t.pump(const Duration(milliseconds: 10));
+    expect(scaleOf(t), 1);
+    await t.pumpAndSettle();
+  });
+
+  testWidgets('a small sheet is on screen from its first frames', (t) async {
+    late BuildContext ctx;
+    await t.pumpWidget(app(Builder(builder: (c) {
+      ctx = c;
+      return const SizedBox();
+    })));
+    showDsActionSheet<String>(ctx, actions: const [DsSheetAction('Archive', 'a')]);
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 16));
+    expect(t.getTopLeft(find.byKey(const ValueKey('sheet-action-Archive'))).dy, lessThan(844));
+    await t.pumpAndSettle();
+  });
+
   testWidgets('Reduce Motion: no shrink on press', (t) async {
     await t.pumpWidget(app(
       Center(child: DsPressable(onTap: () {}, child: const SizedBox(width: 80, height: 40))),

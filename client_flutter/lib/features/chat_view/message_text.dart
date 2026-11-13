@@ -280,7 +280,7 @@ class _MessageTextState extends State<MessageText> with TickerProviderStateMixin
   late List<StyleRun> _runs;
   late List<AutoMark> _marks;
   late List<TextBlock> _blocks;
-  late final AnimationController _reveal = AnimationController(vsync: this, duration: const Duration(milliseconds: 420))
+  late final AnimationController _reveal = AnimationController(vsync: this, duration: DsMotion.slow)
     ..addListener(() => setState(() {}));
   AnimationController? _drift;
   Offset? _revealFrom;

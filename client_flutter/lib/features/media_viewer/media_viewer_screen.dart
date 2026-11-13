@@ -7,6 +7,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../app/theme/palette.dart';
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_icon.dart';
 import '../../l10n/l10n.dart';
@@ -49,7 +50,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _chromeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 220), value: 1.0);
+    _chromeCtrl = AnimationController(vsync: this, duration: DsMotion.base, value: 1.0);
     _viewer = TransformationController();
   }
 
@@ -149,7 +150,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> with SingleTicker
               right: 0,
               child: Center(
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
+                  duration: DsMotion.base,
                   padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, DsSpace.x2, DsSpace.x3h5, DsSpace.x2),
                   decoration: BoxDecoration(
                     color: _noticeOk ? DsPalette.green80 : DsPalette.black40,

@@ -3,6 +3,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sinhron/app/theme/motion.dart';
 import 'package:sinhron/widgets/ds_motion.dart';
 
 Widget host(Widget child, {bool reduceMotion = false}) => MediaQuery(
@@ -30,13 +31,25 @@ void main() {
     expect(t.getTopLeft(find.byKey(const ValueKey('box'))).dy, lessThan(start), reason: 'it rose');
   });
 
-  testWidgets('DsAppear staggers by index, capped', (t) async {
-    await t.pumpWidget(host(const Column(children: [DsAppear(index: 0, child: box), DsAppear(index: 3, child: box)])));
+  testWidgets('DsAppear: rows arrive together (no stagger), within DsMotion.base', (t) async {
+    await t.pumpWidget(host(const Column(children: [DsAppear(index: 0, child: box), DsAppear(index: 7, child: box)])));
     await t.pump(const Duration(milliseconds: 60));
     final list = t.widgetList<FadeTransition>(find.byType(FadeTransition)).toList();
-    expect(list[0].opacity.value, greaterThan(list[1].opacity.value), reason: 'the later row waits a little');
-    await t.pumpAndSettle();
+    expect(list[0].opacity.value, inExclusiveRange(0, 1));
+    expect(list[1].opacity.value, list[0].opacity.value, reason: 'no row waits for another');
+    await t.pump(DsMotion.base);
     expect(t.widgetList<FadeTransition>(find.byType(FadeTransition)).map((f) => f.opacity.value), [1, 1]);
+  });
+
+  testWidgets('list rows play once per app launch', (t) async {
+    DsAppear.resetRowsPlayed();
+    addTearDown(DsAppear.resetRowsPlayed);
+    Widget list(String k) => host(DsAppearScope(key: ValueKey(k), child: Column(children: dsStaggered(const [box]))));
+    await t.pumpWidget(list('first'));
+    expect(fades(t, DsAppear).single.opacity.value, 0, reason: 'the first list fades in');
+    await t.pumpAndSettle();
+    await t.pumpWidget(list('again'));
+    expect(fades(t, DsAppear).single.opacity.value, 1, reason: 'a later list is simply there');
   });
 
   testWidgets('DsPopIn springs in', (t) async {

@@ -1,6 +1,6 @@
-// Chat list motion (owner, 2026-10-18): rows rise in when the list opens,
-// a chat pinned to the top glides there, the others glide down — and with
-// Reduce Motion nothing moves at all.
+// Chat list motion (owner, 2026-10-18): rows fade in together when the list
+// first opens (once per app launch), a chat pinned to the top glides there,
+// the others glide down — and with Reduce Motion nothing moves at all.
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,6 +76,25 @@ List<double> rowFades(WidgetTester t) => [
 ];
 
 void main() {
+  setUp(DsAppear.resetRowsPlayed);
+
+  testWidgets('rows fade in together, once per launch', (t) async {
+    await Harness().pump(t);
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 40));
+    final f = rowFades(t);
+    expect(f.first, inExclusiveRange(0, 1));
+    expect(f, [f.first, f.first, f.first], reason: 'no stagger');
+    await t.pumpAndSettle();
+
+    // Back on the tab: the screen is built anew, the rows are just there.
+    await t.pumpWidget(const SizedBox());
+    await Harness().pump(t);
+    await t.pump();
+    await t.pump();
+    expect(rowFades(t), [1, 1, 1]);
+  });
+
   testWidgets('rows rise in; a pinned chat glides to the top, the others glide down', (t) async {
     final h = Harness();
     await h.pump(t);

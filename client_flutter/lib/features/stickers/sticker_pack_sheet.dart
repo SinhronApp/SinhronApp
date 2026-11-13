@@ -95,10 +95,15 @@ class _PackHeader extends StatelessWidget {
             style: DsText.headline.copyWith(color: tokens.text),
           ),
         ),
-        Text(
-          [l.stickerPackCount(pack.stickers.length), if (credit.isNotEmpty) credit].join(' · '),
-          textAlign: TextAlign.center,
-          style: DsText.footnote.copyWith(color: tokens.text3),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DsSpace.x5),
+          child: Text(
+            [l.stickerPackCount(pack.stickers.length), if (credit.isNotEmpty) credit].join(' · '),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: DsText.footnote.copyWith(color: tokens.text3),
+          ),
         ),
         if (note != null)
           Padding(

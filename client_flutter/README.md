@@ -18,7 +18,7 @@ Implements the chat list screen from `Downloads/sinhron/` (React prototype) usin
 | Flutter SDK | **3.41.5** | Pinned in `.fvmrc` per spec §1 (`fvm use` to activate) |
 | State mgmt | Riverpod 3.x | `Notifier`/`NotifierProvider` (§8.2). НЕ устаревший `StateNotifier`. |
 | Routing | custom `lib/app/navigation.dart` | Caller-binding `WidgetBuilder` pattern + `CupertinoPageRoute`. go_router (§8.3) не заведён — см. ADR в `docs/decisions.md`. |
-| Fonts | bundled Geist + GeistMono | OFL-1.1, in `assets/fonts/`. **No** `google_fonts` — runtime download violates §3.3 "no phone home" |
+| Fonts | bundled Golos Text + GeistMono (codes) | OFL-1.1, in `assets/fonts/`. **No** `google_fonts` — runtime download violates §3.3 "no phone home" |
 | Icons | custom `CustomPainter` | Zero external dep; avoids `flutter_svg`/`flutter_lints_icons` until §17.3 escalation |
 | App root | `WidgetsApp` (not MaterialApp) | Pure §8.5 / §18.17 — no Material defaults bleeding through |
 
@@ -44,13 +44,13 @@ client_flutter/
       ds_filter_pill.dart              ⇐ DsFilterPill + DsFilters (horizontal scroll)
       ds_chat_row.dart                 ⇐ avatar + name/time + preview + trailing indicators
       ds_tab_bar.dart                  ⇐ 4-tab bottom nav with badge support
-  assets/fonts/                        ⇐ Geist {Regular, Medium, SemiBold, Bold} + GeistMono {Regular, Medium}
+  assets/fonts/                        ⇐ GolosText {Regular, Medium, SemiBold, Bold} + GeistMono {Regular, Medium}
   test/
     test_harness.dart                  ⇐ loadAppFonts() + wrapForGolden()
     widget_test.dart                   ⇐ DsAvatar/DsChatRow golden tests + DsTokens semantics
     goldens/                           ⇐ generated PNG goldens, checked into git
   android/ ios/ macos/ linux/ windows/ ⇐ flutter create scaffolding (web added on demand)
-  pubspec.yaml                         ⇐ uses-material-design: false + Geist registration
+  pubspec.yaml                         ⇐ uses-material-design: false + font registration
 ```
 
 ## Running
@@ -82,7 +82,7 @@ fvm flutter test                      # widget tests + golden comparison
 fvm flutter test --update-goldens     # regenerate goldens after intentional UI changes
 ```
 
-Golden snapshots use bundled Geist fonts (via `FontLoader` in `test_harness.dart`) so they render close to production glyphs. Emoji glyphs appear as `□` in test goldens because Flutter's test environment ships no color-emoji font; on a real iOS device Apple Color Emoji renders them correctly.
+Golden snapshots use bundled fonts (via `FontLoader` in `test_harness.dart`) so they render close to production glyphs. Emoji glyphs appear as `□` in test goldens because Flutter's test environment ships no color-emoji font; on a real iOS device Apple Color Emoji renders them correctly.
 
 ## Theme verification trick
 

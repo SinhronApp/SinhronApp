@@ -3,6 +3,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sinhron/widgets/ds_motion.dart';
 import 'package:sinhron/app/theme/tokens.dart';
 import 'package:sinhron/features/calls_list/calls_list_screen.dart';
 import 'package:sinhron/features/contacts_list/contacts_list_screen.dart';
@@ -127,6 +128,8 @@ void main() {
     final calls = [
       CallEntry(chatId: 'c1', name: 'Аня', outgoing: true, video: false, status: 'completed', startedAtUnix: now),
     ];
+    // The list entrance plays once per app launch — this is that first time.
+    DsAppear.resetRowsPlayed();
     await t.pumpWidget(_wrap(const CallsListScreen(myName: 'Гриша', calls: [], loading: true)));
     await t.pump();
     expect(find.text('Аня'), findsNothing);

@@ -42,7 +42,7 @@ import '../server_notices/server_notices.dart' show ServerNoticesSettingsRow;
 
 /// Shown under About. Must equal pubspec `version` (test/core/app_version_test.dart);
 /// raise it with every update the owner installs (CLAUDE.md § Versions).
-const kAppVersion = '0.12.0';
+const kAppVersion = '0.13.0';
 
 /// The build number of this upload (TestFlight / APK), passed by
 /// `scripts/testflight.sh` and `scripts/android_release.sh` as

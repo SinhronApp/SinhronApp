@@ -33,6 +33,7 @@ import '../../widgets/ds_search_pill.dart';
 import '../../widgets/ds_shared_glyphs.dart';
 import '../../widgets/ds_verified_badge.dart';
 import '../../widgets/ds_motion.dart';
+import '../../widgets/ds_pressable.dart';
 import '../../app/theme/motion.dart';
 
 /// A person in my contacts (ADR-052), with our personal chat if there is one.
@@ -236,8 +237,8 @@ class _RealContactsState extends State<_RealContacts> {
       if (widget.people.isNotEmpty)
         DsSearchPill(key: const ValueKey('contacts-search'), controller: _query, hint: l.searchContacts),
       if (!searching) ...[
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        DsPressable(
+          scale: 0.985,
           onTap: w.onMyCard,
           child: _MyCard(
             name: me.name,
@@ -394,8 +395,7 @@ class _Header extends StatelessWidget {
           Expanded(
             child: Text(context.l10n.tabContacts, style: DsType.headerTitle.copyWith(color: tokens.text)),
           ),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
+          DsPressable(
             onTap: onAdd,
             child: SizedBox(
               width: 36,
@@ -474,7 +474,7 @@ class _MyCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            DsAvatar(name: name, size: 50, image: photo),
+            DsAvatar(name: name, size: 52, image: photo),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -545,9 +545,10 @@ class _InviteRow extends StatelessWidget {
     final l = context.l10n;
     return Semantics(
       button: true,
-      child: GestureDetector(
+      child: DsPressable(
         key: const ValueKey('contacts-invite'),
-        behavior: HitTestBehavior.opaque,
+        scale: 1,
+        pressedColor: tokens.bgSoft,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(DsSpace.x4, DsSpace.x3, DsSpace.x4, 0),
@@ -659,8 +660,9 @@ class _ContactRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return DsPressable(
+      scale: 1,
+      pressedColor: tokens.bgSoft,
       onTap: onTap,
       child: Stack(
         children: [
@@ -717,9 +719,8 @@ class _ContactRow extends StatelessWidget {
                   Semantics(
                     button: onCall != null,
                     label: onCall != null ? context.l10n.call : null,
-                    child: GestureDetector(
+                    child: DsPressable(
                       key: onCall != null ? ValueKey('call-${contact.name}') : null,
-                      behavior: HitTestBehavior.opaque,
                       onTap: onCall,
                       child: SizedBox(
                         width: 36,

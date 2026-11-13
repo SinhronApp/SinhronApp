@@ -26,12 +26,12 @@ class DsTokens {
 
   final Color success;
 
-  final List<Color> avatarShadeStops;
-  final List<double> avatarShadeOffsets;
-
-  final List<BoxShadow> shadowRow;
-  final List<BoxShadow> shadowSoft;
-  final List<BoxShadow> shadowFab;
+  /// Message bubbles and the open filter chip / muted badge.
+  final Color bubbleIn;
+  final Color bubbleOut;
+  final Color bubbleOutText;
+  final Color bubbleOutMeta;
+  final Color chipActive;
 
   final double radiusCard;
   final double radiusPill;
@@ -54,11 +54,11 @@ class DsTokens {
     required this.danger,
     required this.dangerSoft,
     required this.success,
-    required this.avatarShadeStops,
-    required this.avatarShadeOffsets,
-    required this.shadowRow,
-    required this.shadowSoft,
-    required this.shadowFab,
+    required this.bubbleIn,
+    required this.bubbleOut,
+    required this.bubbleOutText,
+    required this.bubbleOutMeta,
+    required this.chipActive,
     required this.radiusCard,
     required this.radiusPill,
     required this.radiusBubble,
@@ -68,76 +68,57 @@ class DsTokens {
     // Neutral like Signal / iOS (2026-10-20, owner: "the beige is ugly"):
     // lists on white, grouped screens (settings, info) on system grey.
     bg: Color(0xFFFFFFFF),
-    bgSoft: Color(0xFFF2F2F7),
+    bgSoft: Color(0xFFF4F5F7),
     surface: Color(0xFFFFFFFF),
     elevated: Color(0xFFFFFFFF),
-    divider: Color(0x0F0F1720),
-    dividerStrong: Color(0x1A0F1720),
-    text: Color(0xFF0E141B),
-    text2: Color(0xFF4A5562),
-    text3: Color(0xFF636C76), // AA ≥ 4.5:1 on bg / bgSoft / surface
-    text4: Color(0xFFB4BDC9),
-    accent: Color(0xFF2864DE), // AA as text and under white text
-    accentSoft: Color(0xFFE6EFFE),
+    divider: Color(0x12111316),
+    dividerStrong: Color(0x1A111316),
+    text: Color(0xFF111316),
+    text2: Color(0xFF474C55),
+    text3: Color(0xFF666C76), // AA ≥ 4.5:1 on bg / bgSoft / surface
+    text4: Color(0xFFB4B9C1),
+    accent: Color(0xFF2F5DC4), // AA as text and under white text
+    accentSoft: Color(0xFFE6ECF8),
     accentText: Color(0xFFFFFFFF),
-    danger: Color(0xFFC53434),
+    danger: Color(0xFFC13333),
     dangerSoft: Color(0xFFFDE9E9),
-    success: Color(0xFF167A4D),
-    avatarShadeStops: [Color(0x2EFFFFFF), Color(0x00FFFFFF), Color(0x14000000)],
-    avatarShadeOffsets: [0.0, 0.4, 1.0],
-    shadowRow: [BoxShadow(color: Color(0x0A0F1720), offset: Offset(0, 1), blurRadius: 0)],
-    shadowSoft: [
-      BoxShadow(color: Color(0x0A0F1720), offset: Offset(0, 1), blurRadius: 2),
-      BoxShadow(color: Color(0x0F0F1720), offset: Offset(0, 8), blurRadius: 24),
-    ],
-    shadowFab: [
-      BoxShadow(color: Color(0x4D2D6FF7), offset: Offset(0, 6), blurRadius: 16),
-      BoxShadow(color: Color(0x2E2D6FF7), offset: Offset(0, 2), blurRadius: 4),
-    ],
-    radiusCard: 18,
+    success: Color(0xFF15784B),
+    bubbleIn: Color(0xFFEEF0F3),
+    bubbleOut: Color(0xFF2F5DC4),
+    bubbleOutText: Color(0xFFFFFFFF),
+    bubbleOutMeta: Color(0xFFD5DFF3),
+    chipActive: Color(0xFFE6E8EC),
+    radiusCard: 20,
     radiusPill: 999,
-    radiusBubble: 14,
+    radiusBubble: 20,
   );
 
   static const DsTokens dark = DsTokens(
     // Neutral greys (iOS dark system colours), not the old blue-black.
-    bg: Color(0xFF121214),
-    bgSoft: Color(0xFF0C0C0E),
-    surface: Color(0xFF1C1C1F),
-    elevated: Color(0xFF26262A),
-    divider: Color(0x0FFFFFFF),
+    bg: Color(0xFF111113),
+    bgSoft: Color(0xFF0A0A0C),
+    surface: Color(0xFF1B1B1E),
+    elevated: Color(0xFF262629),
+    divider: Color(0x12FFFFFF),
     dividerStrong: Color(0x1AFFFFFF),
-    text: Color(0xFFECEEF1),
-    text2: Color(0xFFA6AFBD),
-    text3: Color(0xFF7C8695), // AA 4.7:1
-    text4: Color(0xFF4A5365),
-    accent: Color(0xFF4F8AFF),
-    accentSoft: Color(0x294F8AFF),
-    accentText: Color(0xFFFFFFFF),
-    danger: Color(0xFFE45353),
+    text: Color(0xFFEDEEF0),
+    text2: Color(0xFFB1B5BC),
+    text3: Color(0xFF8B9099),
+    text4: Color(0xFF50545C),
+    accent: Color(0xFF7CA4F8),
+    accentSoft: Color(0x297CA4F8),
+    accentText: Color(0xFF0C1424), // dark text on the light accent
+    danger: Color(0xFFF2776F),
     dangerSoft: Color(0x29E03B3B),
-    success: Color(0xFF2BC58A),
-    avatarShadeStops: [Color(0x1AFFFFFF), Color(0x00FFFFFF), Color(0x2E000000)],
-    avatarShadeOffsets: [0.0, 0.4, 1.0],
-    shadowRow: [BoxShadow(color: Color(0x66000000), offset: Offset(0, 1), blurRadius: 0)],
-    shadowSoft: [
-      BoxShadow(color: Color(0x73000000), offset: Offset(0, 1), blurRadius: 2),
-      BoxShadow(color: Color(0x66000000), offset: Offset(0, 12), blurRadius: 28),
-    ],
-    shadowFab: [
-      BoxShadow(color: Color(0x594F8AFF), offset: Offset(0, 6), blurRadius: 16),
-      BoxShadow(color: Color(0x66000000), offset: Offset(0, 2), blurRadius: 4),
-    ],
-    radiusCard: 18,
+    success: Color(0xFF3FCB8F),
+    bubbleIn: Color(0xFF232327),
+    bubbleOut: Color(0xFF2F5DC4),
+    bubbleOutText: Color(0xFFFFFFFF),
+    bubbleOutMeta: Color(0xFFD5DFF3),
+    chipActive: Color(0xFF2C2C31),
+    radiusCard: 20,
     radiusPill: 999,
-    radiusBubble: 14,
-  );
-
-  LinearGradient get avatarShade => LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: avatarShadeStops,
-    stops: avatarShadeOffsets,
+    radiusBubble: 20,
   );
 }
 
@@ -180,9 +161,9 @@ abstract final class DsText {
   /// Screen titles (large title).
   static const title1 = TextStyle(
     fontFamily: _f,
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    letterSpacing: -0.6,
+    fontSize: 30,
+    fontWeight: FontWeight.w600,
+    letterSpacing: -0.4,
     height: 1.15,
   );
 
@@ -314,9 +295,8 @@ abstract final class DsText {
   ];
 }
 
-/// Elevation — UI backlog §5 item 39. Fixed (not theme-dependent)
-/// shadows used across screens; theme-tuned ones live in DsTokens
-/// (shadowRow / shadowSoft / shadowFab).
+/// Elevation — UI backlog §5 item 39. The few shadows left: things that
+/// float over content. Cards, bubbles and buttons have none.
 abstract final class DsShadow {
   /// Context menus, reaction bar, popovers.
   static const menu = [BoxShadow(color: Color(0x33000000), blurRadius: 24, offset: Offset(0, 8))];
@@ -324,52 +304,14 @@ abstract final class DsShadow {
   /// Floating round buttons / chips over content.
   static const float = [BoxShadow(color: Color(0x26000000), blurRadius: 10, offset: Offset(0, 3))];
 
-  /// Incoming bubble hairline lift.
-  static const bubbleIn = [BoxShadow(color: Color(0x0D0F1720), offset: Offset(0, 1), blurRadius: 1)];
+  /// Cards, rows and tiles resting on the background: no shadow in this
+  /// look (one place switches all of them).
+  static const card = <BoxShadow>[];
 
-  /// Cards, rows and tiles resting on the background (the most common
-  /// shadow — was hand-written 29 times).
-  static const card = [BoxShadow(color: Color(0x0A0F1720), offset: Offset(0, 1), blurRadius: 2)];
-
-  /// Thin lift for small chips and pills.
-  static const hairline = [BoxShadow(color: Color(0x0D0F1720), offset: Offset(0, 1), blurRadius: 1)];
-
-  /// Soft lift on media / dark surfaces.
-  static const lift = [BoxShadow(color: Color(0x33000000), offset: Offset(0, 1), blurRadius: 2)];
-
-  /// Subtle drop for floating controls.
-  static const soft = [BoxShadow(color: Color(0x14000000), offset: Offset(0, 1), blurRadius: 3)];
-
-  /// Green "success" glow (verified / connected badges).
-  static const successGlow = [BoxShadow(color: Color(0x381FAF6E), offset: Offset(0, 2), blurRadius: 6)];
-
-  /// Outgoing (accent) bubble glow.
-  static const bubbleOut = [
-    BoxShadow(color: Color(0x332D6FF7), offset: Offset(0, 1), blurRadius: 2),
-    BoxShadow(color: Color(0x1F2D6FF7), offset: Offset(0, 4), blurRadius: 12),
-  ];
   // Tech-debt 2.26 — screen-specific shadows, same values as before.
-  static const art1 = BoxShadow(color: DsPalette.black20, blurRadius: 8, offset: Offset(0, 2));
-  static const art2 = BoxShadow(color: DsPalette.navyShade20, offset: Offset(0, -2), blurRadius: 18);
-  static const art3 = BoxShadow(color: DsPalette.black8, offset: Offset(0, 4), blurRadius: 16);
-  static const art4 = BoxShadow(color: DsPalette.green22, offset: Offset(0, 2), blurRadius: 6);
-  static const art5 = BoxShadow(color: DsPalette.green30, offset: Offset(0, 8), blurRadius: 22);
-  static const art6 = BoxShadow(color: DsPalette.black30, offset: Offset(0, 18), blurRadius: 40);
   static const art7 = BoxShadow(color: DsPalette.black20, offset: Offset(0, 4), blurRadius: 18);
-  static const art8 = BoxShadow(color: DsPalette.art1A2540a4D, offset: Offset(0, 24), blurRadius: 60);
-  static const art9 = BoxShadow(color: DsPalette.navyShade20, offset: Offset(0, 2), blurRadius: 6);
   static const art10 = BoxShadow(color: DsPalette.black20, offset: Offset(0, 2), blurRadius: 6);
-  static const art11 = BoxShadow(color: DsPalette.art0F1720a0F, offset: Offset(0, -2), blurRadius: 12);
-  static const art12 = BoxShadow(color: DsPalette.art0F1720a1A, offset: Offset(0, 1), blurRadius: 2);
-  static const art13 = BoxShadow(color: DsPalette.blue30, offset: Offset(0, 2), blurRadius: 6);
-  static const art14 = BoxShadow(color: DsPalette.black20, offset: Offset(0, 1), blurRadius: 2);
-  static const art15 = BoxShadow(color: DsPalette.art000000a1A, offset: Offset(0, 1), blurRadius: 3);
-  static const art16 = BoxShadow(color: DsPalette.black8, offset: Offset(0, 2), blurRadius: 12);
-  static const art17 = BoxShadow(color: DsPalette.black30, offset: Offset(0, -10), blurRadius: 40);
   static const art18 = BoxShadow(color: DsPalette.art000000a2E, offset: Offset(0, 1), blurRadius: 3);
-  static const art19 = BoxShadow(color: DsPalette.art1A2540a14, offset: Offset(0, 6), blurRadius: 24);
-  static const art20 = BoxShadow(color: DsPalette.art1A2540a66, offset: Offset(0, 24), blurRadius: 60);
-  static const art21 = BoxShadow(color: DsPalette.blue30, offset: Offset(0, 1), blurRadius: 2);
   // Tech-debt 2.26 — shadows that depend on the theme / state, as tokens.
 
   /// A coloured glow under a control: `color` at `alpha`, dropped `y`.
@@ -389,13 +331,6 @@ abstract final class DsShadow {
     blurRadius: s.blurRadius,
     spreadRadius: s.spreadRadius,
   );
-  static const art22 = BoxShadow(color: DsPalette.blue18, offset: Offset(0, 1), blurRadius: 1);
-  static const art23 = BoxShadow(color: DsPalette.slate5, offset: Offset(0, 1), blurRadius: 1);
-  static const art24 = BoxShadow(color: DsPalette.blue20, offset: Offset(0, 1), blurRadius: 2);
-  static const art25 = BoxShadow(color: DsPalette.blue18, offset: Offset(0, 6), blurRadius: 16);
-  static const art26 = BoxShadow(color: DsPalette.slate4, offset: Offset(0, 1), blurRadius: 2);
-  static const art27 = BoxShadow(color: DsPalette.artFF4D4Da38, offset: Offset(0, 1), blurRadius: 2);
-  static const art28 = BoxShadow(color: DsPalette.red20, offset: Offset(0, 6), blurRadius: 16);
 }
 
 /// Spacing grid (4 / 8) — UI backlog §5 item 39.
@@ -452,7 +387,7 @@ abstract final class DsSpace {
 class DsType {
   DsType._();
 
-  static const String family = 'Geist';
+  static const String family = 'GolosText';
   static const String familyMono = 'GeistMono';
 
   static const TextStyle headerTitle = TextStyle(
@@ -466,7 +401,7 @@ class DsType {
   static const TextStyle rowName = TextStyle(
     fontFamily: family,
     fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: -0.2,
     height: 1.2,
   );
@@ -522,7 +457,7 @@ class DsType {
 
   static const TextStyle tabLabel = TextStyle(
     fontFamily: family,
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontWeight: FontWeight.w500,
     letterSpacing: -0.05,
     height: 1.0,
@@ -530,19 +465,19 @@ class DsType {
 
   static const TextStyle tabLabelActive = TextStyle(
     fontFamily: family,
-    fontSize: 10.5,
+    fontSize: 11.5,
     fontWeight: FontWeight.w600,
     letterSpacing: -0.05,
     height: 1.0,
   );
 
-  static TextStyle avatarInitials(double size) => TextStyle(
+  static TextStyle avatarInitials(double size, Color color) => TextStyle(
     fontFamily: family,
-    fontSize: size * 0.38,
-    fontWeight: FontWeight.w600,
+    fontSize: size * 0.36,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0.2,
     height: 1.0,
-    color: const Color(0xFFFFFFFF),
+    color: color,
   );
 }
 

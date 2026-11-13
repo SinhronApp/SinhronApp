@@ -24,7 +24,6 @@ import '../../core/services/media_loader.dart';
 import '../../l10n/l10n.dart';
 import '../../src/rust/api/simple.dart' as core;
 import '../../widgets/ds_avatar.dart';
-import '../chat_view/chat_view_screen.dart' show inBubbleColor;
 import '../chat_view/encrypted_photo.dart' show EncryptedThumbnail;
 import '../chat_view/message_text.dart';
 import '../stickers/sticker_message.dart';
@@ -150,12 +149,12 @@ class _PeekBubble extends StatelessWidget {
         ),
       );
     }
-    final fg = mine ? DsPalette.white : tokens.text;
-    final meta = mine ? DsPalette.white78 : tokens.text3;
-    final fill = mine ? tokens.accent : inBubbleColor(context);
+    final fg = mine ? tokens.bubbleOutText : tokens.text;
+    final meta = mine ? tokens.bubbleOutMeta : tokens.text3;
+    final fill = mine ? tokens.bubbleOut : tokens.bubbleIn;
     final media = m.deleted ? null : m.mediaJson;
     final caption = m.deleted ? '' : m.body;
-    final radius = BorderRadius.circular(tokens.radiusBubble + 2);
+    final radius = BorderRadius.circular(tokens.radiusBubble);
 
     Widget bubble({required Widget child, EdgeInsets? padding}) => Container(
       padding: padding ?? const EdgeInsets.fromLTRB(DsSpace.x3, DsSpace.x1h5, DsSpace.x3, DsSpace.x1h5),
@@ -166,7 +165,7 @@ class _PeekBubble extends StatelessWidget {
       text: text,
       entities: entities,
       style: DsText.body.copyWith(color: fg),
-      linkColor: mine ? DsPalette.white : tokens.accent,
+      linkColor: mine ? fg : tokens.accent,
       trailing: TextSpan(
         children: [
           const TextSpan(text: '   '),
@@ -262,7 +261,7 @@ class _PeekBubble extends StatelessWidget {
           voice: voice,
           fg: fg,
           meta: meta,
-          badge: mine ? DsPalette.white20 : tokens.accent,
+          badge: tokens.accent,
           time: time,
         ),
       );
@@ -337,7 +336,7 @@ class _MediaLineState extends ConsumerState<_MediaLine> {
                 widget.voice ? CupertinoIcons.play_fill : CupertinoIcons.doc_fill,
                 key: ValueKey(widget.voice ? 'peek-voice' : 'peek-document'),
                 size: 18,
-                color: DsPalette.white,
+                color: DsTheme.of(context).accentText,
               ),
             ),
             const SizedBox(width: DsSpace.x2h5),

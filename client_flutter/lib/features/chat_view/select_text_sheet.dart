@@ -73,12 +73,10 @@ class SelectTextSheet extends StatelessWidget {
                 children: [
                   action(l.selectTextClose, () => Navigator.of(context).pop(), key: const ValueKey('select-text-close')),
                   Expanded(
-                    child: Text(
-                      l.selectText,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: DsText.headline.copyWith(color: tokens.text),
+                    // Shrinks rather than cuts between the two actions.
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(l.selectText, maxLines: 1, style: DsText.headline.copyWith(color: tokens.text)),
                     ),
                   ),
                   action(l.copyAll, () => _copyAll(context), key: const ValueKey('select-text-copy-all'), bold: true),

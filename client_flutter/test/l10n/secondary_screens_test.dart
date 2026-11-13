@@ -40,7 +40,6 @@ import 'package:sinhron/features/show_qr/show_qr_screen.dart';
 import 'package:sinhron/features/sign_out/sign_out_screen.dart';
 import 'package:sinhron/features/chat_list/chat_data.dart';
 import 'package:sinhron/features/onboarding/welcome_screen.dart';
-import 'package:sinhron/features/onboarding/onboarding_splash_screen.dart';
 import 'package:sinhron/features/onboarding/profile_screen.dart';
 import 'package:sinhron/features/onboarding/server_invite_screen.dart';
 import 'package:sinhron/features/onboarding/recovery_phrase_screen.dart';
@@ -68,7 +67,6 @@ void main() {
   final cases = <(String, Widget Function())>[
     // The way in, the first screens, a call — all real-mode (2026-10-16 UI audit).
     ('WelcomeScreen', () => WelcomeScreen(onGetStarted: () {}, onLinkDevice: () {}, onRestore: () {}, onTerms: () {})),
-    ('OnboardingSplashScreen', () => OnboardingSplashScreen(onFinish: () {})),
     ('ProfileScreen', () => ProfileScreen(onBack: () {}, onContinue: () {}, initialName: 'Константин')),
     ('ServerInviteScreen', () => ServerInviteScreen(onBack: () {}, onContinue: () {}, initialServer: 'chat.777400777.xyz')),
     ('RecoveryPhraseScreen', () => RecoveryPhraseScreen(onBack: () {}, onSaved: (_) {}, words: 'abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid acoustic acquire across act action actor actress actual'.split(' '))),

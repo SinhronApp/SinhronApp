@@ -93,6 +93,7 @@ class Harness {
     bool blocked = false,
     String? savedId,
     int disappear = 0,
+    Haptics? haptics,
   }) {
     groups.active = member;
     final shown = history ?? rows;
@@ -103,7 +104,7 @@ class Harness {
       messageSenderProvider.overrideWithValue(sender),
       chatStoreProvider.overrideWithValue(chats),
       groupOpsProvider.overrideWithValue(groups),
-      hapticsProvider.overrideWithValue(Haptics(() => false)),
+      hapticsProvider.overrideWithValue(haptics ?? Haptics(() => false)),
       linkPreviewBaseUrlProvider.overrideWithValue(() => null),
       peopleStoreProvider.overrideWithValue(
         people
@@ -240,6 +241,29 @@ void main() {
     await t.tap(find.byKey(const ValueKey('reaction-👍')));
     await t.pumpAndSettle();
     expect(h.store.calls.last, 'react $w1 me 👍');
+  });
+
+  testWidgets('two slow taps on a bubble are not a heart', (t) async {
+    final h = Harness();
+    await h.pump(t);
+    await t.tap(bubble('Hello there'));
+    await t.pump(const Duration(milliseconds: 500));
+    await t.tap(bubble('Hello there'));
+    await t.pumpAndSettle();
+    expect(h.store.calls.where((c) => c.startsWith('react')), isEmpty);
+  });
+
+  testWidgets('send buzzes at the press, before the message has gone', (t) async {
+    late final Harness h;
+    final sentAtBuzz = <int>[];
+    h = Harness(haptics: _SpyHaptics(() => sentAtBuzz.add(h.sender.sent.length)));
+    await h.pump(t);
+    await t.enterText(find.byType(EditableText), 'Hi');
+    await t.pump();
+    await t.tap(find.byKey(const ValueKey('composer-send-or-mic')));
+    await t.pumpAndSettle();
+    expect(h.sender.sent, hasLength(1));
+    expect(sentAtBuzz, [0]);
   });
 
   testWidgets('swipe left on a bubble starts a reply', (t) async {
@@ -742,4 +766,12 @@ void main() {
     expect(find.byKey(const ValueKey('header-timer')), findsOneWidget);
     expect(find.textContaining('⏱'), findsNothing);
   });
+}
+
+class _SpyHaptics extends Haptics {
+  _SpyHaptics(this.onPlay) : super(() => true);
+  final void Function() onPlay;
+
+  @override
+  Future<void> play(Haptic h) async => onPlay();
 }

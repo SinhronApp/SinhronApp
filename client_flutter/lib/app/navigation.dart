@@ -1,7 +1,7 @@
 // App navigation — wires every screen into the flow.
 //
 // Linear flow (the natural user journey):
-//   OnboardingSplash → Welcome
+//   Welcome
 //   Welcome:
 //     Get started → ServerInvite → Profile → SaveAccess → SettingUp → ChatList
 //     Link a device → ServerInvite → PairQr → ChatList
@@ -39,6 +39,7 @@ import '../core/providers/saved_messages.dart';
 import 'adaptive.dart';
 import '../features/chat_list/folders.dart' show chatsInFolder, kFolderAll;
 import 'theme/motion.dart';
+import 'theme/tokens.dart' show DsTheme;
 import '../features/documents/document_share.dart' show shareDecryptedFile, shareOrigin;
 import '../features/chat_list/chat_data.dart' show ChatPreview;
 import '../core/providers/core_providers.dart';
@@ -70,7 +71,6 @@ import '../features/contact_info/contact_profile_screen.dart';
 import '../features/contacts_list/contacts_list_screen.dart';
 import '../features/invite_link/invite_landing_screen.dart';
 import '../features/new_group/new_group_screen.dart';
-import '../features/onboarding/onboarding_splash_screen.dart';
 import '../features/onboarding/profile_screen.dart';
 import '../features/onboarding/pair_qr_screen.dart';
 import '../features/onboarding/restore_screen.dart';
@@ -116,15 +116,15 @@ import 'app.dart' show SinhronApp;
 final ValueNotifier<String> globalDiagnosticBanner = appNotice;
 
 /// Default home. Identity-aware boot routing (WU 73.2):
-///   - If `identityProvider` is still loading → splash screen (its
-///     animation hides the brief Rust→SQLite read on cold launch).
+///   - If `identityProvider` is still loading → the plain theme
+///     background (the Rust→SQLite read on cold launch is brief).
 ///   - If `identityProvider` returned non-null → skip directly to
 ///     ChatList. The user already onboarded on a previous launch; no
 ///     reason to walk through Welcome / ServerInvite / RecoveryPhrase
 ///     again (which would also re-generate a different BIP-39 phrase
 ///     and confuse the user about which one is "their" recovery).
 ///   - Otherwise (no identity / load errored) → the linear onboarding
-///     flow starting at OnboardingSplash.
+///     flow starting at the welcome screen.
 class AppRoot extends ConsumerWidget {
   const AppRoot({super.key});
 
@@ -136,13 +136,13 @@ class AppRoot extends ConsumerWidget {
     if (ref.watch(deviceRemovedProvider)) return const DsReadableWidth(child: DeviceRemovedScreen());
     final identity = ref.watch(identityProvider);
     return identity.when(
-      // IMPORTANT: every branch must return a FULLY WIRED splash (with
-      // `onFinish` callback). An earlier version returned
-      // `const OnboardingSplashScreen()` for the loading branch — that
-      // splash had no onFinish, so its "Get started" / auto-advance
-      // calls short-circuited via `?.call()` and the carousel was stuck.
-      loading: () => _wireSplash(context),
-      error: (_, _) => _wireSplash(context),
+      // Loading (a moment on every launch): just the background — not
+      // the welcome screen, which flashed before the chat list.
+      loading: () => ColoredBox(color: DsTheme.of(context).bg, child: const SizedBox.expand()),
+      // The account could not be read: also just the background. Never the
+      // welcome screen — one tap on "Get started" there would make a new
+      // account over the one that is still on this phone.
+      error: (_, _) => ColoredBox(color: DsTheme.of(context).bg, child: const SizedBox.expand()),
       data: (row) {
         if (row != null) {
           // ADR-021 — a returning user is connected with the device key
@@ -168,9 +168,7 @@ class AppRoot extends ConsumerWidget {
 /// fields across the whole screen.
 WidgetBuilder _form(WidgetBuilder builder) => (context) => DsReadableWidth(child: builder(context));
 
-Widget _wireSplash(BuildContext context) {
-  return OnboardingSplashScreen(onFinish: () => Navigator.of(context).push(_route(_wireWelcomeBuilder())));
-}
+Widget _wireSplash(BuildContext context) => _wireWelcomeBuilder()(context);
 
 WidgetBuilder _wireWelcomeBuilder() => _form((context) {
   // ADR-032 — every path starts with the server: typed or scanned.
@@ -311,17 +309,22 @@ WidgetBuilder _wireRecoveryBuilder() => _form((context) {
     onBack: () => Navigator.of(context).pop(),
     onDone: () => Navigator.of(context).push(
       _route((ctx) {
-        return SettingUpScreen(
-          // The server chosen on the first onboarding step (was the demo host).
-          serverHost: serverHostOf(ProviderScope.containerOf(ctx).read(serverUrlProvider).value ?? ''),
-          onFinished: () {
-            final nav = Navigator.of(ctx);
-            // A fresh root (it shows the chats now that the account exists)
-            // instead of a chat list on top of the old root — Back showed a
-            // second, identical chat list (2026-10-16 UI audit).
-            nav.pushAndRemoveUntil(_route((_) => const AppRoot()), (_) => false);
-            _offerPendingInvite(nav);
-          },
+        // No way back from here: the account already exists, and the step
+        // behind would make it a second time.
+        return PopScope(
+          canPop: false,
+          child: SettingUpScreen(
+            // The server chosen on the first onboarding step (was the demo host).
+            serverHost: serverHostOf(ProviderScope.containerOf(ctx).read(serverUrlProvider).value ?? ''),
+            onFinished: () {
+              final nav = Navigator.of(ctx);
+              // A fresh root (it shows the chats now that the account exists)
+              // instead of a chat list on top of the old root — Back showed a
+              // second, identical chat list (2026-10-16 UI audit).
+              nav.pushAndRemoveUntil(_route((_) => const AppRoot()), (_) => false);
+              _offerPendingInvite(nav);
+            },
+          ),
         );
       }),
     ),

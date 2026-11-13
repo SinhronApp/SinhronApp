@@ -18,6 +18,7 @@ import '../app/adaptive.dart';
 import '../app/theme/tokens.dart';
 import '../l10n/l10n.dart';
 import 'ds_action_sheet.dart';
+import 'ds_pressable.dart';
 
 /// Show the picker sheet. Returns the picked option or null on dismiss.
 Future<String?> showDsPickerSheet({
@@ -85,8 +86,7 @@ class _DsPickerSheet extends StatelessWidget {
                 ),
               ),
               Container(height: DsSpace.x2, color: tokens.bgSoft),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
+              DsPressable(
                 onTap: () => Navigator.of(ctx).pop(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: DsSpace.x3h5),

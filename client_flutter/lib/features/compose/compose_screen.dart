@@ -19,7 +19,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_avatar.dart';
 import '../../widgets/ds_pressable.dart';
@@ -311,7 +310,7 @@ class _CancelAppBar extends StatelessWidget {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Quick actions row — 3 tinted tiles
+// Quick actions row — soft neutral tiles
 // ═════════════════════════════════════════════════════════════════════
 
 class _QuickActionsRow extends StatelessWidget {
@@ -326,6 +325,7 @@ class _QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fg = DsTheme.of(context).text2;
     return Padding(
       padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, 0, DsSpace.x3h5, DsSpace.x4h5),
       child: Row(
@@ -335,9 +335,7 @@ class _QuickActionsRow extends StatelessWidget {
             Expanded(
               child: _QuickTile(
                 label: context.l10n.newGroup,
-                tintBg: DsPalette.blue600a10,
-                tintFg: DsPalette.blue600,
-                painter: _GroupGlyphPainter(color: DsPalette.blue600),
+                painter: _GroupGlyphPainter(color: fg),
                 onTap: onNewGroup,
               ),
             ),
@@ -346,9 +344,7 @@ class _QuickActionsRow extends StatelessWidget {
           Expanded(
             child: _QuickTile(
               label: context.l10n.inviteByQr,
-              tintBg: DsPalette.violet10,
-              tintFg: DsPalette.violet,
-              painter: _QrShareGlyphPainter(color: DsPalette.violet),
+              painter: _QrShareGlyphPainter(color: fg),
               onTap: onInviteQr,
             ),
           ),
@@ -356,9 +352,7 @@ class _QuickActionsRow extends StatelessWidget {
           Expanded(
             child: _QuickTile(
               label: context.l10n.scanQr,
-              tintBg: DsPalette.green10,
-              tintFg: DsPalette.green,
-              painter: _QrScanGlyphPainter(color: DsPalette.green),
+              painter: _QrScanGlyphPainter(color: fg),
               onTap: onScanQr,
             ),
           ),
@@ -367,9 +361,7 @@ class _QuickActionsRow extends StatelessWidget {
             Expanded(
               child: _QuickTile(
                 label: context.l10n.pasteKey,
-                tintBg: DsPalette.artE0B43Ba1A,
-                tintFg: DsPalette.artE0B43B,
-                painter: DsKeyGlyphGlyph(color: DsPalette.artE0B43B),
+                painter: DsKeyGlyphGlyph(color: fg),
                 onTap: onEncryptedByIdentity,
               ),
             ),
@@ -382,14 +374,10 @@ class _QuickActionsRow extends StatelessWidget {
 
 class _QuickTile extends StatelessWidget {
   final String label;
-  final Color tintBg;
-  final Color tintFg;
   final CustomPainter painter;
   final VoidCallback? onTap;
   const _QuickTile({
     required this.label,
-    required this.tintBg,
-    required this.tintFg,
     required this.painter,
     this.onTap,
   });
@@ -402,26 +390,23 @@ class _QuickTile extends StatelessWidget {
       scale: 0.95,
       child: Container(
         height: 80,
+        padding: const EdgeInsets.symmetric(horizontal: DsSpace.x1),
         decoration: BoxDecoration(
-          color: tokens.surface,
+          // A soft neutral tile: visible on white and on the dark background.
+          color: DsTheme.isDarkOf(context) ? tokens.surface : tokens.bgSoft,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tokens.dividerStrong, width: 0.5),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(color: tintBg, borderRadius: BorderRadius.circular(10)),
-              child: Center(
-                child: SizedBox(width: 20, height: 20, child: CustomPaint(painter: painter)),
-              ),
-            ),
-            const SizedBox(height: 8),
+            SizedBox(width: 23, height: 23, child: CustomPaint(painter: painter)),
+            const SizedBox(height: 10),
             Text(
               label,
-              style: DsText.footnote.copyWith(fontWeight: FontWeight.w600, height: 1.0, color: tokens.text),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: DsText.footnote.copyWith(fontWeight: FontWeight.w600, fontSize: 11.5, height: 1.1, color: tokens.text),
             ),
           ],
         ),
@@ -481,26 +466,7 @@ class _ContactRow extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(DsSpace.x4, DsSpace.x2h5, DsSpace.x4, DsSpace.x2h5),
             child: Row(
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    DsAvatar(name: contact.name, size: 42, image: contact.photo),
-                    if (contact.online)
-                      Positioned(
-                        right: -1,
-                        bottom: -1,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: DsPalette.green,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: tokens.bg, width: 2),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                DsAvatar(name: contact.name, size: 42, image: contact.photo, online: contact.online),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -522,7 +488,7 @@ class _ContactRow extends StatelessWidget {
                             SizedBox(
                               width: 13,
                               height: 13,
-                              child: CustomPaint(painter: _VerifiedSealPainter(color: tokens.accent)),
+                              child: CustomPaint(painter: _VerifiedSealPainter(color: tokens.accent, onColor: tokens.accentText)),
                             ),
                           ],
                         ],
@@ -533,7 +499,7 @@ class _ContactRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: DsTextArt.t12p5w500sub.copyWith(
-                          color: contact.online ? DsPalette.green : tokens.text3,
+                          color: contact.online ? tokens.success : tokens.text3,
                         ),
                       ),
                     ],
@@ -555,7 +521,8 @@ class _ContactRow extends StatelessWidget {
 
 class _VerifiedSealPainter extends CustomPainter {
   final Color color;
-  _VerifiedSealPainter({required this.color});
+  final Color onColor;
+  _VerifiedSealPainter({required this.color, required this.onColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -587,7 +554,7 @@ class _VerifiedSealPainter extends CustomPainter {
     canvas.drawPath(path, fill);
     // Inner check (white)
     final tickPaint = Paint()
-      ..color = DsPalette.white
+      ..color = onColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round
@@ -616,7 +583,7 @@ class _VerifiedSealPainter extends CustomPainter {
   double _cos(double x) => _sin(x + 1.5707963267948966);
 
   @override
-  bool shouldRepaint(_VerifiedSealPainter old) => old.color != color;
+  bool shouldRepaint(_VerifiedSealPainter old) => old.color != color || old.onColor != onColor;
 }
 
 class _GroupGlyphPainter extends CustomPainter {

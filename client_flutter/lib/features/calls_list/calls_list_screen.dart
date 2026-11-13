@@ -30,6 +30,7 @@ import '../../widgets/ds_icon_button.dart';
 import '../../widgets/ds_search_pill.dart';
 import '../../widgets/ds_tab_bar.dart';
 import '../../widgets/ds_motion.dart';
+import '../../widgets/ds_pressable.dart';
 import '../chat_list/chat_data.dart' show formatChatTime;
 import '../../l10n/l10n.dart';
 
@@ -299,9 +300,8 @@ class _Header extends StatelessWidget {
           if (onNewCall != null)
             Padding(
               padding: const EdgeInsets.only(left: DsSpace.x1),
-              child: GestureDetector(
+              child: DsPressable(
                 key: const ValueKey('calls-new-call'),
-                behavior: HitTestBehavior.opaque,
                 onTap: onNewCall,
                 child: SizedBox(
                   width: 36,
@@ -395,8 +395,9 @@ class _CallRow extends StatelessWidget {
     final isMissed = call.kind == _CallKind.missed;
     final dirColor = isMissed ? DsPalette.danger : tokens.text3;
     final nameColor = isMissed ? DsPalette.danger : tokens.text;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return DsPressable(
+      scale: 1,
+      pressedColor: tokens.bgSoft,
       onTap: onTap,
       child: Stack(
         children: [
@@ -465,9 +466,8 @@ class _CallRow extends StatelessWidget {
                 Semantics(
                   button: onInfo != null,
                   label: onInfo == null ? null : context.l10n.callsOpenChat,
-                  child: GestureDetector(
+                  child: DsPressable(
                     key: ValueKey('call-info-${call.chatId}'),
-                    behavior: HitTestBehavior.opaque,
                     onTap: onInfo,
                     // A finger-sized target around the small ⓘ.
                     child: SizedBox(

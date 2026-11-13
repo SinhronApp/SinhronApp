@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../app/theme/palette.dart';
+import '../app/theme/motion.dart';
 import '../app/theme/tokens.dart';
 
 /// 4 variants matching design/app/spec-buttons.jsx:
@@ -77,7 +78,7 @@ class _DsButtonState extends State<DsButton> with SingleTickerProviderStateMixin
   DateTime? _pressedAt;
 
   static const Duration _minPressDuration = Duration(milliseconds: 100);
-  static const Duration _releaseDuration = Duration(milliseconds: 180);
+  static const Duration _releaseDuration = DsMotion.base;
 
   bool get _disabled => widget.onPressed == null && !widget.loading;
 
@@ -165,7 +166,9 @@ class _DsButtonState extends State<DsButton> with SingleTickerProviderStateMixin
       Flexible(
         child: Text(
           widget.label,
-          maxLines: 1,
+          // A text link (ghost) wraps onto a second line instead of losing
+          // its end: "Другое устройство рядом? Привязать …".
+          maxLines: widget.variant == DsButtonVariant.ghost ? 2 : 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -173,7 +176,7 @@ class _DsButtonState extends State<DsButton> with SingleTickerProviderStateMixin
             fontSize: fontSize,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.15,
-            height: 1.0,
+            height: widget.variant == DsButtonVariant.ghost ? 1.15 : 1.0,
             color: fg,
           ),
         ),
@@ -218,13 +221,17 @@ class _DsButtonState extends State<DsButton> with SingleTickerProviderStateMixin
 
     if (_disabled) return result;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: _onTapDown,
-      onTapUp: (_) => _releasePress(),
-      onTapCancel: _releasePress,
-      onTap: widget.loading ? null : widget.onPressed,
-      child: result,
+    // VoiceOver / TalkBack: "…, button".
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: _onTapDown,
+        onTapUp: (_) => _releasePress(),
+        onTapCancel: _releasePress,
+        onTap: widget.loading ? null : widget.onPressed,
+        child: result,
+      ),
     );
   }
 }
@@ -269,14 +276,14 @@ _ButtonStyle _resolveStyle({
     case DsButtonVariant.primary:
       return _ButtonStyle(
         bg: pressed ? _mix(tokens.accent, DsPalette.black, 0.88) : tokens.accent,
-        fg: DsPalette.white,
-        shadows: pressed ? const [] : const [DsShadow.art24 /* accent 20% */, DsShadow.art25 /* accent 18% */],
+        fg: tokens.accentText,
+        shadows: const [],
       );
     case DsButtonVariant.secondary:
       return _ButtonStyle(
         bg: pressed ? tokens.bgSoft : tokens.surface,
         fg: tokens.text,
-        shadows: const [DsShadow.art26 /* text 4% */],
+        shadows: const [],
         hairline: true,
       );
     case DsButtonVariant.ghost:
@@ -289,7 +296,7 @@ _ButtonStyle _resolveStyle({
       return _ButtonStyle(
         bg: pressed ? _kDangerBgPressed : _kDangerBg,
         fg: DsPalette.white,
-        shadows: pressed ? const [] : const [DsShadow.art27 /* danger 22% */, DsShadow.art28 /* danger 20% */],
+        shadows: const [],
       );
   }
 }

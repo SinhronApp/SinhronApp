@@ -369,11 +369,11 @@ class _CheckBox extends StatelessWidget {
         border: checked ? null : Border.all(color: tokens.text4, width: 1.5),
       ),
       child: checked
-          ? const Center(
+          ? Center(
               child: SizedBox(
                 width: 13,
                 height: 13,
-                child: CustomPaint(painter: DsCheckmarkGlyph(color: DsPalette.white)),
+                child: CustomPaint(painter: DsCheckmarkGlyph(color: tokens.accentText)),
               ),
             )
           : null,

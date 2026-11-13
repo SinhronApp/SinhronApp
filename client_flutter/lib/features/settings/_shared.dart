@@ -47,9 +47,7 @@ class SettingsSection extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: tokens.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: tokens.dividerStrong, width: 0.5),
-                boxShadow: DsShadow.card,
+                borderRadius: BorderRadius.circular(tokens.radiusCard),
               ),
               child: Column(children: children),
             ),
@@ -129,7 +127,7 @@ class SettingsRow extends StatelessWidget {
     final hasValueChevron = chevron && !hasToggle && !isChoice && onTap != null;
     final labelText = Text(
       label,
-      maxLines: 1,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: DsText.body.copyWith(fontWeight: FontWeight.w500, color: tokens.text),
     );
@@ -139,16 +137,15 @@ class SettingsRow extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null || glyph != null) ...[
-            Container(
+            SizedBox(
               width: 30,
               height: 30,
-              decoration: BoxDecoration(color: tintColors.bg, borderRadius: BorderRadius.circular(8)),
               child: Center(
                 child: glyph != null
-                    ? Icon(glyph, size: 18, color: tintColors.fg)
+                    ? Icon(glyph, size: 21, color: tintColors.fg)
                     : SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 23,
+                        height: 23,
                         child: CustomPaint(
                           painter: SettingsRowIconPainter(shape: icon!, color: tintColors.fg),
                         ),
@@ -169,7 +166,7 @@ class SettingsRow extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         subtitle!,
-                        maxLines: 2,
+                        maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                         style: DsText.footnote.copyWith(fontWeight: FontWeight.w400, color: tokens.text3),
                       ),
@@ -208,7 +205,7 @@ class SettingsRow extends StatelessWidget {
               opacity: selected! ? 1 : 0,
               child: AnimatedScale(
                 duration: DsMotion.of(context, DsMotion.fast),
-                curve: DsMotion.springy,
+                curve: DsMotion.enter,
                 scale: selected! ? 1 : 0.6,
                 child: CustomPaint(
                   size: const Size.square(20),
@@ -239,21 +236,8 @@ class SettingsRow extends StatelessWidget {
     if (hasToggle) content = MergeSemantics(child: content);
     if (isChoice) content = Semantics(selected: selected, inMutuallyExclusiveGroup: true, child: content);
 
-    if (isLast) return content;
-
-    // Hairline divider inset from the icon (left=56 if icon, else 14)
-    return Stack(
-      children: [
-        content,
-        Positioned(
-          left: icon != null ? 56 : 14,
-          right: 0,
-          bottom: 0,
-          height: 0.5,
-          child: ColoredBox(color: tokens.divider),
-        ),
-      ],
-    );
+    // No line between rows (the calm look).
+    return content;
   }
 }
 
@@ -288,7 +272,7 @@ class _SettingsToggleState extends State<SettingsToggle> with SingleTickerProvid
     super.didUpdateWidget(oldWidget);
     if (widget.on != oldWidget.on) {
       // Springy knob — UI backlog §4 item 36.
-      _ctrl.animateTo(widget.on ? 1.0 : 0.0, curve: DsMotion.springy);
+      _ctrl.animateTo(widget.on ? 1.0 : 0.0, curve: DsMotion.enter);
     }
   }
 
@@ -437,22 +421,8 @@ class SettingsTintColors {
 /// both light cream and dark navy). Neutral/grey tints adapt to theme via
 /// [tokens.text2] / [tokens.bgSoft].
 SettingsTintColors resolveSettingsTint(SettingsRowTint tint, DsTokens tokens) {
-  return switch (tint) {
-    SettingsRowTint.privacy => const SettingsTintColors(DsPalette.green10, DsPalette.green),
-    SettingsRowTint.devices => const SettingsTintColors(DsPalette.violet10, DsPalette.violet),
-    SettingsRowTint.recovery => const SettingsTintColors(DsPalette.orange14, DsPalette.orange),
-    SettingsRowTint.lock => const SettingsTintColors(DsPalette.artE0683Ba1F, DsPalette.coral),
-    SettingsRowTint.notif => const SettingsTintColors(DsPalette.pink10, DsPalette.pink),
-    SettingsRowTint.chats => const SettingsTintColors(DsPalette.blue600a10, DsPalette.blue600),
-    SettingsRowTint.appear => const SettingsTintColors(DsPalette.art9333EAa1A, DsPalette.purple600),
-    SettingsRowTint.storage => const SettingsTintColors(DsPalette.art65A30Da1F, DsPalette.lime600),
-    SettingsRowTint.download => const SettingsTintColors(DsPalette.blue10, DsPalette.blue),
-    SettingsRowTint.danger => const SettingsTintColors(DsPalette.red12, DsPalette.red),
-    SettingsRowTint.text ||
-    SettingsRowTint.server ||
-    SettingsRowTint.info ||
-    SettingsRowTint.neutral => SettingsTintColors(tokens.bgSoft, tokens.text2),
-  };
+  // The calm look: plain grey icons, no colour tile; only "danger" keeps its colour.
+  return SettingsTintColors(DsPalette.transparent, tint == SettingsRowTint.danger ? tokens.danger : tokens.text2);
 }
 
 // ═════════════════════════════════════════════════════════════════════

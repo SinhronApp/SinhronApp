@@ -166,7 +166,7 @@ class RealSharedMedia extends ConsumerWidget {
                       key: ValueKey('shared-voice-${r.id}'),
                       mediaJson: r.mediaJson!,
                       color: tokens.accent,
-                      glyph: DsPalette.white,
+                      glyph: tokens.accentText,
                       title: _WhoWhen(sender: senderOf(r), when: _when(r)),
                     ),
           },

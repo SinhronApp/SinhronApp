@@ -14,7 +14,6 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_action_button.dart';
 import '../../widgets/ds_avatar.dart';
@@ -143,12 +142,10 @@ class ContactProfileView extends StatelessWidget {
                     _Row(
                       key: const ValueKey('profile-safety'),
                       icon: _ContactIcon.shieldCheck,
-                      iconTint: verified ? _IconTint.success : _IconTint.accent,
                       label: verified ? l.contactIdentityVerified : l.safetyNumberTitle,
                       subtitle: '${l.contactKey} · $keyLabel',
                       trailing: onSafetyNumber == null ? null : const _Chevron(),
                       onTap: onSafetyNumber,
-                      isLast: onSharedMedia == null,
                     ),
                     if (onSharedMedia != null)
                       _Row(
@@ -157,7 +154,6 @@ class ContactProfileView extends StatelessWidget {
                         label: l.contactMediaLinksDocs,
                         trailing: const _Chevron(),
                         onTap: onSharedMedia,
-                        isLast: true,
                       ),
                   ],
                 ),
@@ -193,7 +189,6 @@ class ContactProfileView extends StatelessWidget {
                       _Row(
                         key: const ValueKey('profile-favourite'),
                         icon: _ContactIcon.star,
-                        iconTint: _IconTint.amber,
                         label: favourite ? l.contactFavouriteRemove : l.contactFavouriteAdd,
                         onTap: onToggleFavourite,
                       ),
@@ -201,21 +196,18 @@ class ContactProfileView extends StatelessWidget {
                       _Row(
                         key: const ValueKey('profile-contact'),
                         icon: _ContactIcon.at,
+                        glyph: isContact ? CupertinoIcons.person_badge_minus : CupertinoIcons.person_badge_plus,
                         label: isContact ? l.contactRemove : l.contactAdd,
                         danger: isContact,
-                        iconTint: isContact ? _IconTint.danger : _IconTint.accent,
                         onTap: onToggleContact,
-                        isLast: onToggleBlock == null,
                       ),
                     if (onToggleBlock != null)
                       _Row(
                         key: const ValueKey('profile-block'),
                         icon: _ContactIcon.block,
-                        iconTint: _IconTint.danger,
                         label: blocked ? l.blockedUnblock : l.chatInfoBlock,
                         danger: !blocked,
                         onTap: onToggleBlock,
-                        isLast: true,
                       ),
                   ],
                 ),
@@ -498,25 +490,8 @@ class _Section extends StatelessWidget {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Row (icon + label/subtitle + value + trailing + divider)
+// Row (icon + label/subtitle + value + trailing)
 // ═════════════════════════════════════════════════════════════════════
-
-enum _IconTint { accent, success, amber, danger }
-
-class _IconTintColors {
-  final Color bg;
-  final Color fg;
-  const _IconTintColors(this.bg, this.fg);
-}
-
-_IconTintColors _resolveIconTint(_IconTint tint, DsTokens tokens) {
-  return switch (tint) {
-    _IconTint.accent => _IconTintColors(tokens.accentSoft, tokens.accent),
-    _IconTint.success => _IconTintColors(DsPalette.green12, tokens.success),
-    _IconTint.amber => const _IconTintColors(DsPalette.orange12, DsPalette.orange),
-    _IconTint.danger => const _IconTintColors(DsPalette.danger10, DsPalette.danger),
-  };
-}
 
 /// A [_Row] tile with a Cupertino glyph (for icons the painter lacks).
 class _GlyphTile extends StatelessWidget {
@@ -526,11 +501,10 @@ class _GlyphTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    return Container(
+    return SizedBox(
       width: 38,
       height: 38,
-      decoration: BoxDecoration(color: tokens.accentSoft, borderRadius: BorderRadius.circular(11)),
-      child: Icon(icon, size: 22, color: tokens.accent),
+      child: Icon(icon, size: 23, color: tokens.text2),
     );
   }
 }
@@ -540,13 +514,11 @@ class _Row extends StatelessWidget {
 
   /// A system glyph instead of a drawn [icon].
   final IconData? glyph;
-  final _IconTint iconTint;
   final Widget? customIcon; // set only by [_Row.customLeading]
   final String label;
   final String? subtitle;
   final String? value;
   final Widget? trailing;
-  final bool isLast;
   final bool danger;
   final VoidCallback? onTap;
 
@@ -554,11 +526,9 @@ class _Row extends StatelessWidget {
     super.key,
     required this.icon,
     this.glyph,
-    this.iconTint = _IconTint.accent,
     required this.label,
     this.subtitle,
     this.trailing,
-    this.isLast = false,
     this.danger = false,
     this.onTap,
   }) : customIcon = null,
@@ -570,34 +540,32 @@ class _Row extends StatelessWidget {
     required this.label,
     this.value,
     this.trailing,
-    this.isLast = false,
     this.onTap,
   }) : icon = _ContactIcon.at,
        glyph = null,
-       iconTint = _IconTint.accent,
        subtitle = null,
        danger = false;
 
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final tintColors = _resolveIconTint(iconTint, tokens);
-    final labelColor = danger ? DsPalette.danger : tokens.text;
+    // The calm look: plain grey icons, no colour tile; only "danger" keeps its colour.
+    final iconColor = danger ? tokens.danger : tokens.text2;
+    final labelColor = danger ? tokens.danger : tokens.text;
 
     final leading =
         customIcon ??
-        Container(
+        SizedBox(
           width: 38,
           height: 38,
-          decoration: BoxDecoration(color: tintColors.bg, borderRadius: BorderRadius.circular(11)),
           child: Center(
             child: glyph != null
-                ? Icon(glyph, size: 22, color: tintColors.fg)
+                ? Icon(glyph, size: 23, color: iconColor)
                 : SizedBox(
-                    width: 22,
-                    height: 22,
+                    width: 23,
+                    height: 23,
                     child: CustomPaint(
-                      painter: _ContactIconPainter(shape: icon, color: tintColors.fg, strokeWidth: 2.1),
+                      painter: _ContactIconPainter(shape: icon, color: iconColor, strokeWidth: 2.1),
                     ),
                   ),
           ),
@@ -649,20 +617,8 @@ class _Row extends StatelessWidget {
       child: DsPressable(onTap: onTap, scale: 1, pressedColor: tokens.bgSoft, child: row),
     );
 
-    if (isLast) return content;
-
-    return Stack(
-      children: [
-        content,
-        Positioned(
-          left: customIcon != null ? 70 : 68, // align after icon
-          right: 0,
-          bottom: 0,
-          height: 0.5,
-          child: ColoredBox(color: tokens.divider),
-        ),
-      ],
-    );
+    // No line between rows (the calm look).
+    return content;
   }
 }
 
@@ -713,7 +669,6 @@ class _GroupsInCommon extends StatelessWidget {
             label: groups[i].name,
             value: groups[i].members > 0 ? context.l10n.contactGroupMembers(groups[i].members) : null,
             trailing: const _Chevron(),
-            isLast: i == groups.length - 1,
             onTap: groups[i].onTap,
           ),
       ],

@@ -5,14 +5,20 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 abstract final class DsMotion {
+  // The one speed table (ADR-108, "Тихий"): 120 / 200 / 300 ms. Explicit
+  // durations elsewhere should be one of these three.
+
   /// Taps, toggles, small fades.
-  static const fast = Duration(milliseconds: 150);
+  static const fast = Duration(milliseconds: 120);
 
   /// Most transitions (sheets, bubbles, banners).
-  static const base = Duration(milliseconds: 250);
+  static const base = Duration(milliseconds: 200);
 
   /// Large movements (full-screen, hero-like).
-  static const slow = Duration(milliseconds: 400);
+  static const slow = Duration(milliseconds: 300);
+
+  /// A quick tap stays highlighted at least this long, so it is seen.
+  static const minPress = Duration(milliseconds: 90);
 
   /// Things arriving / settling.
   static const Curve enter = Curves.easeOutCubic;
@@ -26,7 +32,7 @@ abstract final class DsMotion {
   /// Snappy, no overshoot to speak of — sheets, menus.
   static const spring = SpringDescription(mass: 1, stiffness: 420, damping: 36);
 
-  /// Playful overshoot — reactions, sent bubbles.
+  /// Playful overshoot — only reactions and count badges (ADR-108).
   static const springBouncy = SpringDescription(mass: 1, stiffness: 320, damping: 17);
 
   /// [springBouncy] as a curve (for transitions / animateTo).

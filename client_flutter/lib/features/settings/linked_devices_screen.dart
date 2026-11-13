@@ -75,7 +75,7 @@ _Device _fromCore(BuildContext context, core.LinkedDevice d, String? given) {
   return _Device(
     pkHex: d.devicePkHex,
     name: d.isThisDevice
-        ? (given == null ? l.thisDevice : '${l.thisDevice} · $given')
+        ? given ?? l.thisDevice // the badge beside it already says «Это устройство»
         : given ?? l.devicesUnnamed,
     detail: (d.isPrimary ? '${l.devicesFirstDevice} · $linked' : linked) + seen,
     isOnline: d.isThisDevice,

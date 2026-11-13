@@ -20,7 +20,7 @@ const ceilings = {
   'hand-sized TextStyle': 0,
   'Color(0x…) literal': 0,
   'BoxShadow literal': 0,
-  'CustomPainter class': 80,
+  'CustomPainter class': 71,
   // Every EdgeInsets number goes through DsSpace (odd optical nudges are
   // DsSpace.nudgeN — same values as before).
   'EdgeInsets bare number': 0,

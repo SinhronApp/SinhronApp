@@ -194,7 +194,7 @@ class CallScreen extends StatefulWidget {
   State<CallScreen> createState() => _CallScreenState();
 }
 
-class _CallScreenState extends State<CallScreen> with SingleTickerProviderStateMixin {
+class _CallScreenState extends State<CallScreen> {
   late CallState _state = widget.initialState;
   late CallMedia _media = widget.initialMedia;
   late bool _muted = widget.muted ?? false;
@@ -207,13 +207,9 @@ class _CallScreenState extends State<CallScreen> with SingleTickerProviderStateM
   Duration _elapsed = Duration.zero;
   Timer? _ticker;
 
-  // Pulse animation for the avatar in incoming state
-  late final AnimationController _pulseCtrl;
-
   @override
   void initState() {
     super.initState();
-    _pulseCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat();
     if (_state == CallState.active) {
       final since = widget.connectedAt;
       if (since != null) _elapsed = DateTime.now().difference(since);
@@ -224,7 +220,6 @@ class _CallScreenState extends State<CallScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _ticker?.cancel();
-    _pulseCtrl.dispose();
     super.dispose();
   }
 
@@ -352,7 +347,6 @@ class _CallScreenState extends State<CallScreen> with SingleTickerProviderStateM
         name: widget.contactName,
         photo: widget.contactPhoto,
         media: _media,
-        pulse: _pulseCtrl,
         outgoing: _state == CallState.outgoing,
         ringing: widget.peerRinging,
         muted: _muted,
@@ -424,6 +418,9 @@ class _CallScreenState extends State<CallScreen> with SingleTickerProviderStateM
 const double kCallTopClearance = 52;
 const double kCallBarClearance = 136;
 
+/// The call screen is always dark and flat: the dark theme's background.
+final Color _callBg = DsTokens.dark.bg;
+
 /// "02:37" — a call's length as the timer shows it (minutes go past 59).
 String callClock(Duration d) {
   final m = d.inMinutes;
@@ -439,7 +436,6 @@ class _IncomingView extends StatelessWidget {
   final String name;
   final Uint8List? photo;
   final CallMedia media;
-  final AnimationController pulse;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
@@ -461,7 +457,6 @@ class _IncomingView extends StatelessWidget {
     required this.name,
     this.photo,
     required this.media,
-    required this.pulse,
     required this.onAccept,
     required this.onDecline,
     this.outgoing = false,
@@ -475,16 +470,9 @@ class _IncomingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = DsTheme.of(context);
     final mq = MediaQuery.of(context);
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(DsPalette.navy, tokens.accent, 0.15)!, DsPalette.navy],
-        ),
-      ),
+      color: _callBg,
       padding: _CallBody.paddingOf(mq),
       child: Column(
         children: [
@@ -513,35 +501,12 @@ class _IncomingView extends StatelessWidget {
         style: DsTextArt.t14w500,
       ),
       const SizedBox(height: 36),
-      // Fixed box: the rings grow to 190 px and the Stack used to resize
-      // with them every frame, so the name below jumped.
+      // The box keeps the old 190 px so the name below stays where it was.
       SizedBox(
         width: 190,
         height: 190,
-        child: AnimatedBuilder(
-          animation: pulse,
-          builder: (context, _) {
-            // Reduce Motion: still rings.
-            final t = DsMotion.reduced(context) ? 0.0 : pulse.value;
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                for (var i = 0; i < 3; i++)
-                  Opacity(
-                    opacity: (1.0 - ((t + i / 3) % 1.0)) * 0.5,
-                    child: Container(
-                      width: 130 + 60 * ((t + i / 3) % 1.0),
-                      height: 130 + 60 * ((t + i / 3) % 1.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: DsPalette.white40, width: 1),
-                      ),
-                    ),
-                  ),
-                DsAvatar(name: name, size: 130, image: photo),
-              ],
-            );
-          },
+        child: Center(
+          child: DsAvatar(name: name, size: 130, image: photo, onDark: true),
         ),
       ),
       const SizedBox(height: 28),
@@ -662,16 +627,9 @@ class _ActiveAudioView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = DsTheme.of(context);
     final mq = MediaQuery.of(context);
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(DsPalette.navy, tokens.accent, 0.12)!, DsPalette.navy],
-        ),
-      ),
+      color: _callBg,
       padding: _CallBody.paddingOf(mq),
       child: Column(
         children: [
@@ -862,14 +820,8 @@ class _ActiveVideoView extends StatelessWidget {
           ),
         if (remoteVideo == null)
           Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [DsPalette.art2D2640, DsPalette.art0F1F3D],
-                ),
-              ),
+            child: ColoredBox(
+              color: _callBg,
               child: Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -1113,18 +1065,12 @@ class _EndedView extends StatelessWidget {
       child: Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [DsPalette.navy, DsPalette.art050B17],
-        ),
-      ),
+      color: _callBg,
       padding: EdgeInsets.only(top: mq.padding.top + DsSpace.x6, bottom: mq.padding.bottom + DsSpace.x8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          DsAvatar(name: name, size: 100, image: photo),
+          DsAvatar(name: name, size: 100, image: photo, onDark: true),
           const SizedBox(height: 18),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: DsSpace.x6),
@@ -1484,12 +1430,12 @@ class CallPeerAvatar extends StatelessWidget {
     child: Stack(
       clipBehavior: Clip.none,
       children: [
-        DsAvatar(name: name, size: size, image: photo),
+        DsAvatar(name: name, size: size, image: photo, onDark: true),
         if (micOff)
           Positioned(
             right: 0,
             bottom: 0,
-            child: CallMicOffBadge(key: const ValueKey('peer-mic-off'), size: size * 0.3, ring: DsPalette.navy),
+            child: CallMicOffBadge(key: const ValueKey('peer-mic-off'), size: size * 0.3, ring: _callBg),
           ),
       ],
     ),
@@ -1539,8 +1485,7 @@ class _CircleButton extends StatelessWidget {
         final side = math.min(size, room);
         // The whole button — circle and label — takes the tap (only the
         // circle did, so a tap on the label "missed").
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        return DsPressable(
           onTap: onTap,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1551,9 +1496,6 @@ class _CircleButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: bg,
                   shape: BoxShape.circle,
-                  boxShadow: glyph == _CallGlyph.accept || glyph == _CallGlyph.decline
-                      ? [DsShadow.glowOf(bg, alpha: 0.35, y: 4, blur: 12)]
-                      : null,
                 ),
                 child: Center(
                   child: SizedBox(

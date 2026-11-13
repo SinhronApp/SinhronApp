@@ -92,7 +92,7 @@ class _DsSwipeActionsState extends State<DsSwipeActions> with SingleTickerProvid
   void _animateTo(double target) {
     _ctrl.stop();
     final tween = Tween<double>(begin: _offset, end: target);
-    final curved = CurvedAnimation(parent: _ctrl, curve: DsMotion.springy);
+    final curved = CurvedAnimation(parent: _ctrl, curve: DsMotion.enter);
     _ctrl
       ..removeListener(_handleTick)
       ..value = 0

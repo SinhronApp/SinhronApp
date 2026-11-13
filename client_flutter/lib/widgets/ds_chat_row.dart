@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../app/theme/motion.dart';
@@ -99,7 +100,7 @@ class DsChatRow extends StatelessWidget {
         children: [
           DsAvatar(
             name: chat.name,
-            size: 50,
+            size: 52,
             group: chat.group,
             online: chat.online,
             image: chat.avatar,
@@ -117,12 +118,8 @@ class DsChatRow extends StatelessWidget {
       ),
     );
 
-    final divider = isLast
-        ? const SizedBox.shrink()
-        : Padding(
-            padding: const EdgeInsets.only(left: DsSpace.x19h5, right: DsSpace.x4),
-            child: SizedBox(height: 0.5, child: ColoredBox(color: tokens.divider)),
-          );
+    // No line between rows (the calm look): air separates them.
+    const divider = SizedBox.shrink();
 
     // VoiceOver: one stop per chat with what matters (§7 item 55).
     final l = context.l10n;
@@ -263,7 +260,7 @@ class _TrailingIndicators extends StatelessWidget {
     final children = <Widget>[];
 
     if (chat.pinned && chat.unread == 0) {
-      children.add(DsIcon(shape: DsIconShape.pin, size: 14, color: tokens.text3));
+      children.add(Icon(CupertinoIcons.pin, size: 14, color: tokens.text3));
     }
 
     if (chat.failed && chat.unread == 0) {
@@ -297,7 +294,7 @@ class _TrailingIndicators extends StatelessWidget {
           key: const ValueKey('marked-unread-dot'),
           width: 12,
           height: 12,
-          decoration: BoxDecoration(color: chat.muted ? tokens.text4 : tokens.accent, shape: BoxShape.circle),
+          decoration: BoxDecoration(color: chat.muted ? tokens.chipActive : tokens.accent, shape: BoxShape.circle),
         ),
       );
     }
@@ -309,7 +306,7 @@ class _TrailingIndicators extends StatelessWidget {
           height: 22,
           decoration: BoxDecoration(color: tokens.accent, borderRadius: BorderRadius.circular(11)),
           alignment: Alignment.center,
-          child: const Text('@', style: DsTextArt.t13w700),
+          child: Text('@', style: DsTextArt.t13w700.copyWith(color: tokens.accentText)),
         ),
       );
     }
@@ -334,14 +331,14 @@ class _UnreadPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final bg = muted ? tokens.text4 : tokens.accent;
-    final shadows = muted ? const <BoxShadow>[] : const [DsShadow.art21];
+    final bg = muted ? tokens.chipActive : tokens.accent;
+    final fg = muted ? tokens.text2 : tokens.accentText;
     return Container(
       constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
       padding: const EdgeInsets.symmetric(horizontal: DsSpace.nudge7),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(11), boxShadow: shadows),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(11)),
       alignment: Alignment.center,
-      child: DsAnimatedCount(count: count, style: DsType.badge, max: 1 << 30),
+      child: DsAnimatedCount(count: count, style: DsType.badge.copyWith(color: fg), max: 1 << 30),
     );
   }
 }

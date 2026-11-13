@@ -4,6 +4,7 @@
 // decrypted thumbnail (≤32 KB, fetched eagerly). The full image is only
 // fetched when the viewer opens. All bytes stay in RAM (MediaCache).
 
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -16,6 +17,7 @@ import '../../src/rust/api/simple.dart' as core;
 import '../media_viewer/gallery_pages.dart' show galleryRectTween;
 import '../../l10n/l10n.dart';
 import '../../app/theme/palette.dart';
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 
 // Status 213 (owner: "compare how photos are sent — iMessage, Telegram"):
@@ -34,6 +36,17 @@ double photoBubbleHeight(int w, int h, {double width = kPhotoBubbleWidth}) {
 double photoBubbleWidth(BuildContext context) =>
     math.min(kPhotoBubbleWidth, MediaQuery.sizeOf(context).width * 0.72);
 
+/// Width × height written in the stored media JSON — readable before the
+/// async `info()` answers, so the bubble has its final height from the
+/// first frame (no jump in the feed). (0, 0) when absent.
+(int, int) mediaJsonSize(String mediaJson) {
+  try {
+    final j = jsonDecode(mediaJson);
+    if (j is Map && j['width'] is int && j['height'] is int) return (j['width'] as int, j['height'] as int);
+  } catch (_) {}
+  return (0, 0);
+}
+
 class EncryptedPhoto extends ConsumerStatefulWidget {
   const EncryptedPhoto({super.key, required this.mediaJson, this.onTap, this.heroTag});
 
@@ -51,6 +64,7 @@ class _EncryptedPhotoState extends ConsumerState<EncryptedPhoto> {
   // Fetched once; a FutureBuilder future created in build() would
   // restart (and flicker the bubble size) on every rebuild.
   late final Future<core.MediaInfo> _info = ref.read(mediaLoaderProvider).info(widget.mediaJson);
+  late final (int, int) _size = mediaJsonSize(widget.mediaJson);
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +75,9 @@ class _EncryptedPhotoState extends ConsumerState<EncryptedPhoto> {
       builder: (context, snap) {
         final info = snap.data;
         final width = photoBubbleWidth(context);
-        final height = info == null ? 180.0 : photoBubbleHeight(info.width, info.height, width: width);
+        final height = info == null
+            ? photoBubbleHeight(_size.$1, _size.$2, width: width)
+            : photoBubbleHeight(info.width, info.height, width: width);
         // The bubble rounds it (flush to its edges, as in Telegram).
         return SizedBox(
           width: width,
@@ -254,7 +270,7 @@ class _EncryptedThumbnailState extends ConsumerState<EncryptedThumbnail> {
                   // Fades in over the thumbnail, no pop.
                   frameBuilder: (context, child, frame, sync) => AnimatedOpacity(
                     opacity: sync || frame != null ? 1 : 0,
-                    duration: const Duration(milliseconds: 180),
+                    duration: DsMotion.base,
                     child: child,
                   ),
                 ),

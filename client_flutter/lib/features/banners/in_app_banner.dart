@@ -283,7 +283,7 @@ class _InAppBannerHostState extends ConsumerState<InAppBannerHost> with SingleTi
     _c.duration = DsMotion.of(context, DsMotion.slow);
     _c.reverseDuration = DsMotion.of(context, DsMotion.base);
     if (fresh) DsHaptics.play(Haptic.selection);
-    _c.animateTo(1, curve: DsMotion.springy);
+    _c.animateTo(1, curve: DsMotion.enter);
     _restartTimer();
   }
 

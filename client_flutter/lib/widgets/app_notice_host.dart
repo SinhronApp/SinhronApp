@@ -1,10 +1,9 @@
 // The app's toast: one compact pill under the status bar for
-// [appNotice] (errors / notes) and [showDone] (confirmations). Dark glass
+// [appNotice] (errors / notes) and [showDone] (confirmations). Dark, solid
 // with a coloured badge, slides in, hides itself; a tap hides it sooner.
 // Replaces the full-width blue banner that stayed until tapped.
 
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
 
@@ -137,11 +136,10 @@ class _AppNoticeHostState extends State<AppNoticeHost> {
                       ),
                       child: ClipRRect(
                         borderRadius: const BorderRadius.all(Radius.circular(999)),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                          child: DecoratedBox(
+                        child: Builder(
+                          builder: (_) => DecoratedBox(
                             decoration: BoxDecoration(
-                              color: DsPalette.toastGlass,
+                              color: DsPalette.toastGlass.withValues(alpha: 1),
                               borderRadius: const BorderRadius.all(Radius.circular(999)),
                               border: Border.all(color: DsPalette.white10, width: 0.5),
                             ),

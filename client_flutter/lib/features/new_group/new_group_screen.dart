@@ -25,6 +25,7 @@ import '../../app/theme/palette.dart';
 import '../../core/providers/people.dart' show shortKey;
 import '../chat_list/chat_data.dart' show ChatPreview;
 import '../contacts_list/contacts_list_screen.dart' show ContactEntry;
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_avatar.dart';
 import '../../widgets/ds_verified_badge.dart';
@@ -236,7 +237,7 @@ class _NewGroupScreenState extends State<NewGroupScreen> {
       child: Padding(
         padding: EdgeInsets.only(top: mq.padding.top, bottom: mq.padding.bottom),
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
+          duration: DsMotion.base,
           transitionBuilder: (child, anim) {
             final goingForward = child.key == const ValueKey('step2');
             final begin = Offset(goingForward ? 0.06 : -0.06, 0);
@@ -466,11 +467,11 @@ class _CheckBox extends StatelessWidget {
         border: checked ? null : Border.all(color: tokens.text4, width: 1.5),
       ),
       child: checked
-          ? const Center(
+          ? Center(
               child: SizedBox(
                 width: 13,
                 height: 13,
-                child: CustomPaint(painter: DsCheckmarkGlyph(color: DsPalette.white)),
+                child: CustomPaint(painter: DsCheckmarkGlyph(color: tokens.accentText)),
               ),
             )
           : null,

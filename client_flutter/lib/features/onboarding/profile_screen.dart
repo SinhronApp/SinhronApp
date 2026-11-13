@@ -6,7 +6,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_app_bar.dart';
 import '../../widgets/ds_avatar.dart';
@@ -182,8 +181,8 @@ class _EditBadge extends StatelessWidget {
           DsShadow.ring(tokens.bg, spread: 3),
         ],
       ),
-      child: const Center(
-        child: DsIcon(shape: DsIconShape.edit, size: 14, color: DsPalette.white, strokeWidth: 2),
+      child: Center(
+        child: DsIcon(shape: DsIconShape.edit, size: 14, color: tokens.accentText, strokeWidth: 2),
       ),
     );
   }

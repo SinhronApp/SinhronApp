@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../app/theme/tokens.dart';
 import '../l10n/l10n.dart';
 import 'ds_icon.dart';
+import 'ds_pressable.dart';
 
 class DsIconButton extends StatelessWidget {
   final DsIconShape shape;
@@ -60,7 +61,7 @@ class DsIconButton extends StatelessWidget {
       label: label,
       excludeSemantics: label != null,
       onTap: onTap,
-      child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: onTap, child: child),
+      child: DsPressable(onTap: onTap, child: child),
     );
   }
 }
@@ -82,7 +83,7 @@ class _DsBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: bgColor, width: 2),
       ),
-      child: Center(child: Text(count.toString(), style: DsTextArt.t10w700v2)),
+      child: Center(child: Text(count.toString(), style: DsTextArt.t10w700v2.copyWith(color: tokens.accentText))),
     );
   }
 }

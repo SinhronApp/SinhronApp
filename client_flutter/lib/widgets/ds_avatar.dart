@@ -6,33 +6,32 @@ import '../app/theme/palette.dart';
 import '../app/theme/tokens.dart';
 import 'ds_icon.dart';
 
-const List<List<Color>> _avatarPalettes = [
-  [DsPalette.peach, DsPalette.salmon], // amber
-  [DsPalette.sky, DsPalette.blue500], // blue
-  [DsPalette.lilac, DsPalette.violet], // violet
-  [DsPalette.mint, DsPalette.emerald], // teal
-  [DsPalette.rose200, DsPalette.pink], // pink
-  [DsPalette.artFFE08A, DsPalette.amber], // gold
-  [DsPalette.artA7C5EB, DsPalette.blue600], // navy
-  [DsPalette.artD4B8FF, DsPalette.purple600], // purple
-  [DsPalette.artFFCFA5, DsPalette.coral], // peach
-  [DsPalette.artB5E2A1, DsPalette.lime600], // olive
-];
-
-/// ADR-055 — Saved messages: the "blue" avatar, the same for everyone.
-const List<Color> _savedPalette = [DsPalette.sky, DsPalette.blue500];
+/// Pale fill + coloured initials for [seed]. The first tint (blue) is kept
+/// for Saved messages (ADR-055); people share the rest.
+(Color, Color) _tint(String seed, bool dark, {bool saved = false}) {
+  final list = dark ? kAvatarTintsDark : kAvatarTints;
+  return list[saved ? 0 : 1 + _hashIdx(seed, list.length - 1)];
+}
 
 int _hashIdx(String s, int n) {
   var h = 0;
   for (var i = 0; i < s.length; i++) {
     h = (h * 31 + s.codeUnitAt(i)) & 0xFFFFFFFF;
   }
+  // 31 leaves 1 when divided by 2, 3, 5, 6 or 10, so for a short name
+  // `h % n` alone was just the sum of its letters: "Мама" and "Папа" fell
+  // on one colour. Stir the bits first (the last step of MurmurHash3).
+  h ^= h >> 16;
+  h = (h * 0x85EBCA6B) & 0xFFFFFFFF;
+  h ^= h >> 13;
+  h = (h * 0xC2B2AE35) & 0xFFFFFFFF;
+  h ^= h >> 16;
   return h % n;
 }
 
-/// The darker colour of the avatar gradient for [seed] — the same person
-/// gets the same hue everywhere (group sender names, tech-debt 2.22).
-Color dsAvatarAccent(String seed) => _avatarPalettes[_hashIdx(seed, _avatarPalettes.length)][1];
+/// The initials colour of the avatar for [seed] — the same person gets
+/// the same hue everywhere (group sender names, tech-debt 2.22).
+Color dsAvatarAccent(String seed, {required bool dark}) => _tint(seed, dark).$2;
 
 String _initials(String name) {
   final stripped = name.replaceAll(RegExp(r'^[^A-Za-zА-Яа-яЁё]+'), '');
@@ -58,6 +57,10 @@ class DsAvatar extends StatelessWidget {
   /// ADR-055 — my Saved messages: a bookmark on blue, never initials.
   final bool saved;
 
+  /// On the call screen, dark in every theme: the dark-theme pair and a
+  /// hairline ring, so the disc neither glares nor sinks into the navy.
+  final bool onDark;
+
   const DsAvatar({
     super.key,
     required this.name,
@@ -66,41 +69,27 @@ class DsAvatar extends StatelessWidget {
     this.online = false,
     this.image,
     this.saved = false,
+    this.onDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final palette = saved ? _savedPalette : _avatarPalettes[_hashIdx(name, _avatarPalettes.length)];
+    final (fill, fg) = _tint(name, onDark || DsTheme.isDarkOf(context), saved: saved);
     final initials = _initials(name);
 
     final circle = DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: palette,
-          // CSS 150deg ≈ topLeft→bottomRight, slight skew; close enough visually
-        ),
+        color: fill,
+        border: onDark ? Border.all(color: DsPalette.white16) : null,
       ),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Center(
-              child: saved
-                  ? DsIcon(shape: DsIconShape.bookmark, size: size * 0.46, color: DsPalette.white, strokeWidth: 1.2)
-                  : group
-                  ? DsIcon(shape: DsIconShape.groupSilhouette, size: size * 0.5, color: DsPalette.white)
-                  : Text(initials, style: DsType.avatarInitials(size)),
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(shape: BoxShape.circle, gradient: tokens.avatarShade),
-            ),
-          ),
-        ],
+      child: Center(
+        child: saved
+            ? DsIcon(shape: DsIconShape.bookmark, size: size * 0.46, color: fg, strokeWidth: 1.2)
+            : group
+            ? DsIcon(shape: DsIconShape.groupSilhouette, size: size * 0.5, color: fg)
+            : Text(initials, style: DsType.avatarInitials(size, fg)),
       ),
     );
 

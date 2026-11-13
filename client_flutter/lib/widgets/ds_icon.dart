@@ -8,7 +8,6 @@ enum DsIconShape {
   voice,
   photo,
   call,
-  pin,
   check,
   doubleCheck,
   muteBell,
@@ -135,34 +134,6 @@ class _DsIconPainter extends CustomPainter {
           ..arcToPoint(const Offset(22, 16.92), radius: const Radius.circular(2))
           ..close();
         canvas.drawPath(p, stroke);
-
-      case DsIconShape.pin:
-        // A push-pin at 45° (the old outline crossed itself and read as a
-        // squiggle at 14 pt — 2026-10-16 UI audit).
-        canvas.save();
-        canvas.translate(12, 12);
-        canvas.rotate(math.pi / 4);
-        canvas.translate(-12, -12);
-        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(8.2, 2.4, 7.6, 2.6), const Radius.circular(1.2)), fill);
-        canvas.drawRect(const Rect.fromLTRB(9.9, 4.6, 14.1, 9.8), fill);
-        canvas.drawPath(
-          Path()
-            ..moveTo(9.9, 9.6)
-            ..lineTo(14.1, 9.6)
-            ..lineTo(17.4, 13.2)
-            ..lineTo(6.6, 13.2)
-            ..close(),
-          fill,
-        );
-        canvas.drawLine(
-          const Offset(12, 13),
-          const Offset(12, 21.2),
-          Paint()
-            ..color = color
-            ..strokeWidth = 1.7
-            ..strokeCap = StrokeCap.round,
-        );
-        canvas.restore();
 
       case DsIconShape.check:
         canvas.save();

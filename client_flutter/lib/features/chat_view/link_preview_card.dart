@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/motion.dart';
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../core/services/media_loader.dart';
 import '../../src/rust/api/simple.dart' as core;
@@ -27,6 +26,7 @@ class LinkPreviewCard extends ConsumerStatefulWidget {
 class _LinkPreviewCardState extends ConsumerState<LinkPreviewCard> {
   core.LinkPreviewInfo? _info;
   Uint8List? _image;
+  bool _imageFailed = false;
 
   @override
   void initState() {
@@ -41,11 +41,13 @@ class _LinkPreviewCardState extends ConsumerState<LinkPreviewCard> {
       if (!mounted) return;
       setState(() => _info = info);
       if (info.hasImage) {
-        final img = await loader.image(widget.json);
+        // No picture within 10 s (offline) → its kept place closes.
+        final img = await loader.image(widget.json).timeout(const Duration(seconds: 10));
         if (mounted) setState(() => _image = img);
       }
     } catch (_) {
       // Broken / offline → just no card (or no image); the text stays.
+      if (mounted && _info != null) setState(() => _imageFailed = true);
     }
   }
 
@@ -54,9 +56,9 @@ class _LinkPreviewCardState extends ConsumerState<LinkPreviewCard> {
     final info = _info;
     if (info == null) return const SizedBox.shrink();
     final tokens = DsTheme.of(context);
-    final fg = widget.isOut ? DsPalette.white : tokens.text;
-    final sub = widget.isOut ? DsPalette.white85 : tokens.text2;
-    final stripe = widget.isOut ? DsPalette.white80 : tokens.accent;
+    final fg = widget.isOut ? tokens.bubbleOutText : tokens.text;
+    final sub = widget.isOut ? tokens.bubbleOutMeta : tokens.text2;
+    final stripe = tokens.accent;
     return GestureDetector(
       key: const ValueKey('link-preview'),
       behavior: HitTestBehavior.opaque,
@@ -66,7 +68,7 @@ class _LinkPreviewCardState extends ConsumerState<LinkPreviewCard> {
         padding: const EdgeInsets.fromLTRB(DsSpace.x2h5, DsSpace.x1h5, DsSpace.x2h5, DsSpace.x2),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: widget.isOut ? DsPalette.white12 : tokens.accentSoft,
+          color: widget.isOut ? fg.withValues(alpha: 0.08) : tokens.accentSoft,
           borderRadius: BorderRadius.circular(10),
           border: Border(left: BorderSide(color: stripe, width: 3)),
         ),
@@ -98,7 +100,8 @@ class _LinkPreviewCardState extends ConsumerState<LinkPreviewCard> {
               duration: DsMotion.of(context, DsMotion.base),
               curve: DsMotion.enter,
               child: _image == null
-                  ? const SizedBox(width: double.infinity)
+                  // The picture's place is kept while it loads (no jump).
+                  ? SizedBox(width: double.infinity, height: info.hasImage && !_imageFailed ? DsSpace.x2 + 140 : null)
                   : Padding(
                       padding: const EdgeInsets.only(top: DsSpace.x2),
                       child: ClipRRect(

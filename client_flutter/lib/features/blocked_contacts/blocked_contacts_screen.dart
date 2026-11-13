@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_notice.dart';
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../core/providers/message_actions.dart';
 import '../../core/providers/people.dart';
@@ -199,14 +198,11 @@ class _Row extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, DsSpace.nudge11, DsSpace.x3, DsSpace.nudge11),
           child: Row(
             children: [
-              // Dimmed avatar — desaturate via 60% opacity overlay
-              SizedBox(
-                width: 42,
-                height: 42,
-                child: ColorFiltered(
-                  colorFilter: const ColorFilter.mode(DsPalette.white35, BlendMode.lighten),
-                  child: DsAvatar(name: blocked.name, size: 42, image: blocked.photo),
-                ),
+              // Dimmed avatar. (A "lighten" colour filter here washed out the
+              // whole card: it also paints where the avatar is not.)
+              Opacity(
+                opacity: 0.6,
+                child: DsAvatar(name: blocked.name, size: 42, image: blocked.photo),
               ),
               const SizedBox(width: 12),
               Expanded(

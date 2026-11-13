@@ -1,8 +1,7 @@
 // Message context menu — UI backlog §3 items 23-24. iMessage-style: the
-// pressed bubble lifts out of a blurred chat, a reaction bar springs in
+// pressed bubble lifts out of a dimmed chat, a reaction bar springs in
 // above it and the action list below (or above, near the bottom).
 
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
@@ -139,7 +138,7 @@ class _MessageMenu extends StatelessWidget {
     if (bubbleTop.isNaN) bubbleTop = top + barSpace;
     final menuTop = bubbleTop + bubbleH + _gap;
 
-    final enter = CurvedAnimation(parent: animation, curve: DsMotion.springy, reverseCurve: DsMotion.exit);
+    final enter = CurvedAnimation(parent: animation, curve: DsMotion.enter, reverseCurve: DsMotion.exit);
     final fade = CurvedAnimation(parent: animation, curve: DsMotion.enter, reverseCurve: DsMotion.exit);
 
     Widget slot({required double t, required Widget child}) =>
@@ -170,10 +169,9 @@ class _MessageMenu extends StatelessWidget {
             child: GestureDetector(
               key: const ValueKey('menu-backdrop'),
               onTap: () => Navigator.of(context).maybePop(),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18 * fade.value, sigmaY: 18 * fade.value),
-                child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 0.22 * fade.value)),
-              ),
+              // No blur (re-blurring the screen each frame janks); the same
+              // dim as under a sheet instead.
+              child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 0.34 * fade.value)),
             ),
           ),
           // The bubble glides from where it was and lifts a little.

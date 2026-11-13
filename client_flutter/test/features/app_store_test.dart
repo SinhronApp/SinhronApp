@@ -242,7 +242,9 @@ void main() {
 
   testWidgets('Welcome: "By continuing you accept the Terms of use" opens them', (t) async {
     var terms = 0;
-    await pump(t, host(WelcomeScreen(onTerms: () => terms++)));
+    // Not `pump` (pumpAndSettle): the mark breathes forever.
+    await t.pumpWidget(host(WelcomeScreen(onTerms: () => terms++)));
+    await t.pump(const Duration(seconds: 1));
     await t.tap(find.byKey(const ValueKey('welcome-terms')));
     expect(terms, 1);
   });

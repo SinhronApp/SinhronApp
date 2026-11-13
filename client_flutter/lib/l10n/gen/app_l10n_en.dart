@@ -423,7 +423,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get chatEmptyHint =>
-      'Say hi 👋 — only the two of you can read this chat.';
+      'Say hi — only the two of you can read this chat.';
 
   @override
   String get errLoadMessages =>
@@ -1326,7 +1326,7 @@ class AppL10nEn extends AppL10n {
   String get linkDevice => 'Link a device';
 
   @override
-  String get restoreFromKey => 'Sign in with secret words →';
+  String get restoreFromKey => 'Sign in with secret words';
 
   @override
   String get pickServer => 'Pick a server';

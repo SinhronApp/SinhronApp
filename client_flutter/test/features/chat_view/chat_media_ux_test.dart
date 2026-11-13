@@ -199,8 +199,9 @@ void main() {
     expect(find.text('A great article'), findsOneWidget);
     expect(find.text('example.org'), findsOneWidget);
     await t.tap(find.byKey(const ValueKey('link-preview')));
-    // Text bubbles also take a double tap (❤️) — wait it out.
-    await t.pump(const Duration(milliseconds: 400));
+    // At once: the double-tap heart does not hold a single tap back.
+    await t.pump();
+    expect(find.byKey(const ValueKey('sheet-action-Open link')), findsOneWidget);
     await t.pumpAndSettle();
     expect(find.byKey(const ValueKey('sheet-action-Open link')), findsOneWidget);
   });

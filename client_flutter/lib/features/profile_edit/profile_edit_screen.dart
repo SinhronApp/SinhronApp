@@ -14,12 +14,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../core/providers/core_providers.dart';
 import '../../core/providers/people.dart' show kMaxBioChars;
@@ -412,7 +412,7 @@ class _HeroAvatar extends ConsumerWidget {
                     child: SizedBox(
                       width: 14,
                       height: 14,
-                      child: CustomPaint(painter: _PencilPainter(color: DsPalette.white)),
+                      child: CustomPaint(painter: _PencilPainter(color: tokens.accentText)),
                     ),
                   ),
                 ),
@@ -456,14 +456,7 @@ class _HandleRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, DsSpace.nudge11, DsSpace.x3h5, DsSpace.nudge11),
           child: Row(
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(color: tokens.accentSoft, borderRadius: BorderRadius.circular(8)),
-                child: Center(
-                  child: Text('@', style: DsTextArt.t16w700Mono.copyWith(color: tokens.accent)),
-                ),
-              ),
+              SizedBox(width: 30, height: 30, child: Icon(CupertinoIcons.at, size: 22, color: tokens.text2)),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

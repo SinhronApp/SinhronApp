@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme/palette.dart';
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 import '../../core/haptics.dart';
 import '../../core/providers/chat_providers.dart';
@@ -281,7 +282,7 @@ class _FolderRow extends StatelessWidget {
       child: Row(
         children: [
           AnimatedOpacity(
-            duration: const Duration(milliseconds: 180),
+            duration: DsMotion.base,
             opacity: shown ? 1 : 0.45,
             child: FolderEmojiTile(emoji: folderFace(folder).emoji, icon: folderFace(folder).icon),
           ),

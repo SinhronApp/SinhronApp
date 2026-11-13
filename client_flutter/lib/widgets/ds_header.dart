@@ -83,7 +83,12 @@ class DsHeader extends StatelessWidget {
             const SizedBox(width: DsSpace.x2),
           ],
           Expanded(
-            child: Text(title, key: const ValueKey('header-title'), style: style, overflow: TextOverflow.ellipsis),
+            // Shrinks to fit rather than cutting «Подключение…».
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(title, key: const ValueKey('header-title'), style: style, maxLines: 1),
+            ),
           ),
           DsIconButton(shape: DsIconShape.search, onTap: onSearch),
           DsIconButton(shape: DsIconShape.edit, onTap: onCompose),

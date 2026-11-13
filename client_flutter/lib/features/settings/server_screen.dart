@@ -10,9 +10,9 @@
 // the transport, and the trust comparison (true of every Sinhron server).
 // Operator, policies, latency and Switch server have no backend yet.
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_app_bar.dart';
 import '_shared.dart';
@@ -89,16 +89,19 @@ class _ServerHero extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(DsSpace.x4h5, DsSpace.x4h5, DsSpace.x4h5, DsSpace.x4h5),
         decoration: BoxDecoration(
           color: tokens.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: tokens.dividerStrong, width: 0.5),
-          boxShadow: DsShadow.card,
+          borderRadius: BorderRadius.circular(tokens.radiusCard),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                _ServerIdenticon(hostname: hostname),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(color: tokens.bgSoft, borderRadius: BorderRadius.circular(14)),
+                  child: Icon(CupertinoIcons.globe, size: 24, color: tokens.text2),
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -118,7 +121,7 @@ class _ServerHero extends StatelessWidget {
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: connected ? DsPalette.green : tokens.text4,
+                              color: connected ? tokens.success : tokens.text4,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -136,82 +139,6 @@ class _ServerHero extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Deterministic 4x4 identicon derived from the hostname so the same
-/// server always renders the same glyph. Two-color (accent + soft accent)
-/// for brand cohesion.
-class _ServerIdenticon extends StatelessWidget {
-  final String hostname;
-  const _ServerIdenticon({required this.hostname});
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = DsTheme.of(context);
-    // Hash hostname into a 16-bit grid + a hue choice.
-    final h = hostname.codeUnits.fold<int>(2166136261, (acc, c) {
-      var v = (acc ^ c) & 0xFFFFFFFF;
-      v = (v * 16777619) & 0xFFFFFFFF;
-      return v;
-    });
-    // Pick a brand-cohesive gradient pair from a fixed palette.
-    final palettes = <List<Color>>[
-      [tokens.accent, DsPalette.indigo],
-      [DsPalette.violet, DsPalette.fuchsia],
-      [DsPalette.green, DsPalette.cyan],
-      [DsPalette.coral, DsPalette.amber],
-    ];
-    final colors = palettes[h.abs() % palettes.length];
-    // 4×4 cell pattern, mirrored horizontally to look "iconic".
-    final cells = <bool>[];
-    for (var i = 0; i < 8; i++) {
-      cells.add(((h >> i) & 1) == 1);
-    }
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colors[0].withValues(alpha: 0.14), colors[1].withValues(alpha: 0.14)],
-        ),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      padding: const EdgeInsets.all(DsSpace.x2),
-      child: CustomPaint(
-        painter: _IdenticonPainter(cells: cells, colors: colors),
-      ),
-    );
-  }
-}
-
-class _IdenticonPainter extends CustomPainter {
-  final List<bool> cells; // 8 bits → mirrored 4x4
-  final List<Color> colors;
-  _IdenticonPainter({required this.cells, required this.colors});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cell = size.width / 4;
-    for (var row = 0; row < 4; row++) {
-      for (var col = 0; col < 4; col++) {
-        // Mirror columns 2-3 from 0-1 so the glyph reads centered.
-        final srcCol = col < 2 ? col : 3 - col;
-        final bit = cells[row * 2 + srcCol];
-        if (!bit) continue;
-        final color = (row + col) % 2 == 0 ? colors[0] : colors[1];
-        final paint = Paint()
-          ..color = color
-          ..style = PaintingStyle.fill;
-        final r = Rect.fromLTWH(col * cell, row * cell, cell, cell).deflate(1);
-        canvas.drawRRect(RRect.fromRectAndRadius(r, const Radius.circular(2)), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_IdenticonPainter old) => old.cells != cells || old.colors != colors;
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -242,9 +169,7 @@ class _TrustComparison extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(DsSpace.x4, DsSpace.x4, DsSpace.x4, DsSpace.x4),
               decoration: BoxDecoration(
                 color: tokens.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: tokens.dividerStrong, width: 0.5),
-                boxShadow: DsShadow.card,
+                borderRadius: BorderRadius.circular(tokens.radiusCard),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +187,7 @@ class _TrustComparison extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _TrustGroupHeader(label: context.l10n.serverCantSee, color: DsPalette.green),
+                  _TrustGroupHeader(label: context.l10n.serverCantSee, color: tokens.success),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
@@ -313,11 +238,10 @@ class _TrustItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final fg = positive ? DsPalette.green : tokens.text2;
-    final bg = positive ? DsPalette.green8 : tokens.bgSoft;
+    final fg = positive ? tokens.success : tokens.text2;
     return Container(
       padding: const EdgeInsets.fromLTRB(DsSpace.x2, DsSpace.nudge5, DsSpace.x2h5, DsSpace.nudge5),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: tokens.bgSoft, borderRadius: BorderRadius.circular(999)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

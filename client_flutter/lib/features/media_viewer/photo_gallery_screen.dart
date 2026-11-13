@@ -96,7 +96,7 @@ Future<void> openPhotoGallery(
   await Navigator.of(context, rootNavigator: true).push(
     PageRouteBuilder<void>(
       opaque: false,
-      transitionDuration: DsMotion.of(context, const Duration(milliseconds: 320)),
+      transitionDuration: DsMotion.of(context, DsMotion.slow),
       reverseTransitionDuration: DsMotion.of(context, DsMotion.base),
       pageBuilder: (_, _, _) =>
           PhotoGalleryScreen(items: items, initialIndex: index, actions: actions, allItems: allItems),

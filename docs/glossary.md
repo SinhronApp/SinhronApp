@@ -559,3 +559,4 @@
 | "frb codegen" | flutter_rust_bridge_codegen generate |
 | "full_e2e" | client_flutter/rust/sinhron_sync/examples/full_e2e.rs (Alice↔Bob проф) |
 | "the spec" | design_handoff_sinhron/spec/architecture.md (920 строк) |
+| "Тихий" | Вид приложения с 0.13.0 (ADR-107): почти без цвета, Golos Text, без теней и цветных плиток; свои сообщения — сплошной акцент с белым текстом. Движение — ADR-108 (120 / 200 / 300 мс) |

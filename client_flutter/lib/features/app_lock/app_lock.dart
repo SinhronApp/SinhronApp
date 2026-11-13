@@ -279,7 +279,7 @@ class _LockCover extends StatelessWidget {
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.9, end: 1),
           duration: DsMotion.of(context, DsMotion.slow),
-          curve: DsMotion.springy,
+          curve: DsMotion.enter,
           builder: (_, s, child) => Transform.scale(scale: s, child: child),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

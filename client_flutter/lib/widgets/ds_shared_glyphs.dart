@@ -3,8 +3,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../app/theme/palette.dart';
-
 class DsBellOffGlyph extends CustomPainter {
   final Color color;
   DsBellOffGlyph({required this.color});
@@ -241,7 +239,8 @@ class DsSearchGlyphGlyph extends CustomPainter {
 
 class DsVerifiedSealGlyph extends CustomPainter {
   final Color color;
-  DsVerifiedSealGlyph({required this.color});
+  final Color onColor;
+  DsVerifiedSealGlyph({required this.color, required this.onColor});
   @override
   void paint(Canvas canvas, Size size) {
     final s = size.width / 24;
@@ -251,7 +250,7 @@ class DsVerifiedSealGlyph extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
     final whiteStroke = Paint()
-      ..color = DsPalette.white
+      ..color = onColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round
@@ -266,7 +265,7 @@ class DsVerifiedSealGlyph extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DsVerifiedSealGlyph old) => old.color != color;
+  bool shouldRepaint(DsVerifiedSealGlyph old) => old.color != color || old.onColor != onColor;
 }
 
 class DsQrShareGlyphGlyph extends CustomPainter {

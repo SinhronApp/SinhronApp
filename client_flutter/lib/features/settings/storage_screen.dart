@@ -18,10 +18,10 @@
 import 'package:flutter/widgets.dart';
 
 import '../../core/app_notice.dart';
-import '../../app/theme/palette.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_action_sheet.dart';
 import '../../widgets/ds_app_bar.dart';
+import '../../widgets/ds_avatar.dart';
 import '../../widgets/ds_button.dart';
 import '../../widgets/ds_picker_sheet.dart';
 import '_shared.dart';
@@ -89,20 +89,29 @@ String storageSize(int n) {
 class _Category {
   final String label;
   final int bytes;
-  final Color color;
   final SettingsRowIcon icon;
-  const _Category({required this.label, required this.bytes, required this.color, required this.icon});
+  const _Category({required this.label, required this.bytes, required this.icon});
 }
+
+/// The usage bar's calm shades, one per category in order: accent, then greys.
+List<Color> _barShades(DsTokens t) => [
+  t.accent,
+  t.accent.withValues(alpha: 0.55),
+  t.accent.withValues(alpha: 0.3),
+  t.text2,
+  t.text2.withValues(alpha: 0.55),
+  t.text2.withValues(alpha: 0.3),
+];
 
 List<_Category> _categories(BuildContext context, StorageUsage u) {
   final l = context.l10n;
   return [
-    _Category(label: l.photos, bytes: u.photos, color: DsPalette.blue, icon: SettingsRowIcon.photos),
-    _Category(label: l.storageVideos, bytes: u.videos, color: DsPalette.violet, icon: SettingsRowIcon.videos),
-    _Category(label: l.storageVoice, bytes: u.voice, color: DsPalette.pink, icon: SettingsRowIcon.voice),
-    _Category(label: l.sharedMediaDocuments, bytes: u.documents, color: DsPalette.green, icon: SettingsRowIcon.document),
-    _Category(label: l.storageOther, bytes: u.other, color: DsPalette.coral, icon: SettingsRowIcon.cache),
-    _Category(label: l.storageDatabase, bytes: u.database, color: DsPalette.amber, icon: SettingsRowIcon.storage),
+    _Category(label: l.photos, bytes: u.photos, icon: SettingsRowIcon.photos),
+    _Category(label: l.storageVideos, bytes: u.videos, icon: SettingsRowIcon.videos),
+    _Category(label: l.storageVoice, bytes: u.voice, icon: SettingsRowIcon.voice),
+    _Category(label: l.sharedMediaDocuments, bytes: u.documents, icon: SettingsRowIcon.document),
+    _Category(label: l.storageOther, bytes: u.other, icon: SettingsRowIcon.cache),
+    _Category(label: l.storageDatabase, bytes: u.database, icon: SettingsRowIcon.storage),
   ];
 }
 
@@ -205,7 +214,7 @@ class _StorageScreenState extends State<StorageScreen> {
                     title: l.storageByType,
                     children: [
                       for (var i = 0; i < categories.length; i++)
-                        _CategoryRow(c: categories[i], total: total, isLast: i == categories.length - 1),
+                        _CategoryRow(c: categories[i], total: total),
                     ],
                   ),
                   if (chats.isNotEmpty)
@@ -214,7 +223,7 @@ class _StorageScreenState extends State<StorageScreen> {
                       footer: l.storageTopChatsRealFooter,
                       children: [
                         for (var i = 0; i < chats.length; i++)
-                          _TopChatRow(c: chats[i], isLast: i == chats.length - 1),
+                          _TopChatRow(c: chats[i]),
                       ],
                     ),
                   if (widget.onKeepDays != null)
@@ -282,9 +291,7 @@ class _HeroCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(DsSpace.x4h5, DsSpace.x4h5, DsSpace.x4h5, DsSpace.x4h5),
         decoration: BoxDecoration(
           color: tokens.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: tokens.dividerStrong, width: 0.5),
-          boxShadow: DsShadow.card,
+          borderRadius: BorderRadius.circular(tokens.radiusCard),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,6 +350,7 @@ class _StackedBarState extends State<_StackedBar> with SingleTickerProviderState
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
+    final shades = _barShades(tokens);
     // Flex weights in thousandths of the total (Expanded needs ints).
     int share(int bytes) => widget.total == 0 ? 0 : (bytes * 1000 / widget.total).round();
     return AnimatedBuilder(
@@ -360,11 +368,11 @@ class _StackedBarState extends State<_StackedBar> with SingleTickerProviderState
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final c in widget.categories)
+                for (final (i, c) in widget.categories.indexed)
                   if (share(c.bytes) > 0)
                     Expanded(
                       flex: share(c.bytes),
-                      child: ColoredBox(color: c.color),
+                      child: ColoredBox(color: shades[i]),
                     ),
                 // Trailing spacer that shrinks as t → 1, "drawing" the bar
                 // left-to-right rather than fading colors in.
@@ -386,18 +394,19 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
+    final shades = _barShades(tokens);
     return Wrap(
       spacing: 16,
       runSpacing: 8,
       children: [
-        for (final c in categories)
+        for (final (i, c) in categories.indexed)
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 9,
                 height: 9,
-                decoration: BoxDecoration(color: c.color, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: shades[i], borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(width: 6),
               Text(c.label, style: DsText.footnote.copyWith(color: tokens.text2)),
@@ -409,14 +418,13 @@ class _Legend extends StatelessWidget {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Category row — tinted icon (using the category's own color) + size
+// Category row — plain grey icon + size
 // ═════════════════════════════════════════════════════════════════════
 
 class _CategoryRow extends StatelessWidget {
   final _Category c;
   final int total;
-  final bool isLast;
-  const _CategoryRow({required this.c, required this.total, required this.isLast});
+  const _CategoryRow({required this.c, required this.total});
 
   @override
   Widget build(BuildContext context) {
@@ -429,19 +437,15 @@ class _CategoryRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, DsSpace.nudge11, DsSpace.x3h5, DsSpace.nudge11),
           child: Row(
             children: [
-              Container(
+              SizedBox(
                 width: 30,
                 height: 30,
-                decoration: BoxDecoration(
-                  color: c.color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 child: Center(
                   child: SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 23,
+                    height: 23,
                     child: CustomPaint(
-                      painter: SettingsRowIconPainter(shape: c.icon, color: c.color),
+                      painter: SettingsRowIconPainter(shape: c.icon, color: tokens.text2),
                     ),
                   ),
                 ),
@@ -455,7 +459,7 @@ class _CategoryRow extends StatelessWidget {
                   style: DsText.body.copyWith(fontWeight: FontWeight.w500, color: tokens.text),
                 ),
               ),
-              Text('$percent%', style: DsTextArt.t11p5w500Monov2.copyWith(color: tokens.text4)),
+              Text('$percent%', style: DsText.caption.copyWith(color: tokens.text4)),
               const SizedBox(width: 10),
               ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 64),
@@ -468,20 +472,18 @@ class _CategoryRow extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast) Positioned(left: 56, right: 0, bottom: 0, height: 0.5, child: ColoredBox(color: tokens.divider)),
       ],
     );
   }
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Top-chats row — gradient initials avatar + name + size
+// Top-chats row — avatar + name + size
 // ═════════════════════════════════════════════════════════════════════
 
 class _TopChatRow extends StatelessWidget {
   final StorageChat c;
-  final bool isLast;
-  const _TopChatRow({required this.c, required this.isLast});
+  const _TopChatRow({required this.c});
 
   @override
   Widget build(BuildContext context) {
@@ -492,7 +494,7 @@ class _TopChatRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(DsSpace.x3h5, DsSpace.x2h5, DsSpace.x3h5, DsSpace.x2h5),
           child: Row(
             children: [
-              _MiniAvatar(name: c.name, isGroup: c.isGroup),
+              DsAvatar(name: c.name, size: 30, group: c.isGroup),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -506,50 +508,7 @@ class _TopChatRow extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast) Positioned(left: 56, right: 0, bottom: 0, height: 0.5, child: ColoredBox(color: tokens.divider)),
       ],
     );
-  }
-}
-
-class _MiniAvatar extends StatelessWidget {
-  final String name;
-  final bool isGroup;
-  const _MiniAvatar({required this.name, required this.isGroup});
-
-  @override
-  Widget build(BuildContext context) {
-    // Deterministic gradient pair from the name hash so the same chat keeps
-    // the same color across reloads (and matches DsAvatar's behavior).
-    final hash = name.codeUnits.fold<int>(0, (acc, c) => acc + c);
-    final palettes = <List<Color>>[
-      [DsPalette.blue, DsPalette.indigo],
-      [DsPalette.violet, DsPalette.fuchsia],
-      [DsPalette.pink, DsPalette.amber],
-      [DsPalette.green, DsPalette.cyan],
-      [DsPalette.coral, DsPalette.amber],
-    ];
-    final colors = palettes[hash % palettes.length];
-
-    final initials = _initials(name);
-
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
-        shape: BoxShape.circle,
-      ),
-      child: Center(child: Text(initials, style: DsTextArt.t11w600v3)),
-    );
-  }
-
-  String _initials(String s) {
-    // For groups like "Family · 8" — take the first letter before the dot.
-    final cleaned = s.split('·').first.trim();
-    final parts = cleaned.split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
   }
 }

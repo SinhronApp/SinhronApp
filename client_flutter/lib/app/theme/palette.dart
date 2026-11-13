@@ -5,13 +5,36 @@
 
 import 'package:flutter/widgets.dart';
 
+/// Avatar tints: pale fill + coloured initials, light and dark theme.
+/// The first (blue) is the app's own — Saved messages; people get the
+/// rest, so with the default accent a name in a group never looks like a
+/// link. Initials reach 4.5:1 on their fill and on the incoming bubble
+/// (contrast_test.dart).
+const kAvatarTints = <(Color, Color)>[
+  (Color(0xFFE0E8FA), Color(0xFF2B55B5)),
+  (Color(0xFFE9E3FB), Color(0xFF6540BF)),
+  (Color(0xFFD9F0F1), Color(0xFF0F6770)),
+  (Color(0xFFDFF1E3), Color(0xFF23703F)),
+  (Color(0xFFFBE1EC), Color(0xFFB02A66)),
+  (Color(0xFFFCE4DF), Color(0xFFB03E2B)),
+  (Color(0xFFE3E8EF), Color(0xFF475569)), // slate
+  (Color(0xFFE9F2D6), Color(0xFF4A6B0C)), // lime
+];
+const kAvatarTintsDark = <(Color, Color)>[
+  (Color(0xFF1D2A47), Color(0xFF9DB9FF)),
+  (Color(0xFF2A2347), Color(0xFFBBA6FF)),
+  (Color(0xFF143338), Color(0xFF6FD3DC)),
+  (Color(0xFF17331F), Color(0xFF7DD69A)),
+  (Color(0xFF3D1D2D), Color(0xFFFF9CC4)),
+  (Color(0xFF3F211B), Color(0xFFFFA08C)),
+  (Color(0xFF242C38), Color(0xFFA9B8CC)),
+  (Color(0xFF27331A), Color(0xFFB4D873)),
+];
+
 abstract final class DsPalette {
   static const alert = Color(0xFFE5484D);
   static const amber = Color(0xFFF59E0B);
   static const black = Color(0xFF000000);
-  /// Incoming bubble on a light theme — Signal / iMessage grey: reads on a
-  /// white chat without a shadow.
-  static const bubbleInLight = Color(0xFFE9E9EB);
   /// Dark glass behind a toast pill — reads on light and dark screens.
   static const toastGlass = Color(0xE61C1C20);
   static const black20 = Color(0x33000000);

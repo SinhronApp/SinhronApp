@@ -796,7 +796,7 @@ abstract class AppL10n {
   /// No description provided for @chatEmptyHint.
   ///
   /// In en, this message translates to:
-  /// **'Say hi 👋 — only the two of you can read this chat.'**
+  /// **'Say hi — only the two of you can read this chat.'**
   String get chatEmptyHint;
 
   /// No description provided for @errLoadMessages.
@@ -2320,7 +2320,7 @@ abstract class AppL10n {
   /// No description provided for @restoreFromKey.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with secret words →'**
+  /// **'Sign in with secret words'**
   String get restoreFromKey;
 
   /// No description provided for @pickServer.

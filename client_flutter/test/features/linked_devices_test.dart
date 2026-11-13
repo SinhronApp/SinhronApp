@@ -157,7 +157,7 @@ void main() {
       ..map[deviceNameKey('bb' * 32)] = 'iPhone 16 Pro';
     await pump(t, [dev('aa' * 32, primary: true), dev('bb' * 32, me: true), dev('cc' * 32)], settings: settings);
     expect(find.text('iPad Air'), findsOneWidget);
-    expect(find.text('This device · iPhone 16 Pro'), findsOneWidget);
+    expect(find.text('iPhone 16 Pro'), findsOneWidget);
     expect(find.text('Another device'), findsOneWidget, reason: 'an older build that has not named itself');
   });
 

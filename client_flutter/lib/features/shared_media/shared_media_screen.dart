@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/chat_providers.dart' show messagesProvider;
 
+import '../../app/theme/motion.dart';
 import '../../app/theme/tokens.dart';
 import '../../widgets/ds_icon.dart';
 import 'real_shared_media.dart';
@@ -213,11 +214,11 @@ class _Chip extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
+          duration: DsMotion.fast,
           curve: Curves.easeOut,
           padding: const EdgeInsets.fromLTRB(DsSpace.x3, DsSpace.nudge7, DsSpace.x3, DsSpace.nudge7),
           decoration: BoxDecoration(
-            color: selected ? tokens.text : tokens.bgSoft,
+            color: selected ? tokens.chipActive : tokens.bg,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Row(
@@ -228,14 +229,16 @@ class _Chip extends StatelessWidget {
                 style: DsText.subhead.copyWith(
                   fontWeight: FontWeight.w600,
                   height: 1.0,
-                  color: selected ? tokens.bg : tokens.text,
+                  color: selected ? tokens.text : tokens.text3,
                 ),
               ),
               const SizedBox(width: 6),
               Text(
                 count.toString(),
-                style: DsTextArt.t11p5w500Monov3.copyWith(
-                  color: selected ? tokens.bg.withValues(alpha: 0.65) : tokens.text3,
+                style: DsText.caption.copyWith(
+                  fontWeight: FontWeight.w500,
+                  height: 1.0,
+                  color: selected ? tokens.text2 : tokens.text3,
                 ),
               ),
             ],

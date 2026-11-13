@@ -23,7 +23,7 @@ class DsVerifiedBadge extends StatelessWidget {
     final seal = SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(painter: DsVerifiedSealGlyph(color: tokens.accent)),
+      child: CustomPaint(painter: DsVerifiedSealGlyph(color: tokens.accent, onColor: tokens.accentText)),
     );
     return semanticLabel == null ? ExcludeSemantics(child: seal) : Semantics(label: semanticLabel, child: seal);
   }

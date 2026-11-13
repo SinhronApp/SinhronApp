@@ -175,7 +175,7 @@ class CallTile extends StatelessWidget {
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: DsTextArt.t13w600Mono.copyWith(fontFamily: null),
+                          style: DsTextArt.t13w600Mono.copyWith(fontFamily: DsType.family),
                         ),
                       ),
                     ],

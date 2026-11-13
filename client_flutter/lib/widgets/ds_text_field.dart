@@ -151,8 +151,9 @@ class _DsTextFieldState extends State<DsTextField> {
       cursorHeight: widget.maxLines > 1 ? null : 18,
       // Strip Cupertino's built-in visual chrome — our outer container handles
       // bg/border/padding. Without these, you'd get a doubled border + extra
-      // 6px padding around the text.
-      decoration: null,
+      // 6px padding around the text. An empty decoration, not null: with null
+      // a disabled field paints Cupertino's own near-black / near-white box.
+      decoration: const BoxDecoration(),
       padding: EdgeInsets.zero,
       // Use Cupertino's native placeholder (not a Stack overlay) — the overlay
       // Text widget was intercepting long-press/double-tap gestures on iOS so

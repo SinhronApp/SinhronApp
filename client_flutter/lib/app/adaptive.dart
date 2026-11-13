@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'theme/motion.dart';
 import 'theme/tokens.dart';
 
 /// Two columns from this width — any iPad standing up, half of the big
@@ -349,9 +350,20 @@ class DsSheetPlacement extends StatelessWidget {
     final mq = MediaQuery.of(context);
     Widget placed;
     if (!isWideSize(mq.size)) {
+      // Rises by its own height with the route (not by the screen's — a
+      // small sheet would spend the first frames below the edge).
+      final anim = ModalRoute.of(context)?.animation;
+      final sheet = Builder(builder: builder);
       placed = Align(
         alignment: Alignment.bottomCenter,
-        child: Builder(builder: builder),
+        child: anim == null
+            ? sheet
+            : SlideTransition(
+                position: anim.drive(
+                  Tween(begin: const Offset(0, 1), end: Offset.zero).chain(CurveTween(curve: DsMotion.emphasized)),
+                ),
+                child: sheet,
+              ),
       );
     } else {
       final free = mq.size.height - mq.viewInsets.bottom;

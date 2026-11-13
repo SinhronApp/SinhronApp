@@ -1,6 +1,10 @@
 // Press feedback — UI backlog §4 item 36. Anything tappable shrinks a
-// touch and dims while the finger is down, then springs back; optional
-// haptic on tap. Respects Reduce Motion (dim only, no scale).
+// touch and dims while the finger is down, then eases back; optional
+// haptic on tap. A quick tap stays pressed for DsMotion.minPress so it is
+// seen (onTap itself is not delayed). Respects Reduce Motion (dim only, no
+// scale).
+
+import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
@@ -37,9 +41,34 @@ class DsPressable extends StatefulWidget {
 
 class _DsPressableState extends State<DsPressable> {
   bool _down = false;
+  final _held = Stopwatch(); // not the wall clock: that can jump
+  Timer? _release;
 
   void _set(bool v) {
+    _release?.cancel();
+    if (v) {
+      _held
+        ..reset()
+        ..start();
+    } else if (_down) {
+      // A quick tap: hold the highlight until it has been seen.
+      final left = DsMotion.minPress - _held.elapsed;
+      if (left > Duration.zero) {
+        _release = Timer(left, () => _apply(false));
+        return;
+      }
+    }
+    _apply(v);
+  }
+
+  void _apply(bool v) {
     if (_down != v && mounted) setState(() => _down = v);
+  }
+
+  @override
+  void dispose() {
+    _release?.cancel();
+    super.dispose();
   }
 
   @override
@@ -61,7 +90,7 @@ class _DsPressableState extends State<DsPressable> {
       child: AnimatedScale(
         scale: _down && !reduced ? widget.scale : 1,
         duration: _down ? DsMotion.fast : DsMotion.base,
-        curve: _down ? DsMotion.enter : DsMotion.springy,
+        curve: DsMotion.enter,
         child: widget.pressedColor != null
             ? AnimatedContainer(
                 duration: _down ? Duration.zero : DsMotion.base,

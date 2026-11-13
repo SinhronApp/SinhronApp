@@ -1,7 +1,8 @@
 // Signal-style QR card (owner, 2026-10-20: "окно с QR некрасивое"): the code
-// on a white rounded tile inside a card in the accent colour, with a line
-// or two under it in the accent's text colour. The tile stays white in
-// every theme — scanners need dark modules on light.
+// on a white rounded tile inside a quiet card in the tone of my own bubble
+// (pale on light, deep on dark — no gradient, no glow), with a line or two
+// under it in the bubble's text colours. The tile stays white in every
+// theme — scanners need dark modules on light.
 
 import 'package:flutter/widgets.dart';
 
@@ -23,18 +24,9 @@ class DsQrCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
-    final on = tokens.accentText;
     return Container(
       padding: const EdgeInsets.fromLTRB(DsSpace.x6, DsSpace.x7, DsSpace.x6, DsSpace.x6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [tokens.accent, Color.lerp(tokens.accent, DsPalette.black, 0.18)!],
-        ),
-        boxShadow: [DsShadow.glowOf(tokens.accent, alpha: 0.2, y: 8, blur: 24)],
-      ),
+      decoration: BoxDecoration(color: tokens.bubbleOut, borderRadius: BorderRadius.circular(28)),
       child: Column(
         children: [
           Container(
@@ -51,7 +43,7 @@ class DsQrCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: (titleMono ? DsTextArt.t14w500Mono : DsText.headline).copyWith(
                 fontWeight: FontWeight.w600,
-                color: on,
+                color: tokens.bubbleOutText,
               ),
             ),
           ],
@@ -60,7 +52,7 @@ class DsQrCard extends StatelessWidget {
             Text(
               subtitle!,
               textAlign: TextAlign.center,
-              style: DsText.footnote.copyWith(color: on.withValues(alpha: 0.78)),
+              style: DsText.footnote.copyWith(color: tokens.bubbleOutMeta),
             ),
           ],
         ],

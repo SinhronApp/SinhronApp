@@ -15,6 +15,7 @@ import '../l10n/l10n.dart';
 
 import '../app/theme/tokens.dart';
 import 'ds_icon.dart';
+import 'ds_pressable.dart';
 
 class DsAppBar extends StatelessWidget {
   final String? title;
@@ -44,8 +45,7 @@ class DsAppBar extends StatelessWidget {
         label: context.l10n.a11yBack,
         excludeSemantics: true,
         onTap: onBack,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        child: DsPressable(
           onTap: onBack,
           child: SizedBox(
             width: 36,

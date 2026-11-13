@@ -6,16 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sinhron/app/theme/tokens.dart';
 
-/// Load the bundled Geist + Geist Mono fonts so golden snapshots render
+/// Load the bundled Golos Text + Geist Mono fonts so golden snapshots render
 /// with real glyphs instead of the default Ahem placeholder.
 /// Called from setUpAll() in golden tests.
 Future<void> loadAppFonts() async {
   for (final entry in <String, List<String>>{
-    'Geist': [
-      'assets/fonts/Geist-Regular.ttf',
-      'assets/fonts/Geist-Medium.ttf',
-      'assets/fonts/Geist-SemiBold.ttf',
-      'assets/fonts/Geist-Bold.ttf',
+    'GolosText': [
+      'assets/fonts/GolosText-Regular.ttf',
+      'assets/fonts/GolosText-Medium.ttf',
+      'assets/fonts/GolosText-SemiBold.ttf',
+      'assets/fonts/GolosText-Bold.ttf',
     ],
     'GeistMono': [
       'assets/fonts/GeistMono-Regular.ttf',
