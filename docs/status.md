@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-11-13 (266) · Release: выпуск Android на GitHub — права и очередь
+
+Третий запуск: APK собран и подписан нашим ключом (`android.json` записан — значит, отпечаток совпал), но
+`gh release create` получил 403: в организации сборкам была запрещена запись. Владелец включил «Read and write
+permissions» (организация → Actions → General). Убрана общая очередь `concurrency: release` из `release.yml`: Android
+ждал окончания сборки iPhone (~40 мин); две сборки Android в один час всё равно не создадут два выпуска (тот же tag).
+
+---
+
 ## 2026-11-13 (265) · Release iPhone: ключ App Store Connect в любом виде
 
 Второй запуск: Xcode 26, проверка Swift и CocoaPods прошли; `xcodebuild` отверг ключ (`invalidPEMDocument`) — секрет

@@ -34,10 +34,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: release
-  cancel-in-progress: false
-
 env:
   FLUTTER_VERSION: "3.41.5"
 
