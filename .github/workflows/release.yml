@@ -150,6 +150,8 @@ jobs:
           print("-----BEGIN PRIVATE KEY-----", *lines, "-----END PRIVATE KEY-----", sep="\n")
           ' > "$RUNNER_TEMP/AuthKey.p8"
           openssl pkey -in "$RUNNER_TEMP/AuthKey.p8" -noout 2>/dev/null || {
+            # Shape only, never the contents: a .p8 is ~6 lines, a BEGIN line, ~200 base64 letters.
+            echo "ASC_KEY_P8: $(printf %s "$P8" | wc -c) chars, $(printf '%s\n' "$P8" | wc -l) lines, BEGIN lines: $(printf %s "$P8" | grep -c BEGIN), base64 letters: $(printf %s "$P8" | tr -cd 'A-Za-z0-9+/=' | wc -c) (a .p8 key: ~6 lines, 1, ~230)"
             echo "::error::ASC_KEY_P8 is not an App Store Connect key (.p8). Paste the whole text of AuthKey_<Key ID>.p8 again."; exit 1; }
           KC="$RUNNER_TEMP/build.keychain-db"
           security create-keychain -p "" "$KC"
