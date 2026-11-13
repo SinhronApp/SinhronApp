@@ -134,7 +134,7 @@ fvm flutter analyze
 
 **Если что-то не проходит:** скорее всего env issue (missing dep), а не реальный bug. Открой issue / читай `docs/tech-debt.md` § 6 "Известные gotchas".
 
-**В облаке (Claude Code web / приложение Claude на телефоне):** репозиторий `github.com/SinhronApp/SihnronApp`. При старте сессии SessionStart-hook (`.claude/settings.json` → `.claude/cloud_setup.sh`) ставит protoc + Flutter 3.41.5, поднимает PostgreSQL 16 (роль `sinhron`, только `CREATEDB`) и экспортирует `DATABASE_URL`/`SINHRON_DB_URL` — `cargo test -- --include-ignored` на сервере работает без ручной настройки. Лог: `/tmp/cloud_setup.log`. Golden-тесты (`test/goldens/`, `test/goldens_screens/`) в облаке пропускать — сняты на macOS (экраны — ещё и в UTC+3). iOS-сборка — только на Mac. Команды — в корневом `CLAUDE.md`.
+**В облаке (Claude Code web / приложение Claude на телефоне):** репозиторий `github.com/SinhronApp/SinhronApp`. При старте сессии SessionStart-hook (`.claude/settings.json` → `.claude/cloud_setup.sh`) ставит protoc + Flutter 3.41.5, поднимает PostgreSQL 16 (роль `sinhron`, только `CREATEDB`) и экспортирует `DATABASE_URL`/`SINHRON_DB_URL` — `cargo test -- --include-ignored` на сервере работает без ручной настройки. Лог: `/tmp/cloud_setup.log`. Golden-тесты (`test/goldens/`, `test/goldens_screens/`) в облаке пропускать — сняты на macOS (экраны — ещё и в UTC+3). iOS-сборка — только на Mac. Команды — в корневом `CLAUDE.md`.
 
 ---
 

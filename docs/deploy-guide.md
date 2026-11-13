@@ -13,7 +13,7 @@
 Нужно заранее: VPS с Ubuntu 22.04/24.04 и публичным IP, домен и три записи A (`домен`, `livekit.домен`, `turn.домен` → IP сервера; в Cloudflare — «DNS only»).
 
 ```bash
-git clone https://github.com/SinhronApp/SihnronApp.git sinhron && cd sinhron
+git clone https://github.com/SinhronApp/SinhronApp.git sinhron && cd sinhron
 sudo bash server/install.sh
 ```
 

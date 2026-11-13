@@ -21,7 +21,7 @@
 
 - `<id>` — номер коммита из шага 4 (40 знаков); на сервере его один раз кладут в файл (шаг 7), дальше команды берут его оттуда;
 - `<tag>` — имя выпуска Android из шага 5 (вида `v0.12.0-2026111318`);
-- код на сервер приходит с GitHub: `https://github.com/SinhronApp/SihnronApp`;
+- код на сервер приходит с GitHub: `https://github.com/SinhronApp/SinhronApp`;
 - адрес мессенджера — `chat.777400777.xyz`.
 
 ---
@@ -63,8 +63,9 @@ GitHub → Actions → **Release** → Run workflow → ветка `main`.
 
 - **Android** — всегда здесь. Он только кладёт APK в «Releases» на GitHub, телефоны его не видят, пока в шаге 12 он
   не попадёт на сервер.
-- **iPhone** — здесь, только если в шаге 1 увидел, что TestFlight **не** раздаёт новые сборки группе сам. Раздаёт сам —
-  галочку iPhone снять, iPhone собрать в шаге 12.
+- **iPhone** — галочка «iPhone» собирает и подписывает, но в TestFlight не отправляет. Вторую галочку («…and send it to
+  TestFlight») ставить здесь, только если в шаге 1 увидел, что TestFlight **не** раздаёт новые сборки группе сам; иначе —
+  в шаге 12.
 
 Сборка идёт 30–60 минут. **Удалось, если:** зелёные галочки; в итоге запуска (Summary) строка `Android 0.12.0 (…) —
 release <tag>` — записать `<tag>`. iPhone: сборка появилась в App Store Connect → TestFlight (обработка 10–30 минут),
@@ -92,7 +93,7 @@ release <tag>` — записать `<tag>`. iPhone: сборка появила
 echo <id> > /root/sinhron.id && cat /root/sinhron.id
 cd /opt/sinhron && git remote get-url origin
 git tag -f pre-0.12.0 HEAD   # прежний код остаётся на диске — к нему вернётся откат
-git remote set-url origin https://github.com/SinhronApp/SihnronApp.git && git remote get-url origin
+git remote set-url origin https://github.com/SinhronApp/SinhronApp.git && git remote get-url origin
 ```
 
 **Должно быть:** 40 знаков; затем прежний адрес (`/root/sinhron.bundle`); затем новый адрес. Код на диске при этом не
@@ -342,7 +343,8 @@ bash /opt/sinhron/server/scripts/fetch_android.sh <tag>
 
 **Удалось, если:** последняя строка — `Done: 0.12.0 …`.
 
-iPhone/iPad: если в шаге 5 iPhone не собирали — сейчас GitHub → Actions → Release → Run workflow, галочку Android снять.
+iPhone/iPad: если в шаге 5 в TestFlight не отправляли — сейчас GitHub → Actions → Release → Run workflow: Android снять,
+обе галочки iPhone поставить.
 Сборка в App Store Connect → TestFlight → выдать группе тестировщиков.
 
 - iPhone: Apple обрабатывает сборку 10–30 минут, потом она появляется в приложении TestFlight у тестировщиков.

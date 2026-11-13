@@ -23,9 +23,13 @@ on:
         type: boolean
         default: true
       ios:
-        description: "iPhone / iPad (→ TestFlight)"
+        description: "iPhone / iPad (build)"
         type: boolean
         default: true
+      ios_upload:
+        description: "…and send it to TestFlight (only after the server is updated, if TestFlight gives builds to testers by itself)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -137,7 +141,7 @@ jobs:
           security unlock-keychain -p "" "$KC"
           security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
           security default-keychain -s "$KC"
-      - run: bash scripts/testflight.sh
+      - run: bash scripts/testflight.sh ${{ inputs.ios_upload && ' ' || '--no-upload' }}
         env:
           ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
