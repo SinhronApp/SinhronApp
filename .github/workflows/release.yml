@@ -136,14 +136,15 @@ jobs:
           # rebuild the PEM; then check it before the 30-minute build.
           printf '%s' "$P8" | python3 -I -c '
           import base64, re, sys
+          marker = re.compile(r"(BEGIN|END)\s+(EC\s+)?PRIVATE\s+KEY")
+          def body_of(t):  # drop the BEGIN/END words (on any line, or all on one), keep base64
+              return re.sub(r"[^A-Za-z0-9+/=]", "", marker.sub("", t))
           t = sys.stdin.read()
-          m = re.search(r"BEGIN[^\n]*\n(.*?)\n[^\n]*END", t.replace("\r", ""), re.S)
-          body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(1) if m else t)
+          body = body_of(t)
           try:  # the whole .p8 file pasted as base64
               inner = base64.b64decode(body).decode()
               if "PRIVATE KEY" in inner:
-                  m = re.search(r"BEGIN[^\n]*\n(.*?)\n[^\n]*END", inner, re.S)
-                  body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(1))
+                  body = body_of(inner)
           except Exception:
               pass
           lines = [body[i:i + 64] for i in range(0, len(body), 64)]
