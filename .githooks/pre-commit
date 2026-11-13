@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Pre-commit: when the Rust FFI surface changes, the Dart bindings must be regenerated
+# in the same commit (tech-debt 3.5 / Risk #5). Enable once per clone:
+#   git config core.hooksPath .githooks
+# Skips silently if the codegen isn't installed (CI's frb-drift job still checks).
+set -euo pipefail
+if git diff --cached --name-only | grep -qE '^client_flutter/rust/src/api/'; then
+  if command -v flutter_rust_bridge_codegen >/dev/null 2>&1; then
+    bash client_flutter/scripts/check_frb_drift.sh
+  else
+    echo "pre-commit: client_flutter/rust/src/api changed — run 'flutter_rust_bridge_codegen generate' (codegen not installed here)" >&2
+  fi
+fi

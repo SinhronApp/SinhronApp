@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sinhron</string>
+    <string name="new_message">Новое сообщение</string>
+    <string name="incoming_audio">Входящий звонок</string>
+    <string name="incoming_video">Входящий видеозвонок</string>
+    <string name="ongoing_audio">Идёт звонок</string>
+    <string name="ongoing_video">Идёт видеозвонок</string>
+    <string name="ch_messages">Сообщения</string>
+    <string name="ch_calls">Входящие звонки</string>
+    <string name="ch_ongoing">Идёт звонок</string>
+    <string name="ch_requests">Запросы на переписку</string>
+    <string name="qr_close">Закрыть</string>
+    <string name="qr_hint">Наведите камеру на QR-код Sinhron</string>
+    <string name="keepalive_text">На связи: сообщения приходят сразу</string>
+    <string name="ch_keepalive">Постоянное соединение</string>
+    <string name="screen_share_on">Вы показываете экран</string>
+    <string name="screen_share_text">Его видят все в звонке</string>
+    <string name="screen_share_stop">Остановить</string>
+    <string name="samsung_title">Чтобы звонки доходили всегда</string>
+    <string name="samsung_text">Samsung усыпляет приложения ради батареи — тогда звонок не зазвонит. Добавьте Sinhron в «Никогда не спящие приложения»: кнопка откроет этот список; нажмите +, выберите Sinhron и «Добавить».</string>
+    <string name="samsung_open">Открыть</string>
+    <string name="samsung_later">Позже</string>
+    <string name="reply">Ответить</string>
+    <string name="reply_placeholder">Сообщение</string>
+    <string name="reply_later">Ответ уйдёт, как только Sinhron подключится</string>
+    <string name="reply_failed">Ответ не отправлен — откройте чат</string>
+</resources>

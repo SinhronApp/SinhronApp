@@ -1,0 +1,23 @@
+# Keeps graphify on the project's own code + docs (same scope as the
+# original 256-file build). Without it --update would also feed app
+# icons, golden screenshots and generated platform scaffolding to the
+# semantic (LLM) pass — one subagent per image, all noise.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+client_flutter/linux/
+client_flutter/windows/
+client_flutter/macos/
+client_flutter/android/
+client_flutter/web/
+client_flutter/ios/Runner/Assets.xcassets/
+client_flutter/rust_builder/
+client_flutter/test/widgets/goldens/
+client_flutter/test/goldens/
+docs/evidence/
+# Claude Code tooling (graphify's own skill docs), not project content
+.claude/
+# ADR-072 test certificates (PEM / keys), not project content
+client_flutter/rust/sinhron_net/tests/data/

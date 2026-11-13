@@ -1,0 +1,7 @@
+/* Russian texts for iOS system prompts — tech-debt 2.28. Keys mirror Info.plist. */
+"NSCameraUsageDescription" = "Камера нужна для видеозвонков, видеосообщений и фото, которые вы отправляете. Всё шифруется на телефоне; в фоне камера не включается.";
+"NSPhotoLibraryAddUsageDescription" = "Sinhron сохраняет фото в медиатеку, только когда вы нажимаете «Сохранить».";
+"NSPhotoLibraryUsageDescription" = "Выберите фото, чтобы отправить. Каждое фото пересохраняется на телефоне (место съёмки и данные камеры удаляются) и шифруется до отправки.";
+"NSFaceIDUsageDescription" = "Face ID открывает Sinhron, когда включена блокировка приложения.";
+"NSMicrophoneUsageDescription" = "Микрофон нужен для звонков, голосовых и видеосообщений. Звук шифруется на телефоне; микрофон включён только во время звонка или записи.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth нужен, чтобы выводить звук звонка в наушники.";

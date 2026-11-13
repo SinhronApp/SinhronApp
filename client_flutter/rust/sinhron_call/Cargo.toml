@@ -1,0 +1,46 @@
+# sinhron_call — Phase 3 (Calls) client-side crate.
+#
+# Per spec §10:
+#   • SFrame key derivation per RFC 9605 §5.2 (MLS exporter → epoch_secret
+#     → sender_base_key → per-KID sframe_key + sframe_salt).
+#   • Call FSM (Idle → Inviting → Ringing → Active → Ended).
+#   • FFI surface lives in `../src/api/simple.rs`; this crate stays
+#     pure-Rust (no flutter_rust_bridge dependency).
+#
+# Media transport is intentionally OUT of scope: Flutter side uses
+# `livekit_client` directly. We only feed it SFrame keys per
+# `BaseKeyProvider::setKey()`-shaped FFI calls. This avoids pulling
+# libwebrtc into the Rust workspace and keeps our build minimal.
+
+[package]
+name = "sinhron_call"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "sinhron_call"
+path = "src/lib.rs"
+
+[dependencies]
+# RFC 9605 key schedule — HMAC-based KDF over SHA-256.
+hkdf = "=0.12.4"
+sha2 = "=0.10.9"
+
+# For test-vector decoding (RFC 9605 Appendix A uses hex literals).
+hex = "=0.4.3"
+
+# AEAD primitives — referenced in the SFrame spec as `AEAD.Nk` /
+# `AEAD.Nn`. We expose constants for AES-128-GCM and AES-256-GCM here
+# but do NOT perform the actual encryption (LiveKit does that). Crate
+# is light: just types and the cipher-suite enum.
+aes-gcm = "=0.10.3"
+
+# Error handling.
+thiserror = "=2.0.11"
+
+# UUID for CallId.
+uuid = { version = "=1.18.0", features = ["v7", "serde"] }
+
+# Serde for FFI-friendly types (KeyMaterial transport).
+serde = { version = "=1.0.228", features = ["derive"] }

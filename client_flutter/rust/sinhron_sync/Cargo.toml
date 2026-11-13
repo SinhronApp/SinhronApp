@@ -1,0 +1,94 @@
+# sinhron_sync — MLS-over-WebSocket bridge.
+#
+# Joins three lower-level crates:
+#   • sinhron_crypto — OpenMLS engine + Ed25519 identity
+#   • sinhron_net    — WS client / wire protocol
+#   • sinhron_storage — local persistence (MLS group state, deliveries)
+#
+# Public surface: `SyncClient` — single struct wrapping a WsClient and
+# in-memory MLS state per group. Used by the FFI facade in sinhron_core
+# to expose Dart-callable async functions (Stage C5).
+
+[package]
+name = "sinhron_sync"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+publish = false
+
+[dependencies]
+# Lower layers — path deps so workspace builds find them.
+sinhron_crypto = { path = "../sinhron_crypto" }
+sinhron_net = { path = "../sinhron_net" }
+sinhron_storage = { path = "../sinhron_storage" }
+
+# MLS — pulled in transitively via sinhron_crypto but we use a few types
+# directly (KeyPackage, MlsGroup) so re-declare for clarity.
+openmls = "0.9.2"
+openmls_rust_crypto = "0.6.0"
+openmls_traits = "0.6.0"
+openmls_basic_credential = "0.6.0"
+tls_codec = "0.5"
+
+# WU C6: persist MLS group state across app restarts. Same `rusqlite=0.37`
+# pin as `sinhron_storage` — Cargo will resolve to one `libsqlite3-sys`,
+# which is required for the iOS link step.
+# T1.1 — switched to bundled-sqlcipher-vendored-openssl so the same
+# binary encrypts both sinhron.db (chats) and sinhron-mls.sqlite (MLS).
+# MUST match the feature on sinhron_storage exactly — Cargo will refuse
+# to compile if two consumers request different libsqlite3-sys features.
+openmls_sqlite_storage = "=0.3.0"
+rusqlite = { version = "=0.37.0", features = ["bundled-sqlcipher-vendored-openssl"] }
+
+# Async runtime — sync layer doesn't spawn tasks itself; SyncClient
+# methods are `async fn` so the caller's runtime drives them.
+tokio = { version = "=1.51.6", features = ["sync", "rt", "macros"] }
+
+# HTTP client for /v1/keypackages publish + consume. rustls-only for iOS
+# arm64 friendliness — NO native-tls (would drag OpenSSL into the app).
+reqwest = { version = "=0.12.24", default-features = false, features = ["json", "rustls-tls-webpki-roots", "stream", "socks"] }
+# Chunked media upload body with progress (http_api::upload_media_with_progress).
+bytes = "=1.11.1"
+futures-util = "=0.3.31"
+# Link previews (link_preview.rs): host classification for the fetch rules.
+url = "=2.5.8"
+
+# SHA-256 + signing for the action proof on /v1/keypackages.
+sha2 = "=0.10.9"
+ed25519-dalek = "=2.1.1"
+
+# T1.2 — AES-256-GCM AEAD for owner-encrypted state backup (§6.8.1).
+# The same `aes-gcm` crate is already pulled by openmls_rust_crypto;
+# we re-declare it so changes upstream don't surprise us.
+aes-gcm = "=0.10.3"
+rand_core = { version = "=0.6.4", features = ["getrandom"] }
+
+# JSON for HTTP body construction.
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.140"
+
+# Tracing for debug visibility into the protocol state machine.
+tracing = "=0.1.41"
+hex = "=0.4.3"
+thiserror = "=2.0.11"
+uuid = { version = "=1.18.0", features = ["v7"] }
+base64 = "=0.22.1"
+
+# App-message envelope (envelope.rs) — same pin as sinhron_net so the
+# workspace resolves one prost.
+prost = "=0.13.5"
+
+# Photo prep (photo.rs): decode → apply EXIF orientation → re-encode JPEG,
+# which strips EXIF/GPS. Only the JPEG + PNG codecs — nothing else is
+# accepted as input.
+image = { version = "=0.25.10", default-features = false, features = ["jpeg", "png"] }
+blurhash = { version = "=0.2.3", default-features = false }
+
+[dev-dependencies]
+# Examples use anyhow for ergonomic `?` propagation.
+anyhow = "=1.0.103"
+# CC8 — calls_e2e example chains MLS exporter into SFrame keys.
+sinhron_call = { path = "../sinhron_call" }
+
+[lib]
+crate-type = ["rlib"]

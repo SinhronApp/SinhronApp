@@ -1,0 +1,28 @@
+[package]
+name = "sinhron_crypto"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+# Plain Rust library; ONLY sinhron_core exposes cdylib (frb facade).
+# sinhron_crypto is a downstream dep — no FFI surface of its own.
+
+[dependencies]
+bip39 = { version = "2.1", features = ["rand"] }
+x25519-dalek = { version = "2.0", features = ["static_secrets"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+hkdf = "0.12"
+sha2 = "0.10"
+rand = { version = "0.8", default-features = false, features = ["std", "std_rng"] }
+hex = "0.4"
+thiserror = "1.0"
+
+# OpenMLS — RFC 9420 (per spec §5.1). The spec named 0.8.1; status 249
+# moved to 0.9.2 (hpke-rs 0.7: the libcrux-* advisories). The provider +
+# traits crates version on their own (0.6.x goes with openmls 0.9.x).
+# Same versions as sinhron_sync — one MLS stack in the workspace.
+openmls = "0.9.2"
+openmls_rust_crypto = "0.6.0"
+openmls_traits = "0.6.0"
+openmls_basic_credential = "0.6.0"
+tls_codec = "0.5"

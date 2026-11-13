@@ -1,0 +1,87 @@
+/* Sinhron design tokens — premium warm, cold-blue accent */
+
+/* Light */
+.sn-theme-light {
+  --sn-bg: #FAF9F6;
+  --sn-bg-soft: #F1EFEA;
+  --sn-surface: #FEFCF8;
+  --sn-elevated: #FFFFFF;
+  --sn-divider: rgba(15, 23, 32, 0.06);
+  --sn-divider-strong: rgba(15, 23, 32, 0.10);
+
+  --sn-text: #0E141B;
+  --sn-text-2: #4A5562;
+  --sn-text-3: #8A96A4;
+  --sn-text-4: #B4BDC9;
+
+  --sn-accent: #2D6FF7;
+  --sn-accent-soft: #E6EFFE;
+  --sn-accent-text: #FFFFFF;
+
+  --sn-success: #1FAF6E;
+
+  --sn-shadow-row: 0 1px 0 rgba(15,23,32,0.04);
+  --sn-shadow-soft: 0 1px 2px rgba(15,23,32,0.04), 0 8px 24px rgba(15,23,32,0.06);
+  --sn-shadow-fab: 0 6px 16px rgba(45,111,247,0.30), 0 2px 4px rgba(45,111,247,0.18);
+
+  --sn-avatar-shade: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.08) 100%);
+
+  --sn-radius-card: 18px;
+  --sn-radius-pill: 999px;
+  --sn-radius-bubble: 14px;
+}
+
+/* Dark */
+.sn-theme-dark {
+  --sn-bg: #0B1016;
+  --sn-bg-soft: #0F151D;
+  --sn-surface: #141B25;
+  --sn-elevated: #1A222D;
+  --sn-divider: rgba(255, 255, 255, 0.06);
+  --sn-divider-strong: rgba(255, 255, 255, 0.10);
+
+  --sn-text: #ECEEF1;
+  --sn-text-2: #A6AFBD;
+  --sn-text-3: #6E7889;
+  --sn-text-4: #4A5365;
+
+  --sn-accent: #4F8AFF;
+  --sn-accent-soft: rgba(79, 138, 255, 0.16);
+  --sn-accent-text: #FFFFFF;
+
+  --sn-success: #2BC58A;
+
+  --sn-shadow-row: 0 1px 0 rgba(0,0,0,0.4);
+  --sn-shadow-soft: 0 1px 2px rgba(0,0,0,0.45), 0 12px 28px rgba(0,0,0,0.40);
+  --sn-shadow-fab: 0 6px 16px rgba(79,138,255,0.35), 0 2px 4px rgba(0,0,0,0.4);
+
+  --sn-avatar-shade: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.18) 100%);
+
+  --sn-radius-card: 18px;
+  --sn-radius-pill: 999px;
+  --sn-radius-bubble: 14px;
+}
+
+/* base type */
+.sn-app {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-feature-settings: 'ss01' on, 'cv11' on;
+  color: var(--sn-text);
+  background: var(--sn-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sn-mono { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, monospace; }
+
+/* common helpers */
+.sn-row-hover:active { background: var(--sn-divider); }
+
+/* Scrollable region inside a phone frame — hide native scrollbar */
+.sn-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sn-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }

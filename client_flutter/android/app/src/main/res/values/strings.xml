@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ADR-040 — texts the Android side draws itself (notifications, QR scanner). -->
+<resources>
+    <string name="app_name">Sinhron</string>
+    <string name="new_message">New message</string>
+    <string name="incoming_audio">Incoming call</string>
+    <string name="incoming_video">Incoming video call</string>
+    <string name="ongoing_audio">Call in progress</string>
+    <string name="ongoing_video">Video call in progress</string>
+    <string name="ch_messages">Messages</string>
+    <string name="ch_calls">Incoming calls</string>
+    <string name="ch_ongoing">Call in progress</string>
+    <string name="ch_requests">Message requests</string>
+    <string name="qr_close">Close</string>
+    <string name="qr_hint">Point the camera at a Sinhron QR code</string>
+    <string name="keepalive_text">Connected: messages arrive at once</string>
+    <string name="ch_keepalive">Always connected</string>
+    <string name="screen_share_on">You\'re sharing your screen</string>
+    <string name="screen_share_text">Everyone in the call sees it</string>
+    <string name="screen_share_stop">Stop</string>
+    <string name="samsung_title">So calls always ring</string>
+    <string name="samsung_text">Samsung puts apps to sleep to save battery — then calls don\'t ring. Add Sinhron to \"Never sleeping apps\": the button opens that list; tap +, pick Sinhron, tap Add.</string>
+    <string name="samsung_open">Open</string>
+    <string name="samsung_later">Later</string>
+    <string name="reply">Reply</string>
+    <string name="reply_placeholder">Message</string>
+    <string name="reply_later">Your reply will go once Sinhron connects</string>
+    <string name="reply_failed">Reply not sent — open the chat</string>
+</resources>

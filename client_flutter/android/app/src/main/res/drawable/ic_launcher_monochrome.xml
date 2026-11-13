@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sinhron logo for themed icons (Android 13+) — the same two circles as the iPhone icon
+     (ios/Runner/Assets.xcassets/AppIcon.appiconset), drawn ~58 dp wide inside the 66 dp
+     safe zone of the 108 dp adaptive-icon layer (any launcher mask fits). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- White: the left half of the left ring, the right disc minus the ring. -->
+    <group>
+        <clip-path android:pathData="M0,0 H45.36 V108 H0 Z M42.416,54.0 a20.224,20.224 0 1,1 40.448,0 a20.224,20.224 0 1,1 -40.448,0 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M42.416,54.0 a20.224,20.224 0 1,1 40.448,0 a20.224,20.224 0 1,1 -40.448,0 Z M25.136,54.0 a20.224,20.224 0 1,1 40.448,0 a20.224,20.224 0 1,1 -40.448,0 Z M30.896,54.0 a14.464,14.464 0 1,1 28.928,0 a14.464,14.464 0 1,1 -28.928,0 Z" />
+    </group>
+</vector>

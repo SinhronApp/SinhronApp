@@ -1,0 +1,1915 @@
+{
+  "@@locale": "en",
+  "chatsTitle": "Chats",
+  "@chatsTitle": {
+    "description": "Chat list large title"
+  },
+  "tabChats": "Chats",
+  "tabCalls": "Calls",
+  "tabContacts": "Contacts",
+  "tabSettings": "Settings",
+  "folderAll": "All",
+  "folderPersonal": "Personal",
+  "folderGroups": "Groups",
+  "folderUnread": "Unread",
+  "cancel": "Cancel",
+  "mute": "Mute",
+  "archive": "Archive",
+  "pin": "Pin",
+  "markUnread": "Mark as unread",
+  "editFolder": "Edit folder",
+  "moveLeft": "Move left",
+  "moveRight": "Move right",
+  "markAllRead": "Mark all as read",
+  "deleteFolder": "Delete folder",
+  "chatsLoadError": "Chats could not be loaded",
+  "pullToRetry": "Pull down to try again.",
+  "noChatsYet": "No chats yet",
+  "noChatsHint": "Tap the pencil at the top to message someone.",
+  "noChatsHere": "No chats here",
+  "folderEmptyHint": "Chats matching “{name}” will show up here.",
+  "@folderEmptyHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "archivedChats": "Archived chats",
+  "unmute": "Unmute",
+  "unarchive": "Unarchive",
+  "delete": "Delete",
+  "open": "Open",
+  "unpin": "Unpin",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "markRead": "Mark as read",
+  "deleteChat": "Delete chat",
+  "deleteChatConfirm": "Delete the chat with {name}? Messages on this device are removed for good.",
+  "@deleteChatConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noMessagesYet": "No messages yet",
+  "deleteFolderConfirm": "Delete the folder “{name}”? Chats stay where they are.",
+  "@deleteFolderConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "newFolder": "New folder",
+  "save": "Save",
+  "folderName": "Folder name",
+  "include": "Include",
+  "allPersonal": "All personal chats",
+  "allGroups": "All groups",
+  "hide": "Hide",
+  "archivedNotInFolders": "Archived chats never show in folders.",
+  "mutedChats": "Muted chats",
+  "readChats": "Read chats",
+  "chatsInFolderCount": "Chats · {n} in folder",
+  "@chatsInFolderCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "folderChatHint": "Tap a chat to always include it, tap again to always hide it.",
+  "included": "Included",
+  "hidden": "Hidden",
+  "byRule": "By rule",
+  "noArchivedChats": "No archived chats",
+  "archiveHint": "Swipe a chat left and tap Archive to tuck it away here.",
+  "searchHint": "Search messages, chats, media…",
+  "searchRecent": "Recent",
+  "searchRecentClear": "Clear",
+  "searchRecentRemove": "Remove {name} from recent",
+  "@searchRecentRemove": {"placeholders": {"name": {"type": "String"}}},
+  "searchEmptyTitle": "Search chats and messages",
+  "searchPrivacy": "Search runs only on this device — your server never sees what you're looking for.",
+  "messagesSection": "Messages",
+  "groupWithTime": "Group · {time}",
+  "@groupWithTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noResults": "No results for “{query}”",
+  "@noResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noResultsHint": "Try a shorter word or a different spelling. Search only looks at messages stored on this device.",
+  "openLink": "Open link",
+  "errLibrary": "Photo library unavailable",
+  "messageDeleted": "This message was deleted",
+  "replyToYourself": "Reply to yourself",
+  "replyTo": "Reply to {name}",
+  "@replyTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "statusFailed": "Not sent",
+  "messageNotSent": "Not sent · Tap to retry",
+  "retrySend": "Retry",
+  "msgInfo": "Info",
+  "msgInfoSent": "Sent",
+  "msgInfoDelivered": "Delivered",
+  "msgInfoRead": "Read",
+  "msgInfoNotYet": "Not delivered yet",
+  "statusSending": "Sending",
+  "statusSent": "Sent",
+  "statusDelivered": "Delivered",
+  "kindVoice": "Voice message",
+  "timerMinutes": "{n, plural, =1{1 minute} other{{n} minutes}}",
+  "@timerMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "timerHours": "{n, plural, =1{1 hour} other{{n} hours}}",
+  "@timerHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "timerDays": "{n, plural, =1{1 day} other{{n} days}}",
+  "@timerDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "timerWeeks": "{n, plural, =1{1 week} other{{n} weeks}}",
+  "@timerWeeks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotEdit": "Could not edit the message",
+  "reply": "Reply",
+  "copy": "Copy",
+  "forward": "Forward",
+  "savedMessages": "Saved Messages",
+  "@savedMessages": {"description": "ADR-055: the chat with yourself, synced to all your devices (Telegram's Saved Messages)"},
+  "savedMessagesHint": "Notes, links and files — on all your devices",
+  "saveToSaved": "Save",
+  "@saveToSaved": {"description": "Message menu: copy this message to Saved Messages"},
+  "savedToSaved": "Saved to Saved Messages",
+  "savedMessagesFailed": "Couldn’t open Saved Messages — check the connection and try again",
+  "edit": "Edit",
+  "select": "Select",
+  "selectText": "Select text",
+  "@selectText": {"description": "Message menu: open the message text where any part of it can be selected and copied"},
+  "copyAll": "Copy all",
+  "selectTextClose": "Close",
+  "deleteMessagesConfirm": "{n, plural, =1{Delete this message?} other{Delete {n} messages?}}",
+  "@deleteMessagesConfirm": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteForEveryone": "Delete for everyone",
+  "deleteForMe": "Delete for me",
+  "call": "Call",
+  "timerSheetTitle": "Disappearing messages — new messages in this chat delete themselves on both phones after:",
+  "timerOff": "Off",
+  "errNotEncrypted": "This chat isn’t encrypted, so nothing can be sent from it",
+  "errTooLarge": "File is too large (max 95 MB)",
+  "errOffline": "Not connected to the server",
+  "errCouldNotSend": "Couldn’t send. Check the connection and try again.",
+  "errCamera": "Camera unavailable or access denied",
+  "errFiles": "Couldn’t open Files. Try again.",
+  "errMic": "Microphone access denied",
+  "pinnedMessage": "Pinned message",
+  "quoteFallback": "Reply",
+  "you": "You",
+  "chatEmptyHint": "Say hi 👋 — only the two of you can read this chat.",
+  "errLoadMessages": "Couldn’t load the messages. Close the chat and open it again.",
+  "typing": "typing…",
+  "safetyChanged": "check number changed",
+  "online": "online",
+  "youDeleted": "You deleted this message",
+  "edited": "edited",
+  "messagePlaceholder": "Message",
+  "camera": "Camera",
+  "photos": "Photos",
+  "video": "Video",
+  "document": "Document",
+  "slideToCancel": "‹ Slide to cancel   ↑ lock",
+  "unreadMessages": "Unread messages",
+  "editMessage": "Edit message",
+  "selectedCount": "{n} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "statusRead": "Read",
+  "editedA11y": ", edited",
+  "kindPhoto": "Photo",
+  "timerOffByMe": "You turned off disappearing messages",
+  "timerOffByPeer": "Disappearing messages turned off",
+  "timerSetByMe": "You set messages to disappear after {time}",
+  "@timerSetByMe": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timerSetByPeer": "Messages now disappear after {time}",
+  "@timerSetByPeer": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "timeNow": "now",
+  "yesterday": "Yesterday",
+  "today": "Today",
+  "couldNotShare": "Could not share",
+  "showQr": "Show a QR code instead",
+  "verifiedBody": "You checked that this is really {name}.",
+  "@verifiedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyChangedBody": "{name}’s check number changed — most likely a new phone. Check again.",
+  "@safetyChangedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notVerifiedBody": "Messages are encrypted either way. Checking makes sure nobody is secretly in between.",
+  "neverShown": "Never shown",
+  "perChat": "Per chat",
+  "off": "Off",
+  "previewOut": "Great! We just got back from the mountains 🏔",
+  "forwardTo": "Forward to…",
+  "noOtherChats": "No other chats",
+  "shareSendTo": "Send to…",
+  "shareSearch": "Search chats",
+  "shareCaptionHint": "Add a caption…",
+  "shareMessageHint": "Message",
+  "sharePickChat": "Choose a chat",
+  "shareSend": "Send",
+  "shareSendCount": "{n, plural, =1{Send to 1 chat} other{Send to {n} chats}}",
+  "@shareSendCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sharePhotos": "{n, plural, =1{Photo} other{{n} photos}}",
+  "@sharePhotos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shareVideos": "{n, plural, =1{Video} other{{n} videos}}",
+  "@shareVideos": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shareFiles": "{n, plural, =1{1 file} other{{n} files}}",
+  "@shareFiles": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "shareSent": "Sent",
+  "shareNoChats": "No chats yet — start one first",
+  "shareNoAccount": "Sign in to Sinhron first, then share again.",
+  "shareNothing": "Nothing to send: that app shared nothing Sinhron can open.",
+  "videoUnavailable": "Video unavailable",
+  "videoPlay": "Play",
+  "videoPause": "Pause",
+  "videoSoundOn": "Sound on",
+  "videoSoundOff": "Sound off",
+  "viewerClose": "Close",
+  "showInChat": "Show in chat",
+  "forwarded": "Forwarded",
+  "couldNotForward": "Could not forward",
+  "decrypting": "Opening…",
+  "nOfM": "{n} of {m}",
+  "@nOfM": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "share": "Share",
+  "shared": "Shared",
+  "saveToPhotos": "Save",
+  "savedToPhotos": "Saved to Photos",
+  "couldNotSave": "Could not save",
+  "quickCheck": "Quick check",
+  "quickCheckBody": "Just to be sure the words are safe on paper. {n} of {m}.",
+  "@quickCheckBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "whichWord": "Which is word #{n}?",
+  "@whichWord": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wrongWord": "Not quite — have another look at word #{n} on your paper.",
+  "@wrongWord": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "showWordsAgain": "Show me the words again",
+  "saveAccessTitle": "Keep access to your account",
+  "saveAccessBody": "Your account is 24 secret words. If this phone is lost, they bring the account back on a new one. We don’t have them — keep them where you won’t lose them.",
+  "saveToPasswordsIos": "Save to iCloud Keychain",
+  "saveToPasswordsAndroid": "Save to password manager",
+  "savePasswordsHintIos": "One tap. Only Sinhron can read them — they aren’t in the Passwords app, and no website can ask for them. With iCloud Keychain on, they come to your new iPhone.",
+  "savePasswordsHintAndroid": "One tap. Google encrypts them and brings them to your new phone with your Google account.",
+  "passwordsFailed": "Couldn’t save to the password manager. Try again or write the words down.",
+  "writeWordsAction": "Write the words down",
+  "writeWordsRowHint": "On paper, or a sheet to print",
+  "saveLater": "Later",
+  "saveLaterHint": "Until then the words are only on this phone. We’ll remind you in Settings.",
+  "writeWordsTitle": "Write down the 24 words",
+  "writeWordsBody": "In this order, on paper. Keep it like a passport: anyone who reads these words can open your account.",
+  "screenshotNote": "A screenshot isn’t a safe place: it goes to the cloud with your photos.",
+  "wordsWritten": "I’ve written them down",
+  "sheetAction": "Recovery sheet to print",
+  "sheetTitle": "Sinhron — secret words",
+  "sheetHowTitle": "How to get your account back",
+  "sheetHowBody": "Install Sinhron on the new phone → “Sign in with secret words” → scan this code or type the 24 words in order.",
+  "sheetWarning": "Anyone who sees these words owns your account. Print this sheet and delete the file. Don’t send it to anyone and don’t keep a photo of it in the cloud.",
+  "sheetScan": "Scan the recovery sheet",
+  "sheetNotWords": "This code isn’t a recovery sheet.",
+  "pasteFromPasswordsIos": "Paste from iCloud Keychain",
+  "pasteFromPasswordsAndroid": "Paste from password manager",
+  "reminderBody": "Your secret words are only on this phone. Save them so you don’t lose the account.",
+  "reminderSave": "Save",
+  "wordsNotSaved": "Not saved",
+  "accessNotSavedTitle": "Access not saved",
+  "accessNotSavedBody": "The words are only on this phone. If something happens to it, the account can’t be brought back.",
+  "accessSaveSection": "Save",
+  "accessSaveFooter": "Once saved, the words leave this phone — they’ll be where you saved them.",
+  "accessSavedTitle": "Access saved",
+  "accessSavedPasswordsIos": "In Passwords · {date}, as a website password — a website could ask for it. Move them below.",
+  "@accessSavedPasswordsIos": {"placeholders": {"date": {"type": "String"}}},
+  "accessSavedKeychainIos": "In iCloud Keychain · {date}. Only Sinhron reads them; they move to a new iPhone with iCloud Keychain on.",
+  "@accessSavedKeychainIos": {"placeholders": {"date": {"type": "String"}}},
+  "moveToKeychain": "Move to iCloud Keychain",
+  "moveToKeychainFooter": "Pick the Sinhron entry: the words move to iCloud Keychain, and the old Passwords entry is deleted.",
+  "accessSavedPasswordsAndroid": "In the password manager · {date}. They come to a new phone with your Google account.",
+  "@accessSavedPasswordsAndroid": {"placeholders": {"date": {"type": "String"}}},
+  "accessSavedPaper": "Written down · {date}. Keep the paper like a passport.",
+  "@accessSavedPaper": {"placeholders": {"date": {"type": "String"}}},
+  "accessSavedSheet": "Recovery sheet · {date}. Print it and delete the file.",
+  "@accessSavedSheet": {"placeholders": {"date": {"type": "String"}}},
+  "accessSavedChecked": "Checked · {date}. You have the right words.",
+  "@accessSavedChecked": {"placeholders": {"date": {"type": "String"}}},
+  "accessSavedDone": "Saved",
+  "phraseStatusAllWords": "24 words",
+  "secondDeviceSection": "Second device",
+  "secondDeviceCount": "Other devices: {n}",
+  "@secondDeviceCount": {"placeholders": {"n": {"type": "int"}}},
+  "secondDeviceLink": "Link a second device",
+  "secondDeviceYes": "If something happens to this phone, your chats stay on your other device. But a new phone can still be added only with the secret words.",
+  "secondDeviceNo": "A second device (a tablet, another phone) keeps your chats if this phone is lost. It doesn’t replace the words: a new phone is added with them.",
+  "checkWordsTitle": "Check the words",
+  "checkWordsBody": "Enter your 24 secret words — the app compares them with this account. They aren’t stored.",
+  "checkWordsAction": "Check",
+  "wordsMatch": "Right — these are your words",
+  "wordsDontMatch": "These aren’t this account’s words",
+  "verifyTitle": "Check {name}",
+  "@verifyTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyNotYet": "This chat can’t be verified yet — send a message first.",
+  "showNumber": "Show the number instead",
+  "verifyExplain": "Compare this number with the one on {name}’s phone — in person or on a call. If they match, nobody is in between and only you two read the chat.",
+  "@verifyExplain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "clearVerification": "Clear verification",
+  "markVerified": "Mark as verified",
+  "verifiedTitle": "Verified",
+  "safetyChangedTitle": "Check number changed",
+  "notVerifiedTitle": "Not verified yet",
+  "unlockReason": "Unlock Sinhron",
+  "appLocked": "Sinhron is locked",
+  "tapToUnlock": "Tap to unlock with Face ID or your passcode",
+  "setPasscodeFirst": "Set a passcode on this iPhone first — App Lock uses it.",
+  "turnOnAppLock": "Turn on App Lock",
+  "lockAgain": "Lock again",
+  "appLockTitle": "App lock",
+  "lockSection": "Lock",
+  "appLockFooter": "When on, Sinhron asks for Face ID or your iPhone passcode when it opens. Your chats stay encrypted either way.",
+  "appLockToggle": "App Lock",
+  "appSwitcher": "App switcher",
+  "appSwitcherFooter": "Covers your chats with a blur when you switch apps, so they don’t show in the app switcher.",
+  "hideInSwitcher": "Hide chats in app switcher",
+  "privacyTitle": "Privacy & security",
+  "whatOthersSee": "What others see",
+  "whatOthersSeeFooter": "Turning off read ticks or typing also hides them from you — fair both ways. “Online” and “last seen” go only to your contacts — people you have a personal chat with — and only while this is on. Turning it off makes them forget when they last saw you.",
+  "readReceipts": "Read ticks",
+  "typingIndicators": "Typing indicators",
+  "onlineStatus": "Online status",
+  "showOnline": "Show when I’m online",
+  "onlyContacts": "Contacts only",
+  "lastSeenJustNow": "last seen just now",
+  "lastSeenMinutes": "{n, plural, =1{last seen 1 minute ago} other{last seen {n} minutes ago}}",
+  "@lastSeenMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lastSeenToday": "last seen today at {time}",
+  "@lastSeenToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSeenYesterday": "last seen yesterday at {time}",
+  "@lastSeenYesterday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lastSeenDate": "last seen {date}",
+  "@lastSeenDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "disappearingMessages": "Disappearing messages",
+  "disappearingFooter": "Set it per chat: press and hold the chat’s name at the top. Messages then delete themselves on both phones — text and photos alike.",
+  "timer": "Timer",
+  "links": "Links",
+  "linksFooter": "Your phone fetches the link’s picture and title when you send it: the site learns it was opened from your phone, never who you’re writing to. Off by default.",
+  "linkPreviews": "Link previews",
+  "thisDevice": "This device",
+  "on": "On",
+  "e2eTitle": "Encrypted",
+  "e2eAlways": "Always on. Not a setting.",
+  "e2eBody": "Your messages, calls and files can be read only on your devices and the people you send them to. Your server sees encrypted data and delivery timing — never content, never who you talk to.",
+  "chipKeys": "Every message has its own key",
+  "chipOld": "Old messages stay safe",
+  "chipHeal": "Protection recovers by itself after a break-in",
+  "appearance": "Appearance",
+  "theme": "Theme",
+  "accentColour": "Accent colour",
+  "chatWallpaper": "Chat wallpaper",
+  "wallpaperFooter": "Your own photo stays on this device only.",
+  "previewIn": "Hi! How are you? 👋",
+  "unavailable": "Unavailable",
+  "file": "File",
+  "documentUnavailable": "Document unavailable",
+  "couldNotOpen": "Could not open — tap to retry",
+  "photoUnavailable": "Photo unavailable",
+  "whatPhoto": "photo",
+  "whatVoice": "voice message",
+  "whatVideo": "video",
+  "notSentRetry": "Not sent: {what} — tap to retry",
+  "@notSentRetry": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "sendingPercent": "Sending {what}… {p}%",
+  "@sendingPercent": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      },
+      "p": {
+        "type": "int"
+      }
+    }
+  },
+  "preparing": "Preparing {what}…",
+  "@preparing": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "sending": "Sending {what}…",
+  "@sending": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "lockImmediately": "Immediately",
+  "lockAfterMinutes": "{n, plural, =1{After 1 minute} other{After {n} minutes}}",
+  "@lockAfterMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "lockAfterHour": "After 1 hour",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeOled": "Black (OLED)",
+  "wallNone": "None",
+  "wallDawn": "Dawn",
+  "wallMist": "Mist",
+  "wallDusk": "Dusk",
+  "wallDots": "Dots",
+  "wallWaves": "Waves",
+  "wallPhoto": "Photo",
+  "yourName": "Your name",
+  "keyNotCreated": "Address not ready yet",
+  "keyFingerprint": "Address {fp}",
+  "@keyFingerprint": {
+    "placeholders": {
+      "fp": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Language",
+  "langSystem": "As on phone",
+  "langEn": "English",
+  "langRu": "Русский",
+  "privacySection": "Privacy",
+  "privacySectionFooter": "Your chats are always encrypted — only you and the people in them can read them. These options control what other people and your server can see about you.",
+  "review": "Review",
+  "linkedDevices": "Devices",
+  "accountKey": "Secret words",
+  "notifications": "Notifications",
+  "notificationsFooter": "When Sinhron is closed, an iPhone shows only “New message” — your server can’t read messages.",
+  "soundsVibration": "Sounds & vibrations",
+  "textSize": "Text size",
+  "asInIphone": "As in iPhone settings",
+  "wallpaper": "Wallpaper",
+  "storage": "Storage",
+  "server": "Server",
+  "serverFooter": "The server is the computer that carries your messages to other people. Its owner can see when messages are delivered, never what’s inside them.",
+  "notConnected": "Not connected",
+  "about": "About",
+  "updateAvailableTitle": "Update {version} is available",
+  "@updateAvailableTitle": {"placeholders": {"version": {"type": "String"}}},
+  "updateAvailableBody": "It downloads right here; then Android asks you to tap Install. Chats and keys stay.",
+  "updateAction": "Update",
+  "updateDownloading": "Downloading the update… {percent}%",
+  "@updateDownloading": {"placeholders": {"percent": {"type": "int"}}},
+  "updateReadyTitle": "The update is downloaded",
+  "updateReadyBody": "Tap Install — Android will ask once more.",
+  "updateInstall": "Install",
+  "updateFailedOffline": "Couldn't download the update. Check the internet and try again.",
+  "updateFailedBadFile": "The update file didn't pass the safety check, so it won't be installed. Try again later.",
+  "updateFailedInstaller": "Android didn't open the installer. Try again.",
+  "updateRetry": "Try again",
+  "updateLater": "Later",
+  "updateCheck": "Check for updates",
+  "updateCheckHint": "New versions come from our server",
+  "updateChecking": "Checking…",
+  "updateUpToDate": "You have the latest version",
+  "updateOffline": "No connection to the server — try later",
+  "updateNewVersion": "{version} available",
+  "@updateNewVersion": {"placeholders": {"version": {"type": "String"}}},
+  "updatePermissionExplain": "Android will now ask whether Sinhron may install apps. Tap Settings, turn on “Allow from this source” and go back — the installation carries on; then tap Install. It asks only the first time.",
+  "updateContinue": "Continue",
+  "clipboardClears": "Clipboard auto-clears 60s after copy",
+  "copied": "Copied",
+  "copyPhrase": "Copy the words",
+  "tagline": "Messages that stay between you.",
+  "getStarted": "Get started",
+  "linkDevice": "Link a device",
+  "restoreFromKey": "Sign in with secret words →",
+  "pickServer": "Pick a server",
+  "pickServerBody": "A server is the computer that carries your messages to other people. Your team’s, a friend’s or your own will do. It can’t read what you send.",
+  "serverHowToGet": "Whoever set up the server gives you its address. Type it, or scan the QR code they showed you.",
+  "serverScanQr": "Scan server QR code",
+  "serverInvalid": "That doesn’t look like a server address — for example sinhron.example.com.",
+  "serverNotSinhron": "Something answered at this address, but it isn’t a Sinhron server.",
+  "serverUnreachable": "The server isn’t answering. Check the address and your connection.",
+  "serverNotSaved": "Couldn’t save this on the phone — the app’s storage didn’t open. Close the app and open it again.",
+  "@serverNotSaved": {"description": "Server step: saving the address to local storage failed"},
+  "serverContinueAnyway": "Continue anyway",
+  "pairNoServer": "Choose the server first — go back one step.",
+  "inviteToken": "Invite code",
+  "pasteInvite": "paste your invite code",
+  "inviteAuto": "Filled in automatically from your invite link.",
+  "continueBtn": "Continue",
+  "yourProfile": "Your profile",
+  "profileBody": "Name your contacts will see. You can change this any time.",
+  "nameLabel": "Name",
+  "nameHint": "How you appear to contacts",
+  "settingUp": "Setting up your device",
+  "inApp": "In the app",
+  "vibration": "Vibration",
+  "inChatSounds": "In-chat sounds",
+  "pushNotifications": "Notifications",
+  "comingSoon": "App Store version",
+  "setupConnecting": "Connecting to {host}",
+  "@setupConnecting": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "setupIdentity": "Checking this phone",
+  "setupGroups": "Joining your groups",
+  "setupContacts": "Getting your chats ready",
+  "mediaLoadError": "Could not load media",
+  "noVoiceYet": "No voice messages yet",
+  "noLinksYet": "No links yet",
+  "sharedMediaMedia": "Media",
+  "sharedMediaFiles": "Files",
+  "noMediaYet": "No photos or videos yet",
+  "noFilesYet": "No files yet",
+  "searchContacts": "Search contacts",
+  "contactsEmpty": "No contacts yet. Add someone by their QR code, invite link or address — they stay here even if you delete the chat.",
+  "recent": "Recent",
+  "contactsFooter": "Your contacts stay on this phone only — your server can’t see who you talk to. Start a chat with a QR code or an address.",
+  "noContactNamed": "No contact named “{q}”",
+  "@noContactNamed": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "noContactHint": "Try a different name or invite them with a QR code.",
+  "newChat": "New chat",
+  "newGroup": "New group",
+  "inviteByQr": "Invite by QR",
+  "scanQr": "Scan QR",
+  "pasteKey": "Paste address",
+  "pasteFromClipboard": "Paste",
+  "pasteKeyCount": "{count} of 64 characters",
+  "pasteKeyReady": "Address looks right",
+  "@pasteKeyCount": {"placeholders": {"count": {"type": "int"}}},
+  "startEncrypted": "Start encrypted chat",
+  "pasteKeyHint": "Paste the other person’s address — 64 characters. They find it in My profile → Copy address. They need to be online to get the invite.",
+  "keyHint": "64 characters",
+  "sendingInvite": "Sending invite…",
+  "startChat": "Start chat",
+  "noEmailV": "we never ask for one",
+  "skip": "Skip",
+  "welcome": "Welcome",
+  "privateByDefault": "Private by default.",
+  "splash1Body": "Sinhron encrypts everything from the very first message. Your messages, calls and files can be read only on your devices and by the people you send them to.",
+  "splash2Eyebrow": "Nothing about you",
+  "splash2Title": "No email, no phone, no password.",
+  "noEmail": "No email",
+  "noPhone": "No phone number",
+  "noPhoneV": "people add you by QR code or link",
+  "noPassword": "No password",
+  "noPasswordV": "24 secret words instead",
+  "ownKey": "Only you have the words",
+  "ownKeyV": "lose the words, lose the account",
+  "selfHosted": "Your server",
+  "serverTrust": "Sinhron runs on a server you trust.",
+  "serverRun": "Your team, your company, or you can run one. ",
+  "serverData": ". Your data lives there and nowhere else — not with us, not with anyone.",
+  "a11ySearch": "Search",
+  "a11yUnread": "{n} unread",
+  "@a11yUnread": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "a11yBack": "Back",
+  "a11yVideoCall": "Video call",
+  "a11yAttach": "Attach",
+  "a11yCloseAttach": "Close attachments",
+  "cancelSending": "Cancel sending",
+  "splitPickChat": "Choose a chat",
+  "splitPickSetting": "Choose a section",
+  "splitPickContact": "Choose a contact",
+  "splitPickCall": "Choose a call to open its chat",
+  "a11yOpenPhoto": "Open photo",
+  "typingOne": "{name} is typing…",
+  "@typingOne": {"placeholders": {"name": {"type": "String"}}},
+  "typingTwo": "{a} and {b} are typing…",
+  "@typingTwo": {"placeholders": {"a": {"type": "String"}, "b": {"type": "String"}}},
+  "typingMany": "{count} people are typing…",
+  "@typingMany": {"placeholders": {"count": {"type": "int"}}},
+  "blockedChatNote": "You blocked {name}: their messages and calls aren't shown, and they no longer see your photo or when you're online.",
+  "@blockedChatNote": {"placeholders": {"name": {"type": "String"}}},
+  "a11ySend": "Send",
+  "a11yRecord": "Hold to record a voice message. Tap to switch to video",
+  "a11yRecordVideo": "Hold to record a video message. Tap to switch to voice",
+  "videoMessage": "Video message",
+  "videoNoteCropFailed": "Couldn't cut the video down to the circle, so it wasn't sent. Please record it again.",
+  "whatVideoNote": "video message",
+  "holdToRecordVoice": "Hold to record a voice message, tap for video",
+  "holdToRecordVideo": "Hold to record a video message, tap for voice",
+  "errCameraMic": "Allow the camera and microphone in Settings to record video messages",
+  "a11yVideoNotePlay": "Video message, {duration}. Tap to play with sound",
+  "@a11yVideoNotePlay": {"placeholders": {"duration": {"type": "String"}}},
+  "a11yVoiceSeek": "Playback position. Drag to rewind",
+  "a11yEmoji": "Emoji",
+  "a11yMessageFrom": "{name}, {time}",
+  "@a11yMessageFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "a11yReplyTo": "reply to: {text}",
+  "@a11yReplyTo": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "a11yReactions": "reactions: {list}",
+  "@a11yReactions": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "a11yMessageHint": "Double tap and hold for options",
+  "a11yPinned": "pinned",
+  "a11yMuted": "muted",
+  "a11yDraft": "draft: {text}",
+  "@a11yDraft": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "a11yReact": "React with a heart",
+  "bannerNewMessage": "New message",
+  "notificationReply": "Reply",
+  "@notificationReply": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationReplySend": "Send",
+  "@notificationReplySend": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationReplyPlaceholder": "Message",
+  "@notificationReplyPlaceholder": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationReplyLater": "Your reply will go once Sinhron connects",
+  "@notificationReplyLater": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationReplyOnOpen": "Your reply will go when you open Sinhron",
+  "@notificationReplyOnOpen": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationReplyFailed": "Reply not sent — open the chat",
+  "@notificationReplyFailed": {"description": "ADR-066 \u2014 reply from a notification"},
+  "notificationNewRequest": "New message request",
+  "@notificationNewRequest": {"description": "ADR-071 \u2014 a quiet notification for a stranger's message: no name, no text"},
+  "bannerHint": "Opens the chat",
+  "inAppBanners": "Banners in the app",
+  "bannerPreview": "Show message text",
+  "bannersFooter": "When a message comes into another chat, a banner appears at the top. Tap to open, swipe up to hide. Muted and archived chats stay quiet.",
+  "iconBadge": "Unread count on app icon",
+  "unlockTitle": "Unlock Sinhron",
+  "unlockBody": "Your chats on this phone are encrypted. Enter your 24 secret words to open them.",
+  "reconnectTitle": "Reconnect your account",
+  "reconnectBody": "To reach your server again, enter your 24 secret words. You only need to do this once on this phone.",
+  "unlockHint": "24 words, separated by spaces",
+  "unlockAction": "Unlock",
+  "unlockPhraseNote": "The words never leave the phone and aren’t stored — the phone keeps only a key made from them, in the protected iPhone Keychain.",
+  "unlockInvalidPhrase": "Those don’t look like your secret words — check the words and their order.",
+  "unlockWrongPhrase": "These words don’t match the account on this phone.",
+  "eraseAndStartOver": "Erase and start over",
+  "deviceRemovedTitle": "This device is signed out",
+  "deviceRemovedBody": "It was disconnected from your account on another of your devices. Chats here no longer update, messages and calls don't reach it. Sign out to erase this device's copy — your chats stay on your other devices.",
+  "deviceRemovedAction": "Sign out",
+  "eraseConfirmTitle": "All chats on this phone will be deleted. This can't be undone.",
+  "eraseConfirmAction": "Erase everything",
+  "netConnected": "Connected",
+  "netConnecting": "Connecting…",
+  "netOffline": "Offline",
+  "reconnect": "Reconnect",
+  "connection": "Connection",
+  "navNewChatName": "Chat {id}",
+  "chatDraftPrefix": "Draft: ",
+  "phraseStrengthValue": "Very high",
+  "photoCouldNotUse": "Couldn’t use this photo. Check access to Photos: phone Settings → Sinhron → Photos.",
+  "backupSearching": "Looking for a backup…",
+  "errRecordingFailed": "The recording didn’t work — try again",
+  "linkCouldNotOpen": "Couldn’t open the link",
+  "newChatPlaceholder": "New chat",
+  "newGroupPlaceholder": "New group",
+  "memberUnnamed": "Member",
+  "appLockOffNoPasscode": "App Lock is off: this phone has no passcode or Face ID any more. Turn it on again in Settings → App lock.",
+  "unlockFailed": "Couldn’t open — not because of the words. Try again in a minute.",
+  "@navNewChatName": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "navErrKeyAlreadyInChat": "That address is already in the chat — probably your own. Paste the other person’s address, not yours.",
+  "navErrNoKeyPackage": "Can’t invite them yet: their phone hasn’t finished setting up. Ask them to open Sinhron and wait until it has loaded, then try again.",
+  "navErrRateLimited": "Too many requests to the server. Wait a minute and try again.",
+  "navErrServerUnreachable": "Could not reach the server. Check your internet connection — Sinhron reconnects by itself.",
+  "navErrBadKeyFormat": "An address is exactly 64 characters: digits and the letters a–f. Check that you copied all of it.",
+  "netGroupDefaultName": "Group {id}",
+  "@netGroupDefaultName": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "netAddedToChat": "You were added to this chat",
+  "netUnsupportedMessage": "Unsupported message — update Sinhron to view it",
+  "chatsEncryptedStarted": "Encrypted chat started",
+  "callKitPeerName": "Sinhron call",
+  "callErrMic": "No access to the microphone. Allow it in Settings → Sinhron → Microphone.",
+  "@callErrMic": {"description": "Outgoing call failed: mic"},
+  "callErrCamera": "No access to the camera. Allow it in Settings → Sinhron → Camera.",
+  "@callErrCamera": {"description": "Outgoing call failed: camera"},
+  "callErrFailed": "Couldn’t start the call. Check your connection and try again.",
+  "@callErrFailed": {"description": "Outgoing call failed: failed"},
+  "callsMissed": "Missed",
+  "callsEarlier": "Earlier",
+  "callsAudio": "audio",
+  "callsVideo": "video",
+  "callsMinutes": "{n} min",
+  "@callsMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "callsNoAnswer": "No answer",
+  "callsDeclined": "Declined",
+  "callsEmpty": "No calls yet. Start one from a chat — the phone button at the top.",
+  "callIncomingVideo": "incoming video call",
+  "callIncomingAudio": "incoming Sinhron call",
+  "callCalling": "Calling…",
+  "callRinging": "Ringing…",
+  "@callCalling": {"description": "Outgoing call, still ringing on the other side"},
+  "callOngoing": "Call in progress",
+  "@callOngoing": {"description": "Group call going on in a chat"},
+  "callOngoingVideo": "Video call in progress",
+  "@callOngoingVideo": {"description": "Group call going on in a chat"},
+  "callJoin": "Join",
+  "@callJoin": {"description": "Group call going on in a chat"},
+  "callJoinFailed": "Couldn’t join — the call has ended.",
+  "@callJoinFailed": {"description": "Group call going on in a chat"},
+  "callWaitingForPeople": "Waiting for others to join…",
+  "@callWaitingForPeople": {"description": "Group call: nobody else has joined yet"},
+  "callDecline": "Decline",
+  "callAccept": "Accept",
+  "callUnmute": "Unmute",
+  "callFlipCamera": "Flip",
+  "@callFlipCamera": {"description": "Call: switch front/back camera"},
+  "callMute": "Mute",
+  "callSpeaker": "Speaker",
+  "callEnd": "End",
+  "callEnded": "Call ended · {duration}",
+  "@callEnded": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callReconnecting": "Reconnecting…",
+  "callLinkQuality": "Connection quality",
+  "callWeakLink": "Weak connection",
+  "callWeakLinkPeer": "Weak connection on the other side",
+  "callAutoAudioOnly": "Weak connection — camera off to keep the voice",
+  "callBarTapToReturn": "Tap to return",
+  "contactsFavourites": "Favourites",
+  "contactsVerified": "Verified",
+  "contactsInvite": "Invite friends",
+  "contactsInviteHint": "Send a link — one tap adds you to their contacts",
+  "contactAdd": "Add to contacts",
+  "contactEditName": "Edit name",
+  "contactNameOnlyYou": "Only you see this",
+  "contactNameRestore": "Restore “{name}”",
+  "@contactNameRestore": {"placeholders": {"name": {"type": "String"}}},
+  "contactRemove": "Remove from contacts",
+  "contactRemoveConfirm": "Remove {name} from contacts? The chat stays.",
+  "@contactRemoveConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "contactFavouriteAdd": "Add to favourites",
+  "contactFavouriteRemove": "Remove from favourites",
+  "contactKey": "Key",
+  "profileAboutHint": "The people you chat with see it in your profile",
+  "contactsAllCount": "All contacts · {n}",
+  "@contactsAllCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "contactIdentityVerified": "Checked by you",
+  "contactAbout": "About",
+  "contactIdentity": "Checking",
+  "contactMessage": "Message",
+  "contactMediaLinksDocs": "Media, links and docs",
+  "contactGroupsInCommon": "{n, plural, =1{1 group in common} other{{n} groups in common}}",
+  "@contactGroupsInCommon": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "contactGroupMembers": "{n, plural, =1{1 member} other{{n} members}}",
+  "@contactGroupMembers": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newGroupPickOne": "Pick at least one contact",
+  "newGroupNext": "Next · {n} selected",
+  "@newGroupNext": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newGroupAllContacts": "All contacts",
+  "newGroupCreate": "Create group",
+  "newGroupName": "Group name",
+  "newGroupMembersCount": "Members · {n}",
+  "@newGroupMembersCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "groupInfoAdmin": "Admin",
+  "newGroupFooter": "Members get the group straight from your phone, encrypted. The server only passes it along — it can’t see who’s in it or what’s said.",
+  "newGroupAddCta": "Add · {n} selected",
+  "@newGroupAddCta": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newGroupNoContacts": "No one to add yet. Start a personal chat with someone first — then you can put them in a group.",
+  "newGroupNoOneToAdd": "Everyone you chat with is already in this group.",
+  "newGroupCreating": "Creating the group…",
+  "groupInfoMembers": "Members",
+  "groupInfoMediaFiles": "Media & files",
+  "groupInfoAddMember": "Add member",
+  "groupInfoMemberYou": "{name} (you)",
+  "@groupInfoMemberYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "blockedTitle": "Blocked",
+  "blockedCount": "{n} blocked",
+  "@blockedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "blockedUnblock": "Unblock",
+  "blockedWhatItDoes": "What blocking does",
+  "blockedNoPresence": "A blocked person never sees when you’re online.",
+  "blockedMessagesDiscarded": "Their messages and reactions are dropped on this device — they aren’t told.",
+  "blockedCallsRejected": "Calls in your personal chat with them are declined without ringing.",
+  "blockedNoGroups": "In shared groups their messages are hidden from you; the group itself is unchanged.",
+  "blockedLocalFooter": "The block list stays on this phone only. Your server never learns who you blocked.",
+  "blockedEmptyTitle": "Nobody blocked",
+  "blockedEmptyHint": "Block someone from the Info screen of a chat. Blocking works on this device only.",
+  "sharedMediaTitle": "Shared media",
+  "sharedMediaDocuments": "Documents",
+  "sharedMediaVoice": "Voice",
+  "inviteLandingTitle": "You’ve been invited to join a Sinhron server",
+  "inviteLandingBody": "Sinhron is a private messenger that runs on a server you trust. Below is the server you’ll be joining — and who invited you.",
+  "inviteStepName": "Pick a display name",
+  "inviteStepNameBody": "No email, no phone, no password",
+  "inviteStepPhrase": "Write down your 24 secret words",
+  "inviteStepPhraseBody": "The only way to restore your account later",
+  "inviteStepDone": "You’re in",
+  "inviteStepDoneBody": "{name} will be the first contact in your list",
+  "@inviteStepDoneBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteAccept": "Accept & set up",
+  "inviteHaveAccount": "I already have an account",
+  "inviteEyebrow": "INVITE LINK",
+  "inviteReachable": "Reachable · {ms} ms",
+  "@inviteReachable": {
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteInvitedBy": "Invited by",
+  "inviteExpiresInHours": "Expires in {n}h",
+  "@inviteExpiresInHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteNextSteps": "NEXT STEPS",
+  "legalYourIdentity": "Your account",
+  "safetyNumberTitle": "Check it’s really them",
+  "serverStatus": "Status",
+  "serverProtocol": "Protocol",
+  "serverTrustTitle": "TRUST",
+  "serverSees": "What this server sees",
+  "serverCantSee": "What it can't see",
+  "serverSeesTiming": "Delivery timing",
+  "serverSeesOnline": "When you’re online",
+  "serverSeesPush": "Notification address",
+  "serverSeesQuota": "How much space you use",
+  "serverHiddenContent": "Message text",
+  "serverHiddenFiles": "Files",
+  "serverHiddenContacts": "Who you talk to",
+  "serverTrustFooter": "That’s how the encryption itself works — the server can’t switch it off, even if it wanted to.",
+  "devicesCurrent": "Current device",
+  "devicesOther": "Other devices",
+  "devicesOtherFooter": "Your devices share your encrypted chats. Remove one and it can no longer read anything new — from the very next message.",
+  "devicesOnlyOne": "This is your only device. To use Sinhron on another one, tap “Link a new device” above.",
+  "devicesRemoveAll": "Remove all other devices ({n})",
+  "@devicesRemoveAll": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesLinkedCount": "{n, plural, =1{device linked} other{devices linked}}",
+  "@devicesLinkedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "devicesHeroBody": "Use Sinhron on all your devices at once — the chats are the same everywhere and never stored unencrypted.",
+  "devicesLinkNew": "Link a new device",
+  "devicesModelLinked": "{model} · linked {date}",
+  "@devicesModelLinked": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesLastActive": "Last active {time}",
+  "@devicesLastActive": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesRevoke": "Remove",
+  "done": "Done",
+  "storageVideos": "Videos",
+  "storageVoice": "Voice messages",
+  "storageByType": "By type",
+  "storageTopChats": "Top chats",
+  "storageManage": "Manage",
+  "storageMbUnit": "MB",
+  "phraseStatusTitle": "Secret words",
+  "phraseStatusStrength": "Strength",
+  "phraseStatusActions": "Actions",
+  "phraseStatusActionsFooter": "The phone doesn’t keep the words once they’re saved — only what it needs to sign you in — so they can’t be shown again. Not sure you have the right words? Check them.",
+  "phraseStatusReverify": "Check the words",
+  "phraseStatusTip": "Keep the 24 words in two places — for example, in iCloud Keychain or the password manager, and on paper. They bring your whole account back — anyone who reads them can sign in as you on a new phone.",
+  "showQrTitleMy": "My QR code",
+  "showQrTitleInvite": "Invite to Sinhron",
+  "showQrFooterMy": "Anyone who scans this QR can ask {username} for a chat. It’s not a password or a secret — they can make sure it’s you later with the check number.",
+  "@showQrFooterMy": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "showQrFooterInvite": "Show this code to a friend, or send the link below. Anyone who scans it can request a chat with you and join {server}.",
+  "@showQrFooterInvite": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "showQrOnServer": "on {server}",
+  "@showQrOnServer": {
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "showQrCopyLink": "Copy link",
+  "showQrCopyKey": "Copy address",
+  "@showQrCopyKey": {"description": "My QR code: copy my identity key"},
+  "showQrFooterReal": "Anyone who scans this code can message you. It holds only your address and server — not a password, nothing secret. The other person can make sure it’s really you in the chat — “Check it’s really them”.",
+  "@showQrFooterReal": {"description": "My QR code footer: what the QR holds"},
+  "showQrShareText": "Message me on Sinhron — my address: {key}\nServer: {server}",
+  "@showQrShareText": {"description": "Text shared from My QR code", "placeholders": {"key": {"type": "String"}, "server": {"type": "String"}}},
+  "showQrKeyCopied": "Address copied",
+  "@showQrKeyCopied": {"description": "Toast after copying my key"},
+  "scanContactNotSinhron": "This QR code isn’t a Sinhron contact.",
+  "@scanContactNotSinhron": {"description": "Scanned QR is not a Sinhron contact"},
+  "scanContactOtherServer": "This person is on {server}. Chats only work between people on the same server.",
+  "@scanContactOtherServer": {"description": "Scanned contact is on another server", "placeholders": {"server": {"type": "String"}}},
+  "scanContactSelf": "That’s your own code.",
+  "@scanContactSelf": {"description": "Scanned my own QR"},
+  "showQrSaveImage": "Save image",
+  "signOutTitle": "Sign out",
+  "signOutHeading": "Sign out from this device",
+  "signOutReminderTitle": "Got your secret words handy?",
+  "signOutReminderBody": "Without your 24 words, this device is gone for good. Your other devices keep working — but you won't get back on this one.",
+  "signOutWhatHappens": "WHAT HAPPENS",
+  "signOutRowSignedOut": "This device is signed out and can no longer read your chats.",
+  "signOutRowOtherDevices": "{n, plural, =1{Your other device keeps working — it has its own keys.} other{Your other {n} devices keep working — they have their own keys.}}",
+  "@signOutRowOtherDevices": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "signOutRowWipe": "Chats and keys on this device are erased.",
+  "signOutRowComeBack": "To come back, sign in again with your 24 secret words.",
+  "deleteAccountTitle": "Delete account",
+  "profileEditServerCopied": "Server copied",
+  "profileEditKeyCopied": "Address copied",
+  "profileEditNoPhoneNote": "No phone number, no login: people reach you by your address or QR code. Only the people you chat with see your name and photo — they travel encrypted. About stays on this phone only.",
+  "profileEditIdentityFooter": "Send your address or show your QR code and people can message you. With people who matter, check it’s really you two talking: Info → “Check it’s really them”.",
+  "profileEditCopyKey": "Copy address",
+  "profileEditNotReady": "Not ready",
+  "profileEditTapToCopy": "Tap to copy",
+  "profileEditShowQr": "Show my QR code",
+  "profileEditShareHandle": "Share so people can message me",
+  "profileEditJoined": "On Sinhron since",
+  "profileEditWhoSees": "Who can see your profile",
+  "profileEditSignOut": "Sign out on this device",
+  "profileEditAccountFooter": "Sign out only clears this device — your other linked devices keep working. Deleting the account is immediate and can’t be undone.",
+  "profileEditTitle": "Edit profile",
+  "profileEditChangePhoto": "Change photo",
+  "profileEditHandle": "Server",
+  "profileEditStrength": "Protection",
+  "devicesHowToLink": "Or, on the new device, tap “Sign in with secret words” and enter your 24 words. It joins your chats once this phone is online.",
+  "devicesUnnamed": "Another device",
+  "devicesFirstDevice": "first device",
+  "devicesLinkedOn": "linked {date}",
+  "@devicesLinkedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesRevokeTitle": "Remove this device? It stops receiving your messages from the very next one.",
+  "devicesRevokeAction": "Remove device",
+  "devicesLoadFailed": "Can't load your devices — no connection to the server.",
+  "devicesRevokeFailed": "Couldn't remove the device. Try again when you're online.",
+  "restoreTitle": "Sign in to your account",
+  "restoreBody": "Enter your 24 secret words. This phone becomes one more of your devices: your chats arrive here while your other device is online. Earlier messages stay on that device.",
+  "restoreAction": "Continue",
+  "pairTitle": "Link to your account",
+  "pairBody": "On the device you already use, open Settings → Devices → “Link a new device” and scan this code.",
+  "pairWaiting": "Waiting for your other device…",
+  "pairCopy": "Copy code",
+  "pairCopied": "Copied — paste it on your other device.",
+  "pairFailed": "Couldn't link. Check the connection and try again.",
+  "pairUseWords": "Enter the 24 words instead",
+  "pairCodeUsed": "Another device took this code. Here is a new one — show it only to your own device.",
+  "pairConfirm": "Sign in to the account with address {address}? Check that your other phone shows the same address in its profile. If it doesn’t, tap Cancel.",
+  "@pairConfirm": {"description": "New device, before signing in by QR: whose account answered (start of its key)", "placeholders": {"address": {"type": "String"}}},
+  "pairConfirmAction": "Sign in",
+  "restoreUseQr": "Your other device is nearby? Link with a QR code",
+  "addDeviceBody": "On the new device choose “Link a device” — it shows a QR code. Scan it here.",
+  "addDeviceScan": "Scan QR code",
+  "addDevicePasteHint": "…or paste the code",
+  "addDeviceAction": "Add device",
+  "addDeviceNotACode": "That’s not a Sinhron link code.",
+  "addDeviceConfirm": "Give this device access to your account? It will receive all your new messages. The new device will ask you to check your address: {address}.",
+  "@addDeviceConfirm": {"description": "Confirm linking a device; the address is the start of my key", "placeholders": {"address": {"type": "String"}}},
+  "addDeviceConfirmAction": "Give access",
+  "addDeviceDone": "Done — the new device is signing in. It joins your chats within a minute.",
+  "addDeviceFailed": "Couldn't send it. Check the connection and try again.",
+  "addDeviceCodeUsed": "This code was already used by another device. If that wasn't you, don't confirm anything.",
+  "sealedSectionTitle": "Anonymous messages",
+  "sealedResetAction": "Reset access for anonymous messages",
+  "sealedResetFooter": "People you chat with send you messages without the server learning who sent them. If someone you no longer talk to shouldn’t be able to, reset the access — your current chats get the new one by themselves.",
+  "sealedResetConfirm": "Reset the access? Your chats get the new one by themselves; anyone else who had the old one can no longer message you anonymously.",
+  "sealedResetDone": "Access reset",
+  "devicesNotPrimary": "This device was added to your account later: adding or removing devices asks for your 24 secret words.",
+  "phrasePromptTitle": "Enter your secret words",
+  "phrasePromptBody": "This device was added to your account later. Enter your 24 secret words to go on — they’re used for this step only and aren’t stored.",
+  "phrasePromptAction": "Confirm",
+  "proxyTitle": "Proxy (Tor)",
+  "proxyBody": "For experts: all traffic to your server goes through a proxy (SOCKS5), so the server never learns this phone’s internet address (IP) — for example Tor via Orbot at 127.0.0.1:9050. Leave empty to connect directly. Calls don’t use it.",
+  "proxySave": "Save",
+  "proxyInvalid": "Enter host:port, e.g. 127.0.0.1:9050.",
+  "devicesSeenOn": "seen {date}",
+  "@devicesSeenOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInfoTitle": "Info",
+  "chatInfoPersonal": "Personal chat · encrypted",
+  "chatInfoUnnamed": "No name shared yet",
+  "chatInfoBlocked": "Blocked",
+  "chatInfoBlock": "Block",
+  "chatInfoBlockConfirm": "Block {name}? Their messages and calls won’t reach this device. They aren’t told.",
+  "@chatInfoBlockConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInfoMemberProfile": "Profile",
+  "@chatInfoMemberProfile": {
+    "description": "Group member sheet: open their profile (photo, bio)."
+  },
+  "chatInfoVerify": "Check it’s really them",
+  "chatInfoMemberSafety": "Check it’s really {name}",
+  "@chatInfoMemberSafety": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "incomingCalls": "Incoming calls",
+  "incomingCallsFooter": "Off: incoming calls are declined without ringing. You can still call.",
+  "blockedUnnamed": "Someone without a name",
+  "reorderPinned": "Reorder pinned chats",
+  "reorderPinnedTitle": "Pinned chats",
+  "reorderHint": "Hold a row and drag it to change the order.",
+  "chatFolders": "Chat folders",
+  "chatFoldersHint": "Folders are tabs above your chats. Hold a folder and drag it to change the order; switch it off to hide its tab.",
+  "myFolders": "My folders",
+  "createFolder": "Create a folder",
+  "suggestedFolders": "Suggested",
+  "addFolder": "Add",
+  "folderMuted": "Muted",
+  "folderMutedHint": "Only chats with the sound off",
+  "folderNotMuted": "Not muted",
+  "folderNotMutedHint": "Chats that can notify you",
+  "folderArchived": "Archived",
+  "folderArchivedHint": "Chats you archived",
+  "folderChatCount": "{n, plural, =0{No chats} =1{1 chat} other{{n} chats}}",
+  "@folderChatCount": {"placeholders": {"n": {"type": "int"}}},
+  "folderBuiltIn": "Standard",
+  "hideFolder": "Hide folder",
+  "showFolderTab": "Show the “{name}” tab",
+  "@showFolderTab": {"placeholders": {"name": {"type": "String"}}},
+  "editFolders": "Edit folders",
+  "folderChatTypes": "Chat types",
+  "folderWhichChats": "Which chats",
+  "onlyUnread": "Only unread",
+  "ruleShow": "Show",
+  "ruleHide": "Hide",
+  "ruleOnly": "Only these",
+  "folderRulesFooter": "Muted and archived chats: keep them, leave them out, or show only them.",
+  "folderReorderHint": "Hold a tab and drag it to move it.",
+  "verifyScan": "Scan their code",
+  "verifyScanMatch": "The codes match — {name} is verified.",
+  "@verifyScanMatch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyScanMismatch": "The codes don't match. Don't mark this contact as verified — compare the numbers in person.",
+  "verifyScanNotCode": "This QR isn’t a Sinhron check code.",
+  "recordVideo": "Record video",
+  "videoFromLibrary": "Choose from library",
+  "requestTitle": "Message request",
+  "requestBody": "Until you accept, they won't see that you've read their messages or learn your name, and calls from this chat won't ring.",
+  "requestAccept": "Accept",
+  "screenRecordingByMe": "You are recording the screen",
+  "screenRecordingByPeer": "{name} is recording the screen",
+  "@screenRecordingByPeer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "screenshotByMe": "You took a screenshot",
+  "screenshotByPeer": "{name} took a screenshot",
+  "@screenshotByPeer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "requestBlockFailed": "Couldn't block — try again when you're connected.",
+  "errVideoTooLarge": "This video is too large to send (95 MB at most), even compressed.",
+  "profileEditChoosePhoto": "Choose photo",
+  "profileEditRemovePhoto": "Remove photo",
+  "groupYouWereRemoved": "You were removed from this group.",
+  "@groupYouWereRemoved": {"description": "ADR-035 group membership"},
+  "groupMemberLeft": "{name} left the group.",
+  "@groupMemberLeft": {"description": "ADR-035 group membership", "placeholders": {"name": {"type": "String"}}},
+  "groupYouRemoved": "You removed {names}.",
+  "@groupYouRemoved": {"description": "ADR-035 group membership", "placeholders": {"names": {"type": "String"}}},
+  "groupSomeoneAdded": "{by} added {names}.",
+  "@groupSomeoneAdded": {"description": "mls-identity:3 group membership", "placeholders": {"by": {"type": "String"}, "names": {"type": "String"}}},
+  "groupSomeoneRemoved": "{by} removed {names}.",
+  "@groupSomeoneRemoved": {"description": "ADR-035 group membership", "placeholders": {"by": {"type": "String"}, "names": {"type": "String"}}},
+  "groupYouRenamed": "You renamed the group to “{name}”.",
+  "@groupYouRenamed": {"description": "ADR-035 group membership", "placeholders": {"name": {"type": "String"}}},
+  "groupSomeoneRenamed": "{by} renamed the group to “{name}”.",
+  "@groupSomeoneRenamed": {"description": "ADR-035 group membership", "placeholders": {"by": {"type": "String"}, "name": {"type": "String"}}},
+  "groupLeave": "Leave group",
+  "@groupLeave": {"description": "ADR-035 group membership"},
+  "groupLeaveConfirm": "Leave “{name}”? You won’t get its messages any more, and the chat is removed from this device.",
+  "@groupLeaveConfirm": {"description": "ADR-035 group membership", "placeholders": {"name": {"type": "String"}}},
+  "groupRename": "Rename group",
+  "@groupRename": {"description": "ADR-035 group membership"},
+  "groupRemoveMember": "Remove from group",
+  "@groupRemoveMember": {"description": "ADR-035 group membership"},
+  "groupRemoveConfirm": "Remove {name} from the group? They won’t be able to read new messages.",
+  "@groupRemoveConfirm": {"description": "ADR-035 group membership", "placeholders": {"name": {"type": "String"}}},
+  "groupAdmin": "admin",
+  "@groupAdmin": {"description": "ADR-035 group membership"},
+  "groupNotMember": "You’re no longer a member of this group.",
+  "@groupNotMember": {"description": "ADR-035 group membership"},
+  "groupActionFailed": "Couldn’t do that — check your connection and try again.",
+  "@groupActionFailed": {"description": "ADR-035 group membership"},
+  "chatMissedCall": "Missed call",
+  "@chatMissedCall": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "chatMissedVideoCall": "Missed video call",
+  "@chatMissedVideoCall": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callNoAnswer": "No answer",
+  "@callNoAnswer": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callCouldntConnect": "Couldn’t connect the call",
+  "callNotEncrypted": "Call ended: the server tried to turn off encryption",
+  "@callNotEncrypted": {"description": "Security review 2026-11 (calls:1) \u2014 a track came without SFrame encryption"},
+  "callBusy": "Busy",
+  "@callBusy": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callDeclinedByPeer": "Declined",
+  "@callDeclinedByPeer": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callMissedShort": "Missed call",
+  "@callMissedShort": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callsBusy": "Busy",
+  "@callsBusy": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callsCancelled": "Cancelled",
+  "@callsCancelled": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callsMissedOne": "Missed",
+  "@callsMissedOne": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callsCallBack": "Call back",
+  "@callsCallBack": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "callsOpenChat": "Open chat",
+  "@callsOpenChat": {"description": "Overnight item 5 \u2014 call outcomes"},
+  "storageOther": "Other",
+  "@storageOther": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageDatabase": "Messages",
+  "@storageDatabase": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageUsedHere": "used by Sinhron on this phone",
+  "@storageUsedHere": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageTopChatsRealFooter": "Copies of photos, videos, voice messages and files kept on this phone, by chat.",
+  "@storageTopChatsRealFooter": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageClearCopies": "Delete media copies",
+  "@storageClearCopies": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageClearCopiesConfirm": "Delete the copies of photos, videos and files kept on this phone? Messages stay. A file loads from the server again when you open it — but one the server has already deleted (90 days after anyone last opened it) won’t come back.",
+  "@storageClearCopiesConfirm": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "storageCopiesCleared": "Freed {size}",
+  "@storageCopiesCleared": {"description": "Tech-debt 2.32 — real Storage screen", "placeholders": {"size": {"type": "String"}}},
+  "storageClearCopiesFooter": "Media copies let files open without the internet and keep them after the server deletes old files. Messages and their text are never deleted here.",
+  "@storageClearCopiesFooter": {"description": "Tech-debt 2.32 — real Storage screen"},
+  "deleteAccountWord": "DELETE",
+  "@deleteAccountWord": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountCannotUndo": "This can’t be undone",
+  "@deleteAccountCannotUndo": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountServer": "Your account is removed from {server} right away: your address, devices and messages waiting for you.",
+  "@deleteAccountServer": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"server": {"type": "String"}}},
+  "deleteAccountGroups": "Your groups are told you left; people can no longer write to you.",
+  "@deleteAccountGroups": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountThisPhone": "Chats, media and keys are erased from this phone.",
+  "@deleteAccountThisPhone": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountOtherDevices": "{n, plural, =1{Your other device stops working.} other{Your {n} other devices stop working.}}",
+  "@deleteAccountOtherDevices": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"n": {"type": "int"}}},
+  "deleteAccountSentStays": "Messages and files you already sent stay with the people who received them.",
+  "@deleteAccountSentStays": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountPhrase": "Your 24 words can register again, but these chats and groups won’t come back. The chat backup is deleted from iCloud / Google Drive too, if this phone can reach it.",
+  "@deleteAccountPhrase": {"description": "ADR-037 — account deletion, reports, rules"},
+  "deleteAccountTypeWord": "Type {word} to confirm",
+  "@deleteAccountTypeWord": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"word": {"type": "String"}}},
+  "deleteAccountFailed": "Couldn’t delete the account — check your connection and try again. Nothing was erased.",
+  "@deleteAccountFailed": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportAction": "Report",
+  "@reportAction": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportTitle": "Report {name}?",
+  "@reportTitle": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"name": {"type": "String"}}},
+  "reportBody": "The report goes to the operator of {server}. They can’t read your chats — only what you choose to send.",
+  "@reportBody": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"server": {"type": "String"}}},
+  "reportWithMessage": "Report and send this message",
+  "@reportWithMessage": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportWithoutMessage": "Report without the message",
+  "@reportWithoutMessage": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportAndBlock": "Report and block",
+  "@reportAndBlock": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportReasonTitle": "What’s wrong?",
+  "@reportReasonTitle": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportReasonSpam": "Spam",
+  "@reportReasonSpam": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportReasonAbuse": "Harassment or threats",
+  "@reportReasonAbuse": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportReasonIllegal": "Illegal content",
+  "@reportReasonIllegal": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportReasonOther": "Something else",
+  "@reportReasonOther": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportSent": "Report sent. Thank you.",
+  "@reportSent": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportFailed": "Couldn’t send the report — check your connection and try again.",
+  "@reportFailed": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalSection": "Help & rules",
+  "@legalSection": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalTermsRow": "Terms of use",
+  "@legalTermsRow": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalPrivacyRow": "Privacy policy",
+  "@legalPrivacyRow": {"description": "ADR-037 — account deletion, reports, rules"},
+  "reportProblemTitle": "Report a problem",
+  "reportProblemHint": "Send the app’s log to whoever helps you",
+  "reportProblemNoteHint": "What happened? E.g. “the call connected but there was no sound”",
+  "reportProblemWhat": "The report holds the app’s log for the last hour — connection, notifications, calls — the app version and phone model. No message text, names or keys.",
+  "reportProblemPreview": "View the report",
+  "reportProblemHidePreview": "Hide the report",
+  "reportProblemSend": "Send",
+  "reportProblemCopy": "Copy",
+  "reportProblemCopied": "Report copied",
+  "pasteMarkdownDone": "Markdown turned into formatting",
+  "pasteMarkdownRevert": "Undo",
+  "reportProblemFailed": "Couldn’t put the report together. Try again.",
+  "reportProblemSendHint": "Send opens the share menu: pick Sinhron and the chat with the person who helps you — or Telegram or mail if Sinhron can’t connect.",
+  "backupTitle": "Chat backup",
+  "backupHint": "Your chats and media, in your own cloud",
+  "backupWhere": "Kept in",
+  "backupWhereDrive": "Google Drive",
+  "backupNotConnected": "Not connected",
+  "backupSignInGoogle": "Sign in with Google",
+  "backupSignOutGoogle": "Sign out of Google",
+  "backupIcloudOff": "Turn on iCloud Drive in the iPhone’s settings (your name → iCloud → iCloud Drive)",
+  "backupDaily": "Back up every day",
+  "backupLast": "Last backup",
+  "backupNever": "Not yet",
+  "backupNow": "Back up now",
+  "backupRunning": "Backing up…",
+  "backupRunningMedia": "Media {done} of {total}",
+  "@backupRunningMedia": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "backupFailed": "Didn’t finish. Check the internet and try again.",
+  "backupDone": "Backup saved",
+  "backupRestoreSection": "Restore",
+  "backupRestore": "Restore from backup",
+  "backupRestoreNone": "No backup found in {where}",
+  "@backupRestoreNone": {"placeholders": {"where": {"type": "String"}}},
+  "backupRestoreAskTitle": "Restore your chats?",
+  "backupRestoreAskBody": "Backup of {date}: {messages} messages in {chats} chats, {media} media files.",
+  "@backupRestoreAskBody": {"placeholders": {"date": {"type": "String"}, "messages": {"type": "int"}, "chats": {"type": "int"}, "media": {"type": "int"}}},
+  "backupRestoreOlder": "A newer backup ({newer}) is not in the cloud any more — this one is older. Messages after it will be missing.",
+  "@backupRestoreOlder": {"placeholders": {"newer": {"type": "String"}}},
+  "backupRestoreGo": "Restore",
+  "backupRestoring": "Restoring… {done} of {total}",
+  "@backupRestoring": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "backupRestored": "Chats restored",
+  "backupRestoredAdded": "Chats restored: {n} messages added",
+  "@backupRestoredAdded": {"placeholders": {"n": {"type": "int"}}},
+  "backupRestoredNothingNew": "Nothing new in the backup — it’s all here already",
+  "backupUploadPending": "Still uploading to iCloud — your other devices see it once this iPhone sends it (usually on Wi‑Fi)",
+  "backupFooter": "The backup is encrypted with your 24 secret words: neither Apple nor Google can read it, and without the words it can’t be restored.",
+  "backupUnlockRow": "Turn on backup on this device",
+  "backupUnlockRowHint": "Needs your 24 words — once",
+  "backupUnlockTitle": "Turn on backup here",
+  "backupUnlockBody": "This device was linked before backups existed. Type your 24 words once — the words themselves aren’t kept.",
+  "backupUnlockGo": "Turn on",
+  "backupUnlockOtherWords": "These are another account’s words",
+  "backupOfferDriveTitle": "Look for a chat backup in Google Drive?",
+  "backupOfferDriveBody": "If your old phone made a backup, your chats come back. Sign in to the same Google account.",
+  "backupOfferDriveGo": "Sign in with Google",
+  "backupRestoreStarted": "Restoring your chats — you can use the app meanwhile",
+  "oldDevicesTitle": "Your other devices",
+  "oldDevicesBody": "If your old phone is lost, sold or broken, disconnect it: it gets no more messages or calls and leaves your chats. Only now, while your 24 words are in.",
+  "oldDevicesDisconnect": "Disconnect",
+  "oldDevicesDisconnected": "Disconnected",
+  "legalSupportRow": "Help & support",
+  "@legalSupportRow": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalTermsIntro": "By using Sinhron you agree to these rules. They apply to everyone on this server.",
+  "@legalTermsIntro": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalTermsBody": "No tolerance for objectionable content or abusive people. Don’t send spam, threats, harassment, hate, sexual content involving minors, or anything illegal where you or the recipient live.\n\nReport and block. In any chat you can report a person or a message. The report goes to the operator of your server, who reviews it and may remove the account — usually within 24 hours. Blocking hides a person from you at once.\n\nYour messages are end-to-end encrypted: the operator can’t read them. A report contains only what you choose to send.\n\nThe operator may remove accounts that break these rules. You can delete your account at any time in Profile → Delete account.",
+  "@legalTermsBody": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalPrivacyBody": "Messages, calls, photos and files are encrypted on your devices; the server only passes them along encrypted and can’t read them.\n\nThe server knows: your Sinhron address, your devices, which groups you are in, and when messages are sent — that is what it needs to deliver them. It doesn’t know your name, photo, contacts or message content.\n\nNothing is sold or shared with advertisers. No ads, no analytics.\n\nDelete your account at any time (Profile → Delete account): the server removes your address, devices and messages waiting for you.",
+  "@legalPrivacyBody": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalSupportBody": "Questions, problems, a report about someone: write to the operator of your server.",
+  "@legalSupportBody": {"description": "ADR-037 — account deletion, reports, rules"},
+  "legalSupportOperator": "Server: {server}",
+  "@legalSupportOperator": {"description": "ADR-037 — account deletion, reports, rules", "placeholders": {"server": {"type": "String"}}},
+  "legalSupportReportHint": "To report a person or a message, long-press the message or open the chat’s info and choose Report.",
+  "@legalSupportReportHint": {"description": "ADR-037 — account deletion, reports, rules"},
+  "welcomeAgreeTerms": "By continuing you accept the Terms of use",
+  "@welcomeAgreeTerms": {"description": "ADR-037 — under the onboarding buttons; opens the terms"},
+  "pushToggle": "Message notifications",
+  "@pushToggle": {"description": "Overnight item 8 — push"},
+  "pushFooterOn": "When Sinhron is closed, your phone shows “New message” — no text and no name: your server can’t read messages. Previews come with a future version.",
+  "@pushFooterOn": {"description": "Overnight item 8 — push"},
+  "pushDenied": "Notifications are off in iOS Settings → Sinhron → Notifications.",
+  "@pushDenied": {"description": "Overnight item 8 — push"},
+  "pushNoDistributor": "There’s no notification app on this phone. Install ntfy (Google Play or F-Droid) — Sinhron wakes the phone through it. Which server to set in ntfy shows here once Sinhron is online.",
+  "@pushNoDistributor": {"description": "ADR-040 — Android without a UnifiedPush distributor"},
+  "keepConnected": "Always connected",
+  "@keepConnected": {"description": "ADR-040 fallback without ntfy"},
+  "keepConnectedFooter": "Only needed if calls and messages don’t arrive while Sinhron is closed. It usually turns on and off by itself: when it isn’t needed it only drains the battery.",
+  "@keepConnectedFooter": {"description": "ADR-040 fallback without ntfy"},
+  "callsReachYes": "Calls will reach you: yes",
+  "@callsReachYes": {"description": "ADR-057 — will calls reach this Android phone"},
+  "callsReachNo": "Calls will reach you: not yet — what to do",
+  "@callsReachNo": {"description": "ADR-057 — will calls reach this Android phone"},
+  "callsReachViaGoogle": "Even when Sinhron is closed or swiped away. Google only sees that something came for Sinhron, not what or from whom.",
+  "@callsReachViaGoogle": {"description": "ADR-057 — will calls reach this Android phone"},
+  "callsReachViaNtfy": "Even when Sinhron is closed.",
+  "@callsReachViaNtfy": {"description": "ADR-057 — will calls reach this Android phone"},
+  "callsReachViaAlways": "Through “Always connected”: Sinhron stays online in the background.",
+  "@callsReachViaAlways": {"description": "ADR-057 — will calls reach this Android phone"},
+  "callsReachNone": "Nothing wakes this phone while Sinhron is closed.",
+  "@callsReachNone": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachFixNotifications": "Allow notifications",
+  "@reachFixNotifications": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachFixCalls": "Turn on incoming calls",
+  "@reachFixCalls": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachFixAlways": "Turn on “Always connected”",
+  "@reachFixAlways": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachFixBackground": "Let Sinhron run in the background",
+  "@reachFixBackground": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachSamsung": "Samsung: “Never sleeping apps”",
+  "@reachSamsung": {"description": "ADR-057 — will calls reach this Android phone"},
+  "reachSamsungSub": "Add Sinhron there so the phone never puts it to sleep",
+  "@reachSamsungSub": {"description": "ADR-057 — will calls reach this Android phone"},
+  "ntfyTitle": "Notifications through ntfy",
+  "@ntfyTitle": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyInstallSteps": "To wake this phone, Sinhron needs the free ntfy app.\n1. Install ntfy from Google Play or F-Droid.\n2. In ntfy open the ⋮ menu → Settings → Default server and enter {url}\n3. Come back here and tap “Connect ntfy”.",
+  "@ntfyInstallSteps": {"description": "ADR-040 — which push server to set in the ntfy app", "placeholders": {"url": {"type": "String"}}},
+  "ntfySetServerSteps": "ntfy is installed but not connected yet.\n1. In ntfy open the ⋮ menu → Settings → Default server and enter {url}\n2. Come back here and tap “Connect ntfy”.",
+  "@ntfySetServerSteps": {"description": "ADR-040 — which push server to set in the ntfy app", "placeholders": {"url": {"type": "String"}}},
+  "ntfyOtherServerSteps": "ntfy uses another server ({other}) — Sinhron notifications don’t come through it.\n1. In ntfy open the ⋮ menu → Settings → Default server and enter {url}\n2. Come back here and tap “Connect ntfy”.",
+  "@ntfyOtherServerSteps": {"description": "ADR-040 — which push server to set in the ntfy app", "placeholders": {"other": {"type": "String"}, "url": {"type": "String"}}},
+  "ntfyServerHasNone": "Your Sinhron server doesn’t send notifications to Android phones. Turn on “Always connected” below — then Sinhron stays online by itself.",
+  "@ntfyServerHasNone": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyCopyAddress": "Copy the server address",
+  "@ntfyCopyAddress": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyAddressCopied": "Address copied",
+  "@ntfyAddressCopied": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyInstall": "Install ntfy",
+  "@ntfyInstall": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyOpen": "Open ntfy",
+  "@ntfyOpen": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyConnect": "Connect ntfy",
+  "@ntfyConnect": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "ntfyConnecting": "Connecting ntfy…",
+  "@ntfyConnecting": {"description": "ADR-040 — which push server to set in the ntfy app"},
+  "asInSystem": "As in system settings",
+  "setPasscodeFirstAndroid": "Set a screen lock on this phone first — App Lock uses it.",
+  "appLockFooterAndroid": "When on, Sinhron asks for your fingerprint, face or screen lock when it opens. Your chats stay encrypted either way.",
+  "unlockPhraseNoteAndroid": "The words never leave the phone and aren’t stored — the phone keeps only a key made from them, in Android’s protected storage.",
+  "navErrNotConnected": "No connection to the server — reconnecting. Try again in a few seconds.",
+  "callSwitchingPath": "The call keeps dropping — switching to the backup route…",
+  "callsReserveSection": "Calls",
+  "callsReserve": "Calls over the backup route",
+  "callsReserveFooter": "Sound and video go through your server the same way a normal website loads — for networks where calls connect and then drop. Still encrypted. Sinhron also switches by itself when a call keeps dropping.",
+  "inviteShareText": "Join me on Sinhron — an encrypted messenger. Install the app and tap the link, I'll be in your contacts right away: {link}",
+  "@inviteShareText": {"placeholders": {"link": {"type": "String"}}},
+  "inviteForged": "This invite link was changed or forged — not opening it. Ask the person to send it again.",
+  "inviteDamaged": "This invite link is damaged. Ask the person to send it again.",
+  "inviteExpired": "This link has expired — ask for a new one",
+  "inviteOffline": "Couldn't open the invite — no connection to its server. Tap the link again a bit later.",
+  "inviteKeyRow": "Address {fingerprint}",
+  "@inviteKeyRow": {"placeholders": {"fingerprint": {"type": "String"}}},
+  "inviteYourServer": "Your server",
+  "inviteAddContact": "Add {name} to contacts",
+  "@inviteAddContact": {"placeholders": {"name": {"type": "String"}}},
+  "inviteServerChecking": "Checking the server…",
+  "inviteServerOk": "Server is reachable",
+  "inviteServerUnreachable": "Server doesn't answer right now — you can still go on",
+  "inviteNotSinhron": "This address isn't a Sinhron server",
+  "inviteNotSaved": "Couldn't save the server on this phone — try again",
+  "notificationPreviewTitle": "Notifications show",
+  "notificationPreviewNameAndText": "Name and message",
+  "notificationPreviewNameOnly": "Name only",
+  "notificationPreviewNothing": "Nothing — just \"New message\"",
+  "notificationPreviewFooter": "For banners in the app, Android notifications and the name in the iPhone's call history. On an iPhone with Sinhron closed a notification always says just \"New message\": your server can't read who wrote or what.",
+  "callDiagnostics": "Call diagnostics",
+  "callShareScreen": "Share screen",
+  "@callShareScreen": {"description": "Call: button that starts showing my phone screen to the others"},
+  "callSharingScreen": "You're sharing your screen",
+  "@callSharingScreen": {"description": "Call: banner while my screen is shown"},
+  "callStopSharing": "Stop",
+  "@callStopSharing": {"description": "Call: stop showing my screen"},
+  "callScreenOf": "{name} is sharing the screen",
+  "@callScreenOf": {"description": "Call: title over someone else's shared screen", "placeholders": {"name": {"type": "String"}}},
+  "callScreenBackToCall": "Back to call",
+  "@callScreenBackToCall": {"description": "Call: close the shared-screen viewer"},
+  "callScreenWatch": "Watch screen: {name}",
+  "@callScreenWatch": {"description": "Call: reopen someone's shared screen", "placeholders": {"name": {"type": "String"}}},
+  "callScreenRotate": "Rotate",
+  "@callScreenRotate": {"description": "Call: rotate the shared screen"},
+  "callScreenShareFailed": "Couldn't share the screen",
+  "@callScreenShareFailed": {"description": "Call: screen sharing did not start"},
+  "callAudioOutput": "Audio output",
+  "callAudioPhone": "Phone",
+  "callAudioHeadphones": "Headphones",
+  "callAudioCar": "Car",
+  "callAudioOther": "Other device",
+  "callKeepsDropping": "The call keeps dropping. If a VPN is on, try turning it off",
+  "searchCalls": "Search calls",
+  "callsNewCallTitle": "Call whom?",
+  "storageKeepCopies": "Keep media copies",
+  "storageKeepForever": "Forever",
+  "storageKeepMonth": "A month",
+  "storageKeepWeek": "A week",
+  "storageKeepFooter": "A copy nobody opened for that long is deleted from this phone; the message stays and the file loads from the server again while the server has it (90 days after anyone last loaded it).",
+  "emojiRecent": "Recent",
+  "emojiSmileys": "Smileys & Emotion",
+  "emojiPeople": "People & Body",
+  "emojiAnimals": "Animals & Nature",
+  "emojiFood": "Food & Drink",
+  "emojiActivities": "Activity",
+  "emojiTravel": "Travel & Places",
+  "emojiObjects": "Objects",
+  "emojiSymbols": "Symbols",
+  "emojiFlags": "Flags",
+  "emojiDelete": "Delete",
+  "emojiKeyboard": "Keyboard",
+  "emojiTab": "Emoji",
+  "stickersTab": "Stickers",
+  "emojiSearch": "Search emoji",
+  "emojiNothingFound": "Nothing found",
+  "emojiSkinTone": "Skin tone",
+  "stickersAdd": "Add stickers",
+  "stickersFromFiles": "From files — .tgs, .webp, .webm, .zip",
+  "stickersFromCode": "Paste a link or pack code",
+  "stickersNoCode": "Copy a t.me/addstickers/… link or a pack code, then tap again",
+  "stickersImporting": "Adding stickers…",
+  "stickersImportFailed": "Couldn't add stickers: no usable files",
+  "stickersImported": "Pack “{title}” added",
+  "@stickersImported": {"placeholders": {"title": {"type": "String"}}},
+  "myStickersTitle": "My stickers",
+  "stickersAll": "All",
+  "stickersFound": "Found",
+  "stickersNone": "No stickers with {emoji}",
+  "@stickersNone": {"placeholders": {"emoji": {"type": "String"}}},
+  "stickerPackAdd": "Add {count, plural, one{{count} sticker} other{{count} stickers}}",
+  "@stickerPackAdd": {"placeholders": {"count": {"type": "int"}}},
+  "stickerPackAdded": "Pack added",
+  "stickerPackAlready": "You already have this pack",
+  "stickerPackShare": "Share pack",
+  "stickerPackCopyCode": "Copy pack code",
+  "stickerPackCodeCopied": "Pack code copied",
+  "stickerPackShareText": "My stickers for Sinhron — in the sticker panel tap + and paste this code: {code}",
+  "@stickerPackShareText": {"placeholders": {"code": {"type": "String"}}},
+  "stickerPackDelete": "Remove pack",
+  "stickerPackBuiltin": "Built-in pack",
+  "stickerPackCount": "{count, plural, one{{count} sticker} other{{count} stickers}}",
+  "@stickerPackCount": {"placeholders": {"count": {"type": "int"}}},
+  "stickerPackUnavailable": "Couldn't open the pack — check the connection",
+  "stickerPackNotShared": "This sticker came without its pack",
+  "stickerPackOptions": "Pack options",
+  "tgPackFrom": "From Telegram",
+  "tgPackLoading": "Opening the Telegram pack…",
+  "tgPackDownloading": "Downloading stickers: {done} of {total}",
+  "@tgPackDownloading": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "tgPackNotFound": "Pack not found — check the link",
+  "tgPackNotConfigured": "The server isn't set up for Telegram packs yet — ask whoever runs it",
+  "tgPackServerOld": "The server can't fetch Telegram packs yet — it needs an update",
+  "tgPackUnreachable": "The server can't reach Telegram right now — try later",
+  "tgPackRateLimited": "Too many packs in a row — try again in a few minutes",
+  "tgPackFailed": "Couldn't load the pack — check the connection",
+  "tgPackAddToSinhron": "Add the stickers to Sinhron",
+  "tgPackAddedPartly": "Pack “{title}” added; {count} didn't load",
+  "@tgPackAddedPartly": {"placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}},
+  "kindSticker": "Sticker",
+  "whatSticker": "sticker",
+  "a11ySticker": "Sticker {emoji}",
+  "@a11ySticker": {"placeholders": {"emoji": {"type": "String"}}},
+  "accentBlue": "Blue",
+  "accentViolet": "Violet",
+  "accentGreen": "Green",
+  "accentOrange": "Orange",
+  "accentPink": "Pink",
+  "accentGraphite": "Graphite",
+  "tapToReveal": "Tap to reveal",
+  "textSelectAll": "Select All",
+  "textPaste": "Paste",
+  "textCut": "Cut",
+  "formatMenu": "Format",
+  "formatBold": "Bold",
+  "formatItalic": "Italic",
+  "formatUnderline": "Underline",
+  "formatStrike": "Strikethrough",
+  "formatMono": "Monospace",
+  "formatSpoiler": "Spoiler",
+  "formatLink": "Link",
+  "formatQuote": "Quote",
+  "formatClear": "Clear formatting",
+  "linkSheetTitle": "Link",
+  "linkSheetHint": "Address, e.g. https://…",
+  "linkSheetBad": "That doesn't look like an address",
+  "linkSheetDone": "Done",
+  "linkSheetRemove": "Remove link",
+  "linkHiddenWarning": "The link text and its address differ — check where it leads",
+  "codeCopy": "Copy",
+  "codeCopied": "Code copied",
+  "a11ySpoiler": "Hidden text, double-tap to show",
+  "a11yQuote": "Quote",
+  "a11yCodeBlock": "Code",
+  "callBarIncoming": "Incoming call",
+  "callBarEnded": "Call ended",
+  "profileSaveFailed": "Couldn't save the profile — try again",
+  "signOutFailed": "Couldn't sign out — try again",
+  "startingChat": "Starting an encrypted chat…",
+  "restoreFailed": "Couldn't sign in — check the connection and try again. The words are still here.",
+  "requestAcceptFailed": "Couldn't accept the request — check the connection and try again",
+  "sendQueuedOffline": "No connection — the message will go out by itself when it's back",
+  "safetyNumberA11y": "Check number: {groups}",
+  "@safetyNumberA11y": {"placeholders": {"groups": {"type": "String"}}},
+  "callMicMode": "Mic: {mode}",
+  "@callMicMode": {"placeholders": {"mode": {"type": "String"}}},
+  "callMicStandard": "Standard",
+  "callMicVoiceIsolation": "Voice Isolation",
+  "callMicWideSpectrum": "Wide Spectrum",
+  "callMinimize": "Minimise — the call goes on",
+  "callPeerMicOff": "Mic off",
+  "@callPeerMicOff": {
+    "description": "The other person in the call has muted their microphone (under their photo, in the call bar)."
+  },
+  "callConnecting": "Connecting…",
+  "callBarReturn": "tap to return",
+  "callBarAnswer": "tap to answer",
+  "myProfileTitle": "My profile",
+  "myProfileShare": "Share so people can message me",
+  "myProfileQrHint": "Show this code — scanning it lets people message you. It isn’t a password: there’s nothing secret in it.",
+  "myProfileAddress": "Your Sinhron address",
+  "myProfileNotReady": "Your address appears once the phone connects to the server.",
+  "myProfileNoBio": "A few words about you — tap Edit",
+  "settingsProfileHint": "Profile and QR code so people can message you",
+  "settingsNotificationsHint": "Sound, vibration and what a notification shows",
+  "settingsPrivacyHint": "Who sees you online and your read ticks",
+  "settingsAppLockHint": "Ask for Face ID or a passcode on opening",
+  "settingsAppLockHintAndroid": "Ask for a fingerprint or screen lock on opening",
+  "settingsAppearanceHint": "Theme, colour and wallpaper",
+  "settingsChatsSection": "Chats & folders",
+  "settingsNewFolderHint": "For example Work or Family",
+  "settingsArchiveHint": "Chats you moved out of the list",
+  "settingsStorageHint": "How much space photos and videos take",
+  "settingsAccountSection": "Account & devices",
+  "settingsDevicesHint": "Phones and computers with your account",
+  "settingsWordsHint": "Bring your account back on a new phone",
+  "settingsAdvanced": "Advanced",
+  "settingsProxyHint": "Hide your phone’s IP from the server; backup route for calls",
+  "settingsHelpHint": "Questions, problems, reports",
+  "transferOutTitle": "Moving everything to your new device",
+  "transferInTitle": "Bringing everything over from your other device",
+  "transferStageBuild": "Packing chats, contacts and settings…",
+  "transferStageUpload": "Sending: {done} of {total}",
+  "@transferStageUpload": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "transferStageOffer": "Telling your new device…",
+  "transferStageMedia": "Photos and files: {done} of {total}",
+  "@transferStageMedia": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "transferStageManifest": "Getting ready…",
+  "transferStageParts": "Receiving chats: {done} of {total}",
+  "@transferStageParts": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "transferStagePacks": "Loading sticker packs…",
+  "transferDone": "Done — {messages} messages moved",
+  "@transferDone": {"placeholders": {"messages": {"type": "int"}}},
+  "transferDoneMediaLater": "{messages} messages are here. Photos and files open as your other device puts them up",
+  "@transferDoneMediaLater": {"placeholders": {"messages": {"type": "int"}}},
+  "transferDoneMissing": "Done — {messages} messages. {missing} photos and files were no longer anywhere",
+  "@transferDoneMissing": {"placeholders": {"messages": {"type": "int"}, "missing": {"type": "int"}}},
+  "transferFailed": "The transfer didn't finish. On your other device: Devices → this device → Send everything",
+  "transferWaiting": "No connection — it carries on when you're back online",
+  "transferHide": "Hide",
+  "transferStop": "Stop",
+  "transferStrip": "Bringing your chats over… {percent}%",
+  "@transferStrip": {"placeholders": {"percent": {"type": "int"}}},
+  "devicesSendAll": "Send everything to this device",
+  "devicesSendAllFailed": "Couldn't start the transfer. Check the connection and try again.",
+  "devicesSyncNote": "Your devices stay in step: chats with their whole history, contacts, blocked people, sticker packs, folders and privacy settings. Look, sounds and connection settings stay per device.",
+  "serverChatTitle": "Server",
+  "serverChatSubtitle": "Service notices · for the administrator",
+  "serverChatEmpty": "All quiet — no notices yet.",
+  "serverChatFooter": "Your server writes here because you are its administrator. You can't reply. Notices are kept on the server for 30 days. Long press — copy.",
+  "previewReply": "So jealous! Take me with you next time? 😍",
+  "previewSure": "Of course! 🙌",
+  "wallSameAsAll": "Same as all chats",
+  "shareContact": "Share contact",
+  "@shareContact": {"description": "Profile / chat info row: send this person's contact card into a chat"},
+  "shareContactTo": "Send contact to…",
+  "@shareContactTo": {"description": "Chat picker title when sharing a contact"},
+  "contactSent": "Contact sent",
+  "@contactSent": {"description": "Confirmation after a contact card was sent"},
+  "contactCardNoName": "Contact",
+  "@contactCardNoName": {"description": "Contact card in a chat: the person shared no name"},
+  "contactCardNameUnverified": "Name from the card, not checked",
+  "@contactCardNameUnverified": {"description": "Contact card in a chat from someone not yet known: the name is what the sender typed"},
+  "contactCardPreview": "Contact: {name}",
+  "@contactCardPreview": {"description": "Chat list preview of a contact card", "placeholders": {"name": {"type": "String"}}}
+}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sinhron — конфиденциальность / Privacy</title>
+<style>
+  body { font: 16px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px 16px 48px; color: #1c1c1f; background: #fff; }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 19px; margin: 28px 0 8px; }
+  .muted { color: #6b6b72; font-size: 14px; }
+  hr { border: 0; border-top: 1px solid #e3e3e8; margin: 40px 0; }
+  ul { padding-left: 20px; }
+  a { color: #2f6fe4; }
+  @media (prefers-color-scheme: dark) { body { background: #121214; color: #ececf0; } .muted { color: #9a9aa3; } hr { border-top-color: #2a2a2e; } a { color: #7aa7ff; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Sinhron — политика конфиденциальности</h1>
+<p class="muted">Действует с 23 октября 2026 г., обновлена 12 ноября 2026 г. · <a href="#en">English below</a></p>
+
+<p>Sinhron — мессенджер со сквозным шифрованием. Мы строим его так, чтобы о вас знать как можно меньше.</p>
+
+<h2>Что мы не видим</h2>
+<ul>
+  <li><b>Содержимое</b> сообщений, фото, видео, голосовых, файлов и звонков. Всё шифруется на вашем телефоне ключами, которых у сервера нет (MLS, звонки — SFrame).</li>
+  <li><b>Номер телефона и почта</b> для аккаунта не нужны. Аккаунт — это ключи, созданные из ваших 24 секретных слов. Слова хранятся только у вас.</li>
+  <li><b>Рекламы, аналитики и сторонних трекеров</b> в приложении нет. Ваши данные мы не продаём и никому не передаём.</li>
+</ul>
+
+<h2>Что видит сервер</h2>
+<ul>
+  <li><b>Открытые ключи</b> аккаунта и устройств, список ваших устройств.</li>
+  <li><b>Служебные сведения для доставки:</b> в какие чаты входят какие устройства, время и размер зашифрованных сообщений.</li>
+  <li><b>Зашифрованные сообщения:</b> сервер хранит их до года — чтобы они дошли и до устройства, которое долго было без связи. Прочитать их сервер не может. Зашифрованные медиафайлы лежат, пока их скачивают собеседники.</li>
+  <li><b>Короткие ссылки-приглашения:</b> когда вы делитесь короткой ссылкой, сервер до года хранит ваше приглашение в запечатанном виде. Ключ к нему есть только в самой ссылке — серверу он не передаётся, и прочитать приглашение сервер не может. Сервер видит, когда ссылка создана, и IP-адрес того, кто её создаёт или открывает (в базу адрес не записывается). К аккаунту такое приглашение не привязано и при удалении аккаунта лежит до конца срока.</li>
+  <li><b>Токены push-уведомлений</b> (Apple, Google). В самих уведомлениях нет текста сообщений и имени отправителя.</li>
+  <li><b>IP-адрес</b> устройства виден серверу при подключении, как любому сайту. В журналы и базу мы его не записываем, кроме случаев ниже.</li>
+</ul>
+
+<h2>Жалобы и защита сервера</h2>
+<ul>
+  <li><b>Жалоба.</b> Когда вы жалуетесь на человека, сервер сохраняет: ваш открытый ключ, его открытый ключ, причину и — только если вы сами решили его приложить — текст сообщения. Вместе с жалобой сохраняются ваш IP-адрес (с которого отправлена жалоба) и последний IP-адрес того, на кого жалоба (с которого он последний раз подключался). Через <b>30 дней</b> оба IP-адреса удаляются; сама жалоба остаётся.</li>
+  <li><b>Администратор сервера</b> получает в приложении служебные уведомления: о новой жалобе (ключи и IP-адреса) и о высокой нагрузке на сервер (процессор, память, число соединений — без адресов и аккаунтов). Эти уведомления хранятся на сервере <b>30 дней</b>.</li>
+  <li><b>Только в памяти:</b> последний IP-адрес каждого аккаунта сервер держит в оперативной памяти (чтобы указать его в жалобе) — на диск он не пишется и пропадает при перезапуске. Если администратор не назначен, сервер его не хранит вовсе.</li>
+</ul>
+
+<h2>Резервная копия в iCloud и Google Диске</h2>
+<ul>
+  <li><b>Копия зашифрована</b> ключом из ваших 24 слов. Ни Apple, ни Google, ни мы её прочитать не можем.</li>
+  <li><b>iPhone:</b> копия лежит в скрытой папке приложения в вашем iCloud.</li>
+  <li><b>Android:</b> после «Войти через Google» копия лежит в скрытой папке приложения на вашем Google Диске. Sinhron просит только доступ <code>drive.appdata</code> — к своей скрытой папке. Ваши файлы на Диске приложение не видит и не трогает. Данные из Google Диска используются только для того, чтобы сохранить и восстановить вашу копию; на наш сервер они не передаются.</li>
+  <li><b>Использование данных из Google API</b> соответствует <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, включая требования Limited Use.</li>
+  <li><b>Как отключить и удалить:</b> копию можно выключить в приложении (Настройки → «Резервная копия») и удалить в настройках iCloud или Google Диска (управление приложениями).</li>
+</ul>
+
+<h2>Удаление аккаунта</h2>
+<p>В приложении: Настройки → ваш профиль → «Удалить аккаунт». Сервер удаляет устройства, ключи, членство в чатах, недоставленные сообщения и push-токены. Медиа, которое вы отправили, остаётся у получателей.</p>
+
+<h2>Связь</h2>
+<p><a href="mailto:laringrv@gmail.com">laringrv@gmail.com</a></p>
+
+<hr id="en">
+
+<h1>Sinhron — Privacy Policy</h1>
+<p class="muted">Effective October 23, 2026, updated November 12, 2026</p>
+
+<p>Sinhron is an end-to-end encrypted messenger, built to know as little about you as possible.</p>
+
+<h2>What we cannot see</h2>
+<ul>
+  <li><b>Content</b> of messages, photos, videos, voice notes, files and calls. Everything is encrypted on your phone with keys the server never has (MLS; calls use SFrame).</li>
+  <li><b>Phone number or email</b> — neither is needed. Your account is a set of keys derived from your 24 secret words, which only you keep.</li>
+  <li><b>No ads, analytics or third-party trackers.</b> We do not sell or share your data.</li>
+</ul>
+
+<h2>What the server sees</h2>
+<ul>
+  <li><b>Public keys</b> of your account and devices, and your list of devices.</li>
+  <li><b>Delivery metadata:</b> which devices are in which chats, and the time and size of encrypted messages.</li>
+  <li><b>Encrypted messages:</b> kept for up to a year, so they still reach a device that was offline for a long time. The server can’t read them. Encrypted media stays while your contacts download it.</li>
+  <li><b>Short invite links:</b> when you share a short link, the server keeps your invite, sealed, for up to a year. The key is only in the link itself — it is never sent to the server, which can’t read the invite. The server sees when the link was made and the IP address of whoever makes or opens it (the address is not written to the database). The invite is not tied to an account and stays until it expires even if you delete yours.</li>
+  <li><b>Push notification tokens</b> (Apple, Google). Notifications carry no message text or sender name.</li>
+  <li><b>IP address</b> of your device is visible to the server when it connects, as to any website. We do not write it to logs or the database, except as below.</li>
+</ul>
+
+<h2>Reports and protecting the server</h2>
+<ul>
+  <li><b>Reports.</b> When you report someone, the server stores your public key, theirs, the reason and — only if you chose to attach it — the message text. With the report it also stores your IP address (the one the report came from) and the last IP address of the reported person (the one they last connected from). Both IP addresses are deleted after <b>30 days</b>; the report itself stays.</li>
+  <li><b>The server's administrator</b> gets service notices in the app: a new report (keys and IP addresses) and high load on the server (CPU, memory, number of connections — no addresses or accounts). These notices are kept on the server for <b>30 days</b>.</li>
+  <li><b>In memory only:</b> the last IP address of each account is held in the server's memory (to name it in a report) — never written to disk, gone on restart. If no administrator is set, it is not kept at all.</li>
+</ul>
+
+<h2>Backups in iCloud and Google Drive</h2>
+<ul>
+  <li><b>Backups are encrypted</b> with a key from your 24 words. Apple, Google and we cannot read them.</li>
+  <li><b>iPhone:</b> the backup is stored in the app's hidden folder in your iCloud.</li>
+  <li><b>Android:</b> after "Sign in with Google", the backup is stored in the app's hidden folder in your Google Drive. Sinhron requests only the <code>drive.appdata</code> scope — its own hidden folder. It cannot see or change your other Drive files. Data from Google Drive is used only to save and restore your backup and is never sent to our server.</li>
+  <li><b>Google API data:</b> Sinhron's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</li>
+  <li><b>Turning it off:</b> backups can be turned off in the app (Settings → "Chat backup") and deleted in your iCloud or Google Drive settings (manage apps).</li>
+</ul>
+
+<h2>Deleting your account</h2>
+<p>In the app: Settings → your profile → "Delete account". The server deletes your devices, keys, chat memberships, undelivered messages and push tokens. Media you sent stays with its recipients.</p>
+
+<h2>Contact</h2>
+<p><a href="mailto:laringrv@gmail.com">laringrv@gmail.com</a></p>
+</main>
+</body>
+</html>

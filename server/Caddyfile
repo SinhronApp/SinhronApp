@@ -1,0 +1,210 @@
+# Caddy reverse-proxy config for the operator-hosted Sinhron stack.
+#
+# Built from `Dockerfile.caddy` (Caddy + caddy-l4) — the stock image
+# lacks the `layer4` app this file needs.
+#
+# Port 443 is owned by the layer4 router, which splits connections by
+# TLS SNI so restrictive networks that only allow TCP/443 still get
+# calls (ADR-016):
+#
+#   SINHRON_TURN_HOSTNAME    → TLS terminated here, plain TURN-over-TCP
+#                              to coturn (clients use `turns:<host>:443`)
+#   everything else          → TLS passthrough (+ PROXY protocol v2) to
+#                              the HTTP app on 127.0.0.1:8443, which
+#                              serves the API and LiveKit hostnames
+#
+# All three hostnames need DNS A/AAAA records pointing at this server;
+# Caddy obtains Let's Encrypt certs for each via HTTP-01 on port 80.
+# For self-hosted operator-CA deploys (spec §6.1 TLS pinning) add
+#   tls /certs/operator.pem /certs/operator-key.pem
+# to each site block and mount the keypair into Caddy.
+#
+# Env vars (interpolated by docker-compose):
+#   SINHRON_PUBLIC_HOSTNAME   API + WS,  e.g. `cabin.example.com`
+#   SINHRON_LIVEKIT_HOSTNAME  LiveKit,   e.g. `livekit.cabin.example.com`
+#   SINHRON_TURN_HOSTNAME     TURN/TLS,  e.g. `turn.cabin.example.com`
+#   TURN_TCP_UPSTREAM         coturn TCP listener (default host network)
+#   ACME_EMAIL                certificate account (default certs@<API host>)
+{
+	# The HTTP app's TLS listener moves off 443 (layer4 owns it). Its
+	# redirects would point at :8443, so they're replaced by the
+	# explicit `http://` block below.
+	https_port 8443
+	auto_https disable_redirects
+
+	# With an account email Caddy also tries ZeroSSL when Let's Encrypt
+	# fails. 2026-10-18: a Russian VPS couldn't reach Let's Encrypt over
+	# IPv4 (its Cloudflare address timed out; the container has no IPv6),
+	# so no certificate came at all. ZeroSSL was reachable.
+	email {$ACME_EMAIL}
+
+	servers :8443 {
+		# Recover real client IPs from the layer4 hop — the server's
+		# per-IP rate limits read X-Forwarded-For built from these.
+		listener_wrappers {
+			proxy_protocol {
+				allow 127.0.0.1/32
+			}
+			tls
+		}
+		# No HTTP/3: UDP 443 is not routed to this listener.
+		protocols h1 h2
+	}
+
+	layer4 {
+		:443 {
+			# Status 183 (owner, 2026-10-19: "with a VPN on, no connection to
+			# the server, calls don't connect") — a slow VPN can take longer
+			# than the 3 s default to send its TLS hello; the connection was
+			# dropped ("aborted matching according to timeout", ~80 a day).
+			matching_timeout 15s
+			@turn tls sni {$SINHRON_TURN_HOSTNAME:turn.localhost}
+			route @turn {
+				tls
+				proxy {$TURN_TCP_UPSTREAM:host.docker.internal:3478}
+			}
+			route {
+				proxy {
+					proxy_protocol v2
+					upstream 127.0.0.1:8443
+				}
+			}
+		}
+	}
+}
+
+http:// {
+	redir https://{host}{uri} 308
+}
+
+# Tech-debt 2.14 — security headers on everything we serve. HSTS for
+# two years incl. subdomains (no `preload`: that's a one-way submission
+# the operator should choose deliberately). The API serves no HTML, so
+# the CSP denies everything; nosniff / no-referrer / DENY framing.
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		# `?` = only if not set already: /join sets its own (below) — a plain
+		# set here ran after it and replaced it (seen live, 2026-10-16).
+		?Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+}
+
+{$SINHRON_PUBLIC_HOSTNAME:localhost} {
+	import security_headers
+
+	# The WebSocket. `read_timeout` is how long Caddy waits for the next
+	# byte from the server — on a socket that is the gap between heartbeat
+	# replies, up to 300 s for an Android phone in the background (battery
+	# 2026-10-18; at 90 s Caddy would cut it). The server's own watchdog
+	# (at most 450 s) closes dead sessions first.
+	reverse_proxy /v1/sync sinhron-server:8080 {
+		transport http {
+			read_timeout 10m
+			write_timeout 90s
+			dial_timeout 5s
+		}
+	}
+
+	# API. Bumped read timeouts to accept long polls later if we add them.
+	reverse_proxy /v1/* sinhron-server:8080 {
+		transport http {
+			read_timeout 90s
+			write_timeout 90s
+			dial_timeout 5s
+		}
+	}
+
+	# Health/ready probes — same backend, no auth. Named matcher: an
+	# inline path matcher takes only ONE path, so the old
+	# `reverse_proxy /_healthz /_readyz ...` turned `/_readyz` into an
+	# upstream address.
+	@probes path /_healthz /_readyz
+	reverse_proxy @probes sinhron-server:8080
+	# ADR-043 — invite links: the install page for a phone without the app
+	# (/join, and /i/<id> for a short link) and the files that make phones
+	# open them in the app.
+	@join path /join /i/* /.well-known/apple-app-site-association /.well-known/assetlinks.json
+	reverse_proxy @join sinhron-server:8080
+	# The page runs exactly one inline script (copies the link's #fragment
+	# into "Open in the app"); its hash is `JOIN_SCRIPT_SHA256` in
+	# server/src/handlers/join.rs — a test keeps them equal.
+	@joinpage path /join /i/*
+	header @joinpage Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-6FclWoJyYXY0mN8JKrLf/LA8iX0VitVk7UzjtuXBG8M='; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+
+	# The Android app as a plain download (2026-10-18: a user
+	# in Russia has no Google Play route and the GitHub repo is private).
+	# Files the operator puts in server/download/ (mounted read-only) are at
+	# https://<host>/download/<file>; /join links to it when
+	# SINHRON_ANDROID_INSTALL_URL points here.
+	# ADR-058 — android.json (written by client_flutter/scripts/
+	# android_release.sh, uploaded by publish_android.sh) tells installed
+	# apps there is a newer build; never cached, so they see it at once.
+	handle_path /download/* {
+		root * /srv/download
+		header *.apk Content-Type application/vnd.android.package-archive
+		header /android.json Cache-Control "no-cache"
+		file_server
+	}
+
+	# No access log (security review 2026-11-02): it kept every client's IP,
+	# time and path — the "who talked when" record the server otherwise
+	# avoids — and grew without end. Caddy's own errors still go to stdout.
+
+	# Tighten the default Caddy defaults: deny anything we don't route.
+	@unknown not path /v1/* /_healthz /_readyz /join /i/* /download/* /.well-known/apple-app-site-association /.well-known/assetlinks.json
+	handle @unknown {
+		respond "Not Found" 404
+	}
+}
+
+# LiveKit signaling (wss://). The client gets this URL from
+# /v1/call/token via LIVEKIT_URL. Media itself goes direct to LiveKit
+# (UDP 7882 / TCP 7881) or through TURN.
+# Bodies capped (security review 2026-11, critic:12): LiveKit writes a big
+# multipart body to disk before it checks any token — one stranger could
+# fill the disk. Calls send only small JSON; the WebSocket has no body.
+{$SINHRON_LIVEKIT_HOSTNAME:livekit.localhost} {
+	import security_headers
+	request_body {
+		max_size 1MB
+	}
+	reverse_proxy livekit:7880
+}
+
+# Certificate holder only: the layer4 `tls` handler terminates TURN/TLS
+# with certificates Caddy already manages, and it manages them because
+# this site exists. Real TURN connections never reach this block.
+# ADR-040 — the operator's ntfy (UnifiedPush for Android). Without the
+# `ntfy` profile nothing answers behind it (502).
+{$SINHRON_NTFY_HOSTNAME:ntfy.localhost} {
+	import security_headers
+	request_body {
+		max_size 1MB
+	}
+	reverse_proxy ntfy:80
+}
+
+{$SINHRON_TURN_HOSTNAME:turn.localhost} {
+	respond 404
+}
+
+# Other sites on this server (status 203 — e.g. another project):
+# each neighbour drops `/etc/sinhron/caddy-sites/<name>.caddy` on the host
+# (mounted here read-only) with a plain site block, no port:
+#   notes.example.com {
+#   	reverse_proxy <container on the `edge` network>:<port>
+#   }
+# They are served by the same HTTP app on :8443 (layer4 passes every SNI
+# but TURN there) and get certificates via HTTP-01 on :80 like ours. They
+# do NOT import (security_headers) — its CSP would break a web app; headers
+# are the neighbour's job. An empty folder is fine (only a warning). A
+# broken file fails `caddy reload` (old config keeps running) but would
+# stop Caddy from starting — always `caddy validate` first
+# (docs/deploy-guide.md, "Другие сайты на этом сервере").
+import /etc/caddy/sites/*.caddy

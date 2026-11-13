@@ -1,0 +1,46 @@
+# Local-dev override — expose sinhron-server port 8080 directly to host
+# so iPhone on LAN can reach ws://192.168.1.109:8080/v1/sync without
+# going through Caddy (Caddy needs real DNS + Let's Encrypt, which we
+# don't have for raw LAN IP tests).
+#
+# Named `docker-compose.dev.yml` on purpose (status 167): as
+# `docker-compose.override.yml` it was loaded by every plain `docker
+# compose …` — on 2026-10-19 a production restart picked it up and gave
+# phones LiveKit at ws://localhost:7880 (every call dropped at 0 s). Use:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# Disable Caddy too — it would try to provision Let's Encrypt for
+# "localhost", which fails silently and clutters logs. The dev path
+# is iPhone → 8080 directly, and LiveKit signaling on plain ws://7880.
+
+services:
+  sinhron-server:
+    ports:
+      - "8080:8080"
+    environment:
+      # No Caddy in dev → no wss:// LiveKit hostname. Set LIVEKIT_URL in
+      # .env to ws://<Mac LAN IP>:7880 for on-device tests.
+      LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+
+  caddy:
+    profiles:
+      - donotstart
+
+  livekit:
+    ports:
+      - "7880:7880"
+
+  # Docker Desktop on Mac has no real host networking — back to bridge
+  # with a small relay range. Same-LAN calls don't need TURN anyway
+  # (ICE host candidates); cross-LAN TURN testing needs a Linux host.
+  coturn:
+    network_mode: bridge
+    command:
+      - --realm=${TURN_REALM:-sinhron}
+      - --external-ip=${TURN_EXTERNAL_IP:-127.0.0.1}
+      # Match the published range below (turnserver.conf says 49999).
+      - --max-port=49200
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "49152-49200:49152-49200/udp"

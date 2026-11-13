@@ -1,0 +1,32 @@
+[package]
+name = "sinhron_storage"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+# Plain Rust library; only sinhron_core exposes cdylib.
+
+[dependencies]
+# Use rusqlite (sync API) instead of sqlx (async). Spec §5.2 says sqlx,
+# but `openmls_sqlite_storage` already uses rusqlite — staying consistent
+# saves us a tokio runtime on the FFI hot path. Documented as a deviation
+# in status.md "spec deviations".
+#
+# Version pinned to 0.37 — matches `openmls_sqlite_storage 0.3.0`'s
+# requirement. Both crates need to resolve to the same `libsqlite3-sys`
+# build, otherwise iOS link step explodes with "native library `sqlite3`
+# linked more than once".
+# T1.1 — SQLCipher: bundled-sqlcipher-vendored-openssl statically links
+# SQLCipher (encryption-aware SQLite fork) + OpenSSL into our binary,
+# so iOS/macOS deploys have zero system deps.
+# PRAGMA key = '...' applied first thing after Connection::open derives
+# AES-256 keys for all DB pages. Without the right key, the file is
+# random-looking ciphertext and SQLite refuses to recognize it as a DB.
+rusqlite = { version = "=0.37.0", features = ["bundled-sqlcipher-vendored-openssl"] }
+sha2 = "0.10"
+hex = "0.4"
+thiserror = "1.0"
+# ADR-019 — reactions map (messages.reactions_json). Same pin as sinhron_sync.
+serde_json = "=1.0.140"
+# ADR-061 — device transfer rows. Same pin as sinhron_sync.
+serde = { version = "=1.0.228", features = ["derive"] }

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ru</string>
+	</array>
+	<key>CFBundleDisplayName</key>
+	<string>Sinhron</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>sinhron</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<!-- Only standard algorithms (AES-GCM, X25519, Ed25519 via OpenMLS): exempt;
+	     no per-upload export question. Owner's decision 2026-10-15. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<!-- ADR-043 — sinhron://join#… (the invite page's "Open in the app"). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.sinhron.sinhron.invite</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sinhron</string>
+			</array>
+		</dict>
+	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<!-- CD1 — calls permissions (Phase 3, spec §10). Without these strings
+	     iOS kills the app at the first camera/mic permission prompt. The
+	     wording shown to the user MUST be specific to the actual use:
+	     vague placeholder text is grounds for App Store rejection. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Sinhron uses the camera for video calls, video messages and the photos you send. Everything is end-to-end encrypted on your device; the camera is never accessed in the background.</string>
+	<!-- ADR-017 — photo picking for encrypted media messages. -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Sinhron saves a photo to your library only when you tap Save.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sinhron lets you pick photos to send. Each photo is re-encoded on your device (location and camera metadata removed) and end-to-end encrypted before upload.</string>
+<key>NSFaceIDUsageDescription</key>
+	<string>Sinhron uses Face ID to unlock the app when App Lock is on.</string>
+		<key>NSMicrophoneUsageDescription</key>
+	<string>Sinhron uses the microphone for calls, voice and video messages. Audio is end-to-end encrypted on your device; the microphone is only on while you're on a call or recording.</string>
+	<!-- CD1 — background modes:
+	       • voip  — allows the app to continue an active call when the
+	                 screen locks (UIBackgroundMode "voip"). REQUIRES
+	                 PushKit for proper lock-screen incoming-call UX —
+	                 currently DEFERRED (E2) until Apple Developer cert
+	                 is provisioned. Listing it here doesn't enable the
+	                 feature alone — it's an entitlement signal.
+	       • audio — allows the audio stream to continue when the screen
+	                 locks. Required for calls; safe to declare. -->
+	<!-- ADR-056 — the Keychain group shared with the notification extension. -->
+	<key>SinhronKeychainGroup</key>
+	<string>$(AppIdentifierPrefix)com.sinhron.shared</string>
+	<!-- ADR-059 — where Passwords files the secret words: the webcredentials
+	     domain in Runner.entitlements (its server lists this app in the AASA). -->
+	<key>SinhronPasswordDomain</key>
+	<string>chat.777400777.xyz</string>
+	<!-- ADR-061 — screen sharing in calls: the Broadcast Upload Extension
+	     (ios/ScreenShare) and the App Group holding its socket to the app
+	     (read by flutter_webrtc and livekit_client). -->
+	<key>RTCScreenSharingExtension</key>
+	<string>com.sinhron.sinhron.ScreenShare</string>
+	<key>RTCAppGroupIdentifier</key>
+	<string>group.com.sinhron.sinhron</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>voip</string>
+		<string>audio</string>
+		<!-- ADR-071 (amended): message requests come as background pushes;
+		     the app decides whether to show "New message request". -->
+		<string>remote-notification</string>
+	</array>
+	<!-- CD1 — iOS 14+ Bluetooth permission for audio routing during
+	     calls (Bluetooth headsets). Without this, the system silently
+	     downgrades to speakerphone when a headset is connected. -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Sinhron uses Bluetooth to route call audio to your headset.</string>
+	<!-- ADR-017 — voice playback serves decrypted audio to AVPlayer
+	     through just_audio's in-process proxy on 127.0.0.1 (no plaintext
+	     file). Only local/loopback loads are exempted; TLS rules for
+	     everything else stay default-strict. Rust networking (reqwest,
+	     tungstenite) doesn't go through ATS at all. -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

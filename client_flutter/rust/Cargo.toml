@@ -1,0 +1,43 @@
+# sinhron_core — frb facade. Single crate at this path so cargokit
+# (rust_builder/ios|android|...) keeps working unchanged. Sibling crates
+# (sinhron_crypto, …) live in subdirs and are pulled in as path deps.
+# See ADR-008 for layout rationale.
+
+[workspace]
+members = [".", "sinhron_crypto", "sinhron_storage", "sinhron_net", "sinhron_sync", "sinhron_cli", "sinhron_call"]
+
+[package]
+name = "sinhron_core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+flutter_rust_bridge = "=2.11.1"
+sinhron_crypto = { path = "sinhron_crypto" }
+sinhron_storage = { path = "sinhron_storage" }
+sinhron_net = { path = "sinhron_net" }
+sinhron_sync = { path = "sinhron_sync" }
+sinhron_call = { path = "sinhron_call" }
+hex = "0.4"
+base64 = "=0.22.1"
+tokio = { version = "=1.51.6", features = ["sync", "rt", "time", "macros"] }
+uuid = { version = "=1.18.0", features = ["v7"] }
+prost = "=0.13.5"
+# WU B3: tracing for TLS-pinning configuration logs (success / parse fail).
+tracing = "=0.1.41"
+# ADR-019: action / push JSON for Dart (same pin as sinhron_sync).
+serde_json = "=1.0.140"
+# ADR-049: the list of added sticker packs (same pin as sinhron_sync).
+serde = { version = "=1.0.228", features = ["derive"] }
+# ADR-062 — a batch of Telegram sticker files at once.
+futures-util = "=0.3.31"
+
+[dev-dependencies]
+# Tests build a real JPEG (with EXIF/GPS) for the photo-avatar trip; same pin as sinhron_sync.
+image = { version = "=0.25.10", default-features = false, features = ["jpeg", "png"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

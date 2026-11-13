@@ -1,0 +1,65 @@
+# deploy-deps:11 (docs/security-review-2026-11.md) — known holes in the Rust
+# libraries of both lock files (`cargo audit`, RustSec database). Nothing ran
+# it, and a hole sat in a pinned library for two weeks.
+#
+# Weekly and by hand ("Run workflow") only — never on a push: the owner's
+# Actions minutes are limited. About a minute with the tool cached.
+#
+# Ignored, with the reason (only what is shown not to reach us):
+#   RUSTSEC-2026-0387 — crypto-bigint 0.5.5, through elliptic-curve 0.13 (p256
+#   for the APNs JWT on the server; on the client openmls_rust_crypto's P-256 /
+#   P-384 suites, which our MLS suite — X25519 + Ed25519 — never uses). The
+#   fix is only in 0.7.6+, which the 0.13 curves can't take. Audit 2026-11,
+#   deploy-deps:11.
+#   RUSTSEC-2023-0071 — rsa 0.9.10 (Marvin): no fixed release; in the server
+#   lock only through sqlx-mysql, which is not compiled (we use Postgres).
+#   RUSTSEC-2026-0330, -0331 — libcrux-kem 0.0.9, pinned (=0.0.9) by
+#   hpke-rs-libcrux 0.7.0 <- hpke-rs 0.7 <- openmls_rust_crypto 0.6. Lock-only:
+#   hpke-rs' `libcrux` feature is off, so neither is compiled (and our suite —
+#   X25519 + Ed25519 — has no hybrid KEM). The fix needs hpke-rs 0.8, which no
+#   openmls_rust_crypto takes yet. The other six libcrux-* advisories went with
+#   OpenMLS 0.9 (status 249, tech-debt §3.3).
+#   RUSTSEC-2026-0459 — libsqlite3-sys < 0.39 (C SQLite, a crafted -wal file).
+#   Server lock (0.30.1): a lock entry only — optional sqlx-sqlite, never
+#   compiled (we use Postgres). Client lock (0.35.0, bundled SQLCipher): the
+#   phone opens only its own, locally created, encrypted databases (every page
+#   carries an HMAC — a forged -wal fails as "malformed"); the fix needs
+#   rusqlite 0.41 / Rust 1.89, which openmls_sqlite_storage 0.3.0 can't take.
+#   Low risk. Added 2026-11-12 (the weekly job was red since 2026-11-09).
+#   REVIEW BY 2027-02-01, or at the next openmls / rusqlite bump — drop the
+#   ignore then. Audit 2026-11b, rs-server:1 / rs-client:1.
+name: Audit
+
+on:
+  schedule:
+    - cron: "41 3 * * 1" # Mondays 03:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IGNORE: --ignore RUSTSEC-2026-0387 --ignore RUSTSEC-2023-0071 --ignore RUSTSEC-2026-0330 --ignore RUSTSEC-2026-0331 --ignore RUSTSEC-2026-0459
+
+jobs:
+  audit:
+    name: cargo audit (server + client)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      # The tool, kept between runs (cargo rebuilds it only when a newer
+      # version is out — a new advisory format needs a new tool).
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/cargo-audit
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+          key: cargo-audit-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: cargo-audit-${{ runner.os }}-
+      - run: cargo install cargo-audit --locked
+      - name: Server (server/Cargo.lock)
+        run: cargo audit --file server/Cargo.lock $IGNORE
+      - name: Client (client_flutter/rust/Cargo.lock)
+        if: ${{ !cancelled() }}
+        run: cargo audit --file client_flutter/rust/Cargo.lock $IGNORE

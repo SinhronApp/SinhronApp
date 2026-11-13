@@ -1,0 +1,476 @@
+{
+ "v": 1,
+ "packs": [
+  {
+   "id": "sinhron.noto_faces",
+   "dir": "noto_faces",
+   "title": {
+    "ru": "Эмоции",
+    "en": "Feelings"
+   },
+   "author": "Google — Noto Emoji Animation",
+   "license": "CC BY 4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "stickers": [
+    {
+     "file": "1f600.tgs",
+     "emoji": "😀"
+    },
+    {
+     "file": "1f602.tgs",
+     "emoji": "😂"
+    },
+    {
+     "file": "1f923.tgs",
+     "emoji": "🤣"
+    },
+    {
+     "file": "1f60a.tgs",
+     "emoji": "😊"
+    },
+    {
+     "file": "1f60d.tgs",
+     "emoji": "😍"
+    },
+    {
+     "file": "1f618.tgs",
+     "emoji": "😘"
+    },
+    {
+     "file": "1f970.tgs",
+     "emoji": "🥰"
+    },
+    {
+     "file": "1f929.tgs",
+     "emoji": "🤩"
+    },
+    {
+     "file": "1f60e.tgs",
+     "emoji": "😎"
+    },
+    {
+     "file": "1f914.tgs",
+     "emoji": "🤔"
+    },
+    {
+     "file": "1f928.tgs",
+     "emoji": "🤨"
+    },
+    {
+     "file": "1f644.tgs",
+     "emoji": "🙄"
+    },
+    {
+     "file": "1f60f.tgs",
+     "emoji": "😏"
+    },
+    {
+     "file": "1f62d.tgs",
+     "emoji": "😭"
+    },
+    {
+     "file": "1f622.tgs",
+     "emoji": "😢"
+    },
+    {
+     "file": "1f97a.tgs",
+     "emoji": "🥺"
+    },
+    {
+     "file": "1f621.tgs",
+     "emoji": "😡"
+    },
+    {
+     "file": "1f92f.tgs",
+     "emoji": "🤯"
+    },
+    {
+     "file": "1f631.tgs",
+     "emoji": "😱"
+    },
+    {
+     "file": "1f973.tgs",
+     "emoji": "🥳"
+    },
+    {
+     "file": "1f634.tgs",
+     "emoji": "😴"
+    },
+    {
+     "file": "1f92e.tgs",
+     "emoji": "🤮"
+    },
+    {
+     "file": "1f921.tgs",
+     "emoji": "🤡"
+    },
+    {
+     "file": "1f47b.tgs",
+     "emoji": "👻"
+    },
+    {
+     "file": "1f480.tgs",
+     "emoji": "💀"
+    },
+    {
+     "file": "1f608.tgs",
+     "emoji": "😈"
+    },
+    {
+     "file": "1f917.tgs",
+     "emoji": "🤗"
+    },
+    {
+     "file": "1f92b.tgs",
+     "emoji": "🤫"
+    },
+    {
+     "file": "1f605.tgs",
+     "emoji": "😅"
+    },
+    {
+     "file": "1f609.tgs",
+     "emoji": "😉"
+    },
+    {
+     "file": "1f643.tgs",
+     "emoji": "🙃"
+    },
+    {
+     "file": "1f972.tgs",
+     "emoji": "🥲"
+    },
+    {
+     "file": "1f92a.tgs",
+     "emoji": "🤪"
+    },
+    {
+     "file": "1f60b.tgs",
+     "emoji": "😋"
+    },
+    {
+     "file": "1f633.tgs",
+     "emoji": "😳"
+    },
+    {
+     "file": "1f62c.tgs",
+     "emoji": "😬"
+    },
+    {
+     "file": "1f971.tgs",
+     "emoji": "🥱"
+    },
+    {
+     "file": "1f975.tgs",
+     "emoji": "🥵"
+    },
+    {
+     "file": "1f976.tgs",
+     "emoji": "🥶"
+    },
+    {
+     "file": "1f911.tgs",
+     "emoji": "🤑"
+    },
+    {
+     "file": "1f913.tgs",
+     "emoji": "🤓"
+    },
+    {
+     "file": "1f9d0.tgs",
+     "emoji": "🧐"
+    },
+    {
+     "file": "1f62e.tgs",
+     "emoji": "😮"
+    },
+    {
+     "file": "1f63b.tgs",
+     "emoji": "😻"
+    },
+    {
+     "file": "1f62e_200d_1f4a8.tgs",
+     "emoji": "😮‍💨"
+    }
+   ]
+  },
+  {
+   "id": "sinhron.noto_gestures",
+   "dir": "noto_gestures",
+   "title": {
+    "ru": "Жесты и праздник",
+    "en": "Hands & party"
+   },
+   "author": "Google — Noto Emoji Animation",
+   "license": "CC BY 4.0",
+   "license_url": "https://creativecommons.org/licenses/by/4.0/",
+   "stickers": [
+    {
+     "file": "1f44d.tgs",
+     "emoji": "👍"
+    },
+    {
+     "file": "1f44e.tgs",
+     "emoji": "👎"
+    },
+    {
+     "file": "1f44f.tgs",
+     "emoji": "👏"
+    },
+    {
+     "file": "1f64f.tgs",
+     "emoji": "🙏"
+    },
+    {
+     "file": "1f44b.tgs",
+     "emoji": "👋"
+    },
+    {
+     "file": "270c_fe0f.tgs",
+     "emoji": "✌️"
+    },
+    {
+     "file": "1f91d.tgs",
+     "emoji": "🤝"
+    },
+    {
+     "file": "1f4aa.tgs",
+     "emoji": "💪"
+    },
+    {
+     "file": "1f918.tgs",
+     "emoji": "🤘"
+    },
+    {
+     "file": "1f64c.tgs",
+     "emoji": "🙌"
+    },
+    {
+     "file": "1f90c.tgs",
+     "emoji": "🤌"
+    },
+    {
+     "file": "1f44c.tgs",
+     "emoji": "👌"
+    },
+    {
+     "file": "1f483.tgs",
+     "emoji": "💃"
+    },
+    {
+     "file": "1f525.tgs",
+     "emoji": "🔥"
+    },
+    {
+     "file": "2764_fe0f.tgs",
+     "emoji": "❤️"
+    },
+    {
+     "file": "1f494.tgs",
+     "emoji": "💔"
+    },
+    {
+     "file": "1f496.tgs",
+     "emoji": "💖"
+    },
+    {
+     "file": "1f4af.tgs",
+     "emoji": "💯"
+    },
+    {
+     "file": "1f389.tgs",
+     "emoji": "🎉"
+    },
+    {
+     "file": "2728.tgs",
+     "emoji": "✨"
+    },
+    {
+     "file": "1f680.tgs",
+     "emoji": "🚀"
+    },
+    {
+     "file": "1f381.tgs",
+     "emoji": "🎁"
+    },
+    {
+     "file": "1f382.tgs",
+     "emoji": "🎂"
+    },
+    {
+     "file": "1f440.tgs",
+     "emoji": "👀"
+    },
+    {
+     "file": "1f648.tgs",
+     "emoji": "🙈"
+    },
+    {
+     "file": "1f4a9.tgs",
+     "emoji": "💩"
+    },
+    {
+     "file": "1f308.tgs",
+     "emoji": "🌈"
+    }
+   ]
+  },
+  {
+   "id": "sinhron.fluent_3d",
+   "dir": "fluent_3d",
+   "title": {
+    "ru": "Зверята и вещи",
+    "en": "Critters & things"
+   },
+   "author": "Microsoft — Fluent Emoji",
+   "license": "MIT",
+   "license_url": "https://github.com/microsoft/fluentui-emoji/blob/main/LICENSE",
+   "stickers": [
+    {
+     "file": "dog_face.webp",
+     "emoji": "🐶"
+    },
+    {
+     "file": "cat_face.webp",
+     "emoji": "🐱"
+    },
+    {
+     "file": "fox.webp",
+     "emoji": "🦊"
+    },
+    {
+     "file": "panda.webp",
+     "emoji": "🐼"
+    },
+    {
+     "file": "unicorn.webp",
+     "emoji": "🦄"
+    },
+    {
+     "file": "frog.webp",
+     "emoji": "🐸"
+    },
+    {
+     "file": "penguin.webp",
+     "emoji": "🐧"
+    },
+    {
+     "file": "owl.webp",
+     "emoji": "🦉"
+    },
+    {
+     "file": "octopus.webp",
+     "emoji": "🐙"
+    },
+    {
+     "file": "koala.webp",
+     "emoji": "🐨"
+    },
+    {
+     "file": "tiger_face.webp",
+     "emoji": "🐯"
+    },
+    {
+     "file": "hamster.webp",
+     "emoji": "🐹"
+    },
+    {
+     "file": "rabbit_face.webp",
+     "emoji": "🐰"
+    },
+    {
+     "file": "bear.webp",
+     "emoji": "🐻"
+    },
+    {
+     "file": "monkey_face.webp",
+     "emoji": "🐵"
+    },
+    {
+     "file": "pizza.webp",
+     "emoji": "🍕"
+    },
+    {
+     "file": "hot_beverage.webp",
+     "emoji": "☕"
+    },
+    {
+     "file": "birthday_cake.webp",
+     "emoji": "🎂"
+    },
+    {
+     "file": "avocado.webp",
+     "emoji": "🥑"
+    },
+    {
+     "file": "watermelon.webp",
+     "emoji": "🍉"
+    },
+    {
+     "file": "doughnut.webp",
+     "emoji": "🍩"
+    },
+    {
+     "file": "rocket.webp",
+     "emoji": "🚀"
+    },
+    {
+     "file": "crown.webp",
+     "emoji": "👑"
+    },
+    {
+     "file": "gem_stone.webp",
+     "emoji": "💎"
+    },
+    {
+     "file": "balloon.webp",
+     "emoji": "🎈"
+    },
+    {
+     "file": "trophy.webp",
+     "emoji": "🏆"
+    },
+    {
+     "file": "light_bulb.webp",
+     "emoji": "💡"
+    },
+    {
+     "file": "party_popper.webp",
+     "emoji": "🎉"
+    },
+    {
+     "file": "alien.webp",
+     "emoji": "👽"
+    },
+    {
+     "file": "robot.webp",
+     "emoji": "🤖"
+    },
+    {
+     "file": "sun_with_face.webp",
+     "emoji": "🌞"
+    },
+    {
+     "file": "rainbow.webp",
+     "emoji": "🌈"
+    },
+    {
+     "file": "four_leaf_clover.webp",
+     "emoji": "🍀"
+    },
+    {
+     "file": "cactus.webp",
+     "emoji": "🌵"
+    },
+    {
+     "file": "snowman.webp",
+     "emoji": "☃️"
+    },
+    {
+     "file": "christmas_tree.webp",
+     "emoji": "🎄"
+    }
+   ]
+  }
+ ]
+}

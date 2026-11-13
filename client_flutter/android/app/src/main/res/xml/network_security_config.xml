@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Voice, video, round videos, video stickers, ringback and UI sounds play
+     from memory through just_audio / the RAM media server at
+     http://127.0.0.1:<port>. Android 9+ blocks plain HTTP unless allowed:
+     only the phone's own loopback is opened, everything else stays HTTPS. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

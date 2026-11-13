@@ -1,0 +1,398 @@
+// Sinhron WebSocket wire protocol — spec §7.3.
+//
+// Binary frames over `wss://<host>/v1/sync`, negotiated via
+// `Sec-WebSocket-Protocol: sinhron.v1`. Every frame is a `WsFrame`
+// envelope carrying one of the variants below.
+//
+// Frame catalog (spec §7.3 line 363):
+//   Hello       — server → client, opens the session with challenge nonce
+//   Auth        — client → server, signed challenge → identity proof
+//   Heartbeat   — bidirectional, 30s tick (75s timeout)
+//   Resume      — client → server on reconnect (last_acked_seq per stream)
+//   Ack         — server → client, confirming an inbound frame was applied
+//   Push        — server → client, new MLS-frame delivery
+//   Submit      — client → server, outgoing MLS-frame
+//   Presence    — bidirectional, online/offline ping
+//   Typing      — bidirectional, transient typing-indicator
+//   Receipt     — bidirectional, delivery/read receipts
+//
+// Stages: A5 wires Hello + Auth + Heartbeat + Ack end-to-end.
+// Submit / Push routing lands in A6 (fanout). Resume in A7.
+// Presence / Typing / Receipt deferred to Phase 3 polish.
+
+syntax = "proto3";
+package sinhron.v1;
+
+// ── Envelope ─────────────────────────────────────────────────────────
+// Every wire frame is a WsFrame. The `oneof body` keeps the parsing
+// stateless: server matches on variant and routes to the right handler.
+
+message WsFrame {
+  // Optional per-frame correlation id for ack/resume bookkeeping. Empty
+  // for fire-and-forget frames (Hello, Heartbeat, Presence, Typing).
+  string frame_id = 1;
+
+  oneof body {
+    Hello     hello     = 10;
+    Auth      auth      = 11;
+    Heartbeat heartbeat = 12;
+    Resume    resume    = 13;
+    Ack       ack       = 14;
+    Push      push      = 15;
+    Submit    submit    = 16;
+    Presence  presence  = 17;
+    Typing    typing    = 18;
+    Receipt   receipt   = 19;
+    // MLS Welcome — sent client→server when inviting a new member; the
+    // server forwards it to the recipient's connected sessions. WU C4.
+    Welcome   welcome   = 20;
+
+    // Calls signaling — WU CB1. 1:1 audio + video via LiveKit SFU
+    // (spec §10). The server is media-blind; it only signals "who's
+    // calling whom" + forwards the LiveKit room name.
+    CallInvite call_invite = 21;
+    CallAccept call_accept = 22;
+    CallEnd    call_end    = 23;
+    CallRing   call_ring   = 24;
+
+    // ADR-023 — sealed sender (spec §6.5): one HPKE envelope per
+    // recipient delivery key; the server never sees the group.
+    SealedSubmit sealed_submit = 25;
+  }
+}
+
+// ── Hello (server → client) ──────────────────────────────────────────
+// Sent immediately after WS upgrade. The challenge_nonce is 32 random
+// bytes; the client must sign `("sinhron-ws-auth-v1:" || nonce)` with
+// their identity privkey and respond with Auth. Server stores the nonce
+// in connection state for exactly one Auth attempt.
+
+message Hello {
+  string server_version  = 1;
+  // Unix seconds, UTC. Lets the client detect clock skew vs the server.
+  int64  server_time     = 2;
+  // 32 random bytes — the auth challenge.
+  bytes  challenge_nonce = 3;
+}
+
+// ── Auth (client → server) ───────────────────────────────────────────
+
+message Auth {
+  // 32-byte Ed25519 identity pubkey. Must match a registered users row.
+  bytes identity_pubkey = 1;
+  // 64-byte Ed25519 signature over the canonical message:
+  //   "sinhron-ws-auth-v1:" || hello.challenge_nonce
+  bytes signature = 2;
+}
+
+// ── Heartbeat (bidirectional) ────────────────────────────────────────
+// Client sends every 20s. Server replies with its own Heartbeat. Connection
+// closed if no frame arrives within 45s (SINHRON_WS_IDLE_TIMEOUT_SECS).
+// Battery 2026-10-18 — an Android phone in the background ("always
+// connected", ADR-040) asks for a longer gap with `next_within_secs`; the
+// server stretches that session's idle watchdog and says in its reply how
+// much it allowed (an older server replies 0 → the client stays at 20s).
+
+message Heartbeat {
+  // Client-local monotonic counter — helps debug missed-heartbeat issues.
+  uint64 sequence = 1;
+  // Client → server: my next heartbeat comes within this many seconds
+  // (0 = the default 20s). Server → client: the gap it accepted (capped).
+  uint32 next_within_secs = 2;
+}
+
+// ── Ack (server → client) ────────────────────────────────────────────
+// Confirms a client frame was applied. Carries the frame_id of the
+// originating frame so the client can clear it from its retry queue.
+
+message Ack {
+  string acked_frame_id = 1;
+  // 0 = ok; non-zero = application-level error code (defined per
+  // endpoint). The optional `error_message` is human-readable for logs.
+  int32  error_code     = 2;
+  string error_message  = 3;
+}
+
+// ── Resume (client → server) ─────────────────────────────────────────
+// On reconnect, the client tells the server the last sequence number it
+// successfully ACKed per server-side stream. Server replays anything
+// newer, or responds with ResumeImpossible (in Ack body) and the client
+// falls back to a full re-sync. Implementation lands in WU A7.
+
+message Resume {
+  message StreamCursor {
+    string stream_id = 1;       // server-defined stream identifier
+    uint64 last_acked_seq = 2;  // last sequence number client received + ACKed
+  }
+  repeated StreamCursor cursors = 1;
+}
+
+// ── Submit (client → server) ─────────────────────────────────────────
+// Outgoing MLS-encrypted message. Server stores ciphertext + fans out
+// to recipients per WU A6.
+
+message Submit {
+  bytes  group_id   = 1;  // opaque MLS group id (mls_groups.group_id)
+  bytes  ciphertext = 2;  // MLS PrivateMessage TLS-encoded bytes
+  // UUIDv7 message_id generated client-side per spec §7.3 line 365.
+  // Used for de-dup across at-least-once retries.
+  string message_id = 3;
+
+  // T1.4 — sealed-sender flag, spec §6.5. When `true`, the server
+  // MUST treat the sender's identity as anonymous:
+  //   • messages.sender_user_pk + sender_device_pk written as NULL
+  //   • Push frames to recipients carry no sender hint
+  //   • Logs replace sender_user_pk with "anonymous"
+  // Full §6.5 also wraps the MLS ciphertext in an HPKE envelope keyed
+  // by recipient delivery_key, but that's a larger WU. The flag here
+  // is the FOUNDATION — once HPKE wrapping lands, the same flag still
+  // governs server-side anonymization.
+  bool   sealed_sender = 4;
+
+  // Tech-debt 2.3 / ADR-022, ADR-092 — commit ordering. A frame carrying
+  // an MLS Commit sets `is_commit` and the epoch it was made in (the one in
+  // the Commit's own header; a Commit without the flag, or the flag on
+  // anything else — 400). A Commit that loses (fields 9–10) gets Ack 409 —
+  // not stored, not fanned out. The loser discards its pending Commit,
+  // applies the winner's, and retries.
+  bool   is_commit     = 5;
+  uint64 commit_epoch  = 6;
+
+  // Overnight item 8 — a real message: offline recipients get a push
+  // (see SealedDelivery.urgent).
+  bool   urgent        = 7;
+
+  // ADR-087 (amended) — the sender's access keys to the group's members
+  // (the keys they gave the sender, any order; as CallInvite.access_keys).
+  // Someone who hands out per-contact keys is pushed as usual when one of
+  // them is theirs and not revoked; only a revoked one (blocked) — no push;
+  // none (a stranger, a key not yet received) — a content-free request
+  // push. An older server ignores the field.
+  repeated bytes access_keys = 8;
+
+  // ADR-092 — with `is_commit`: the server can't read a Commit, so a
+  // member's garbage one must not freeze the chat. `parent_commit_id` is
+  // the Commit that brought this device to `commit_epoch` (its message_id;
+  // empty when it came by a Welcome or a card), `refused_commit_ids` the
+  // Commits for that epoch it has seen since and did not take. The server
+  // takes this Commit only if every Commit it holds for that epoch after
+  // the parent is among them (and this device has none there yet);
+  // otherwise 409, as when another member's Commit came first.
+  repeated string refused_commit_ids = 9;
+  string parent_commit_id = 10;
+}
+
+// ── Push (server → client) ───────────────────────────────────────────
+
+message Push {
+  bytes  group_id       = 1;
+  bytes  ciphertext     = 2;
+  string message_id     = 3;
+  int64  delivered_at   = 4;  // unix seconds
+  uint64 sequence       = 5;  // per-recipient monotonic — Resume cursor
+  // ADR-023 — set for a sealed delivery: `ciphertext` is the HPKE
+  // envelope for this delivery key and `group_id` is empty (the
+  // recipient learns the group only after opening it).
+  bytes  sealed_key_id  = 6;
+}
+
+// ── SealedSubmit (client → server) — ADR-023 ─────────────────────────
+// The sender wraps {group_id, mls_message} once per recipient device
+// under that device's weekly delivery key (GET /v1/sealed-keys). The
+// server routes each envelope by key_id; it learns neither the group
+// nor the content. No group-membership check is possible — rate limits
+// and the recipient's MLS processing are the guards.
+message SealedDelivery {
+  bytes key_id   = 1;  // sha256(delivery public key)[..16]
+  bytes envelope = 2;
+  // Tech-debt 2.5 — the chat's disappearing timer, seconds (0 = keep):
+  // the server deletes this delivery after it. Reveals the timer value,
+  // not the chat.
+  uint32 ttl_secs = 3;
+  // Overnight item 8 — a real message (not a receipt, "typing" or
+  // presence): wakes an offline phone with a push and counts in its badge.
+  bool urgent = 4;
+  // ADR-056 — an urgent delivery's notification preview, HPKE-sealed by
+  // the sender to the same delivery key (sender, chat, text — only the
+  // recipient's phone opens it). The server copies it into the push
+  // unread; capped at 1024 bytes, otherwise dropped.
+  bytes push_preview = 5;
+  // Tech-debt 2.53 — drop this delivery if the recipient hasn't got it
+  // within this many seconds of the server storing it (0 = keep until
+  // delivered). Set for "online" heartbeats and "typing": stale by then,
+  // so an offline contact isn't sent hundreds of them on next login. An
+  // older server ignores the field and keeps them, as before.
+  uint32 drop_after_secs = 6;
+}
+
+message SealedSubmit {
+  string message_id = 1;            // UUIDv7, de-dup per recipient
+  repeated SealedDelivery deliveries = 2;
+  // ADR-087 (amended) — as Submit.access_keys: the sender's access keys to
+  // the recipients, so the signed-in fallback still pushes contacts.
+  repeated bytes access_keys = 3;
+}
+
+// ── Presence (bidirectional, transient) ──────────────────────────────
+
+message Presence {
+  enum State {
+    UNKNOWN = 0;
+    ONLINE  = 1;
+    OFFLINE = 2;
+    IDLE    = 3;
+  }
+  bytes peer_device_pk = 1;
+  State state          = 2;
+  // Optional — last_seen unix seconds. 0 for "now".
+  int64 last_seen      = 3;
+}
+
+// ── Typing (bidirectional, transient) ────────────────────────────────
+
+message Typing {
+  bytes group_id   = 1;
+  bytes by_device_pk = 2;
+  bool  is_typing  = 3;
+}
+
+// ── Receipt (bidirectional) ──────────────────────────────────────────
+
+message Receipt {
+  enum Kind {
+    UNKNOWN   = 0;
+    DELIVERED = 1;  // server acknowledges fan-out
+    READ      = 2;  // recipient device reports message was read
+  }
+  bytes  group_id   = 1;
+  string message_id = 2;
+  Kind   kind       = 3;
+  // Unix seconds.
+  int64  ts         = 4;
+}
+
+// ── Welcome (bidirectional · WU C4) ──────────────────────────────────
+// Sent client→server when inviting a new member to a group. The server
+// looks up `recipient_identity_pubkey` → recipient user → connected
+// sessions, and forwards the Welcome frame verbatim. If the recipient
+// is offline the v1 server drops the Welcome and the sender must retry
+// when the recipient comes online (Settings → "Re-invite"). A future
+// WU adds `pending_welcomes` persistence so offline deliveries replay
+// on next connect.
+
+message Welcome {
+  // 32-byte Ed25519 identity pubkey of the new member.
+  bytes  recipient_identity_pubkey = 1;
+  // Opaque MLS group_id this welcome admits the recipient into.
+  bytes  group_id                  = 2;
+  // TLS-encoded MLS Welcome bytes — the exact output of
+  // `MlsGroup::add_members(...)`.welcome_bytes.
+  bytes  welcome_bytes             = 3;
+  // Unix seconds at the inviter's clock — diagnostic only.
+  int64  sent_at                   = 4;
+  // ADR-025 — the recipient's devices this Welcome is for (their device
+  // keys). Empty: any of the recipient's devices (older clients). When set,
+  // only those devices get it, and a queued copy is dropped once that
+  // device has it.
+  repeated bytes recipient_device_pks = 5;
+}
+
+// ── Call signaling (Phase 3 — WU CB1) ────────────────────────────────
+//
+// All call lifecycle goes through these four messages. The server is
+// strictly a signaling relay — it does NOT see media (LiveKit handles
+// SRTP transport, SFrame keys live client-side per spec §10).
+//
+// Lifecycle:
+//   1. Caller → server:   CallInvite { call_id, group_id, kind }
+//   2. Server → callee:   CallInvite (forwarded)
+//   3. Server → caller:   CallRing  (ack: "we delivered it")
+//   4. Callee → server:   CallAccept { call_id, accept }
+//   5. Server → caller:   CallAccept (forwarded)
+//   6. Either side → server: CallEnd { call_id, reason }
+//   7. Server → opposite party: CallEnd (forwarded)
+//
+// All four messages are idempotent on the server — duplicate frames are
+// detected via `call_id` and dropped.
+
+message CallInvite {
+  // UUIDv7 generated by caller. Echoed back in CallAccept / CallEnd /
+  // CallRing so all four frames share the same identifier.
+  string call_id = 1;
+
+  // Opaque MLS group_id — must be a group both caller AND callee are
+  // members of. For 1:1 calls this is the existing 1:1 chat's group.
+  // Server verifies caller membership before forwarding.
+  bytes  group_id = 2;
+
+  enum CallKind {
+    KIND_UNKNOWN = 0;
+    AUDIO        = 1;
+    VIDEO        = 2;  // includes audio — video tracks always travel with audio
+  }
+  CallKind kind = 3;
+
+  // LiveKit room name minted server-side as "sinhron-call-<call_id>".
+  // Both sides connect to this room with JWTs obtained via
+  // POST /v1/call/token. Forwarded verbatim from caller's CallInvite
+  // so server only needs to validate, not generate.
+  string livekit_room = 4;
+
+  // Ringing TTL — server-side watchdog auto-terminates with reason
+  // "no_answer" if `Accept` doesn't arrive within this window.
+  // Default 30 sec; capped at 60 sec server-side.
+  int64  ttl_secs = 5;
+
+  // Tech-debt 2.27 — who is calling: the caller's identity key, set by the
+  // server from the authenticated connection (whatever a caller puts here
+  // is overwritten). Group members see who calls anyway; this lets a phone
+  // ignore a group call from someone it blocked. Empty from older servers.
+  bytes  caller_identity = 6;
+
+  // ADR-071 — the caller's access keys to the people called (each person
+  // gave the caller their own, inside MLS). For someone who hands out
+  // per-contact keys: a key they gave → it rings (app + push); only a key
+  // they revoked (blocked the caller) → the server swallows the invite for
+  // them; no key → their open app only, no push. Not forwarded.
+  repeated bytes access_keys = 7;
+
+  // ADR-071 (amended) — set by apps that know access keys (0.7.0+), keys or
+  // not. An invite without it comes from an older app: during the
+  // transition it still wakes the callee's phone (the phone screens
+  // blocked callers itself); with it and no key, the open app only.
+  bool sends_access_keys = 8;
+
+  // ADR-090 (calls:5) — the caller's own signature on this invite:
+  // u64 BE ts | Ed25519 signature | credential (identity key or device
+  // certificate), over "sinhron-call-invite-v1:" | ts | kind | u8 len call_id
+  // | call_id | group_id (sinhron_sync::call_invite). The server only passes
+  // it on (to the invite and, sealed to the phone's key, the VoIP push); a
+  // phone names the call only when it checks out. Required (104..204 bytes).
+  bytes caller_proof = 9;
+}
+
+message CallAccept {
+  string call_id = 1;
+  // true  = callee picked up, both sides should connect to LiveKit room
+  // false = callee declined (rejected the call before answering)
+  bool   accept = 2;
+}
+
+message CallEnd {
+  string call_id = 1;
+  // Free-text reason for diagnostics. Common values: "hangup",
+  // "no_answer", "network_lost", "busy", "rejected", "error".
+  string reason = 2;
+}
+
+message CallRing {
+  // Server → caller signal that the invite was delivered to the callee.
+  // Equivalent to "ringing" sound on traditional telephony. Sent as
+  // soon as the server fans out the CallInvite — does NOT confirm
+  // the callee has acknowledged anything beyond TCP delivery.
+  string call_id = 1;
+  // Status 213 — true: the invite reached an open connection of the callee
+  // (now, or when their phone woke up and connected): the caller's screen
+  // says "Ringing". False / absent (an older server): "Calling".
+  bool delivered = 2;
+}

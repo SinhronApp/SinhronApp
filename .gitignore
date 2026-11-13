@@ -1,0 +1,23 @@
+.DS_Store
+target/
+client_flutter/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+client_flutter/ios/Pods/
+client_flutter/macos/Pods/
+.fvm/flutter_sdk
+.env
+.env.*
+!.env.example
+sinhron (2)/
+.idea/
+
+# Downloads served by Caddy at /download/ (the APK) — not in git
+server/download/*
+!server/download/README.txt
+!server/download/privacy.html
+server/.download-partial/
+
+# Golden test failure reports (flutter_test writes them next to the test)
+client_flutter/test/**/failures/

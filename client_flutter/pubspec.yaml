@@ -1,0 +1,129 @@
+name: sinhron
+description: "Sinhron — premium E2EE messenger (UI prototype, Phase: pre-Core)"
+publish_to: 'none'
+version: 0.12.0+1
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Russian + English (backlog §7 item 53): gen_l10n from lib/l10n/*.arb.
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_riverpod: 3.3.1
+  flutter_rust_bridge: 2.11.1
+  path_provider: 2.1.5
+  sinhron_core:
+    path: rust_builder
+  # CD1 — calls (Phase 3, spec §10). `livekit_client` handles WebRTC
+  # transport; SFrame keys we feed via custom KeyProvider built on
+  # the FFI surface in `sinhron_core/api/simple.rs` (CC6).
+  #
+  # 2026-05-23 bump 2.5.0 → 2.7.0: livekit_client 2.5.0 had open caret
+  # `flutter_webrtc: ^1.0.0` which let the resolver pick 1.4.1
+  # (WebRTC-SDK 144.x), conflicting with what the older flutter_webrtc
+  # was tested against (WebRTC-SDK 137.x). livekit_client 2.7.0 has an
+  # EXACT pin `flutter_webrtc: 1.4.0` — single WebRTC-SDK version
+  # everywhere, no CocoaPods conflict.
+  livekit_client: 2.7.0
+  # Mirror livekit_client 2.7.0's exact-pin to keep `pub get` deterministic
+  # and `depend_on_referenced_packages` lint clean (we use flutter_webrtc
+  # types transitively where livekit re-exports them).
+  flutter_webrtc: 1.4.0
+  # CD2 — Camera + microphone permissions. iOS requires Info.plist
+  # entries (added below in ios/Runner/Info.plist) AND a runtime
+  # request flow which this plugin handles cross-platform.
+  permission_handler: 11.4.0
+  # CD3 — call_id generation in activeCallProvider. Used elsewhere too
+  # eventually (message_id is already UUIDv7 server-side). Transitively
+  # pulled by livekit_client; declared explicitly so `depend_on_referenced_packages`
+  # lint stays clean.
+  uuid: 4.5.3
+  # ADR-041 — RAM / low-RAM flag / Android version pick the lighter call
+  # preset on weak phones. Already in the lock via livekit_client; same
+  # exact version, declared for `depend_on_referenced_packages`.
+  device_info_plus: 12.4.0
+
+  # Media in chats (ADR-017): photo picking. Bytes go straight to Rust,
+  # which re-encodes (strips EXIF/GPS) and encrypts before any upload.
+  # Pinned to 1.2.3 (1.2.4 was < 2 weeks old when added).
+  image_picker: 1.2.3
+  # Documents (ADR-017 stage 3). Picked bytes go to Rust for encryption.
+  # 11.x: file_picker 13 / share_plus ≥13 need win32 6, livekit_client
+  # 2.7.0 pins win32 5 (via device_info_plus 12).
+  file_picker: 11.0.3
+  # Opening/sharing a received document hands the OS a short-lived
+  # plaintext temp file (deleted afterwards) — see ADR-017.
+  share_plus: 12.0.2
+  # Explicit user action "Save to Photos" — the only path where a
+  # decrypted photo is written outside the app.
+  gal: 2.3.3
+  # Voice messages (stage 4). record 7.x needs Flutter ≥3.44; we pin
+  # Flutter 3.41.5, so the last 6.x.
+  record: 6.2.1
+  # Playback straight from decrypted bytes in RAM (StreamAudioSource).
+  just_audio: 0.10.6
+  audio_session: 0.2.4
+  # Links / phone numbers tapped in messages (after a confirm sheet).
+  # Pinned; 6.3.1 is long settled.
+  url_launcher: 6.3.1
+  # Video messages (backlog §3 item 31). Played from RAM through a
+  # loopback-only server (no plaintext file on disk), like voice.
+  video_player: 2.9.2
+  # App lock (backlog §6 item 47): Face ID / Touch ID / device passcode.
+  local_auth: 2.3.0
+  qr: 3.0.2
+  video_compress: 3.1.4
+  screen_protector: 1.5.3
+  # Round video messages (ADR-048): front-camera preview + recording.
+  camera: 0.12.0+2
+  # Stickers (ADR-049): Lottie / Telegram .tgs animations (MIT, xvrh —
+  # pure Dart renderer, no platform code) and .zip pack imports (MIT).
+  # 3.6.1 is the newest lottie for Flutter 3.41 (3.4–3.5 need 3.44).
+  lottie: 3.6.1
+  archive: 4.2.0
+  # ADR-058 — SHA-256 of a downloaded Android update before it's installed
+  # (already in the lock via other packages; same version).
+  crypto: 3.0.7
+  cupertino_icons: ^1.0.9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+  integration_test:
+    sdk: flutter
+  # Gallery video tests drive a fake player platform (already a
+  # transitive dependency of video_player; same version).
+  video_player_platform_interface: 6.9.0
+
+flutter:
+  uses-material-design: false
+  generate: true
+  # ADR-049 — the built-in sticker packs (Noto Emoji Animation, CC BY 4.0;
+  # Fluent Emoji 3D, MIT). Manifest: assets/stickers/packs.json.
+  assets:
+    - assets/stickers/
+    - assets/stickers/noto_faces/
+    - assets/stickers/noto_gestures/
+    - assets/stickers/fluent_3d/
+  fonts:
+    - family: Geist
+      fonts:
+        - asset: assets/fonts/Geist-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Geist-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Geist-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Geist-Bold.ttf
+          weight: 700
+    - family: GeistMono
+      fonts:
+        - asset: assets/fonts/GeistMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/GeistMono-Medium.ttf
+          weight: 500

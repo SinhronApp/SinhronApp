@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Sinhron — Mobile Chat List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="app/tokens.css"/>
+
+  <style>
+    html, body { margin: 0; padding: 0; background: #f0eee9; }
+    /* Inside iOS frame the status bar is absolutely positioned at top,
+       reserve room with a top pad so our custom header doesn't slip under it. */
+    .sn-ios-safe { padding-top: 54px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+    .sn-and-safe { height: 100%; display: flex; flex-direction: column; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="starters/design-canvas.jsx"></script>
+  <script type="text/babel" src="starters/ios-frame.jsx"></script>
+  <script type="text/babel" src="starters/android-frame.jsx"></script>
+  <script type="text/babel" src="app/chat-list.jsx"></script>
+  <script type="text/babel" src="app/chat-view.jsx"></script>
+  <script type="text/babel" src="app/contact-info.jsx"></script>
+  <script type="text/babel" src="app/settings.jsx"></script>
+  <script type="text/babel" src="app/entry.jsx"></script>
+  <script type="text/babel" src="app/compose.jsx"></script>
+  <script type="text/babel" src="app/groups.jsx"></script>
+  <script type="text/babel" src="app/calls.jsx"></script>
+  <script type="text/babel" src="app/verify.jsx"></script>
+  <script type="text/babel" src="app/settings-detail.jsx"></script>
+  <script type="text/babel" src="app/message-actions.jsx"></script>
+  <script type="text/babel" src="app/media.jsx"></script>
+  <script type="text/babel" src="app/search.jsx"></script>
+  <script type="text/babel" src="app/states.jsx"></script>
+  <script type="text/babel" src="app/composer-pack.jsx"></script>
+  <script type="text/babel" src="app/chat-completion.jsx"></script>
+  <script type="text/babel" src="app/trust-polish.jsx"></script>
+  <script type="text/babel" src="app/group-calls.jsx"></script>
+  <script type="text/babel" src="app/loading-skeletons.jsx"></script>
+  <script type="text/babel" src="app/schedule-send.jsx"></script>
+  <script type="text/babel" src="app/lockscreen.jsx"></script>
+  <script type="text/babel" src="app/spec-icons.jsx"></script>
+  <script type="text/babel" src="app/spec-buttons.jsx"></script>
+  <script type="text/babel" src="app/server-detail.jsx"></script>
+  <script type="text/babel" src="app/active-call-bar.jsx"></script>
+  <script type="text/babel" src="app/chat-events.jsx"></script>
+  <script type="text/babel" src="app/message-request.jsx"></script>
+  <script type="text/babel" src="app/disappearing-active.jsx"></script>
+  <script type="text/babel" src="app/storage-data.jsx"></script>
+  <script type="text/babel" src="app/account-delete.jsx"></script>
+  <script type="text/babel" src="app/no-internet.jsx"></script>
+  <script type="text/babel" src="app/document-bubble.jsx"></script>
+  <script type="text/babel" src="app/perm-denied.jsx"></script>
+  <script type="text/babel" src="app/call-participants.jsx"></script>
+  <script type="text/babel" src="app/invite-link.jsx"></script>
+  <script type="text/babel" src="app/onboarding-splash.jsx"></script>
+  <script type="text/babel" src="app/devices-manage.jsx"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // iOS frame — render the SinhronChatList without the built-in IOSNavBar/title.
+    // We add our own header inside so the design system is custom (not iOS defaults).
+    function IOSChats({ dark }) {
+      return (
+        <IOSDevice width={392} height={848} dark={dark}>
+          <div className="sn-ios-safe">
+            <SinhronChatList dark={dark} platform="ios"/>
+          </div>
+        </IOSDevice>
+      );
+    }
+
+    function AndroidChats({ dark }) {
+      return (
+        <AndroidDevice width={400} height={868} dark={dark}>
+          <div className="sn-and-safe">
+            <SinhronChatList dark={dark} platform="android"/>
+          </div>
+        </AndroidDevice>
+      );
+    }
+
+    function IOSChat({ dark }) {
+      return (
+        <IOSDevice width={392} height={848} dark={dark}>
+          <div className="sn-ios-safe">
+            <SinhronChatView dark={dark} platform="ios"/>
+          </div>
+        </IOSDevice>
+      );
+    }
+    function AndroidChat({ dark }) {
+      return (
+        <AndroidDevice width={400} height={868} dark={dark}>
+          <div className="sn-and-safe">
+            <SinhronChatView dark={dark} platform="android"/>
+          </div>
+        </AndroidDevice>
+      );
+    }
+
+    function IOSContact({ dark }) {
+      return (
+        <IOSDevice width={392} height={848} dark={dark}>
+          <div className="sn-ios-safe">
+            <SinhronContactInfo dark={dark} platform="ios"/>
+          </div>
+        </IOSDevice>
+      );
+    }
+    function AndroidContact({ dark }) {
+      return (
+        <AndroidDevice width={400} height={868} dark={dark}>
+          <div className="sn-and-safe">
+            <SinhronContactInfo dark={dark} platform="android"/>
+          </div>
+        </AndroidDevice>
+      );
+    }
+
+    function IOSSettings({ dark }) {
+      return (
+        <IOSDevice width={392} height={848} dark={dark}>
+          <div className="sn-ios-safe">
+            <SinhronSettings dark={dark} platform="ios"/>
+          </div>
+        </IOSDevice>
+      );
+    }
+    function AndroidSettings({ dark }) {
+      return (
+        <AndroidDevice width={400} height={868} dark={dark}>
+          <div className="sn-and-safe">
+            <SinhronSettings dark={dark} platform="android"/>
+          </div>
+        </AndroidDevice>
+      );
+    }
+
+    function App() {
+      // Plain factories (NOT components) — DCSection filters its children by
+      // type === DCArtboard, so a wrapper component gets dropped. Returning
+      // a DCArtboard element from a function called via {phone(...)} survives.
+      const phone = (label, Screen, dark = false) => (
+        <DCArtboard
+          key={label}
+          id={label.toLowerCase().replace(/[^a-z0-9]+/g, '-') + (dark ? '-dark' : '')}
+          label={label + (dark ? ' · Dark' : '')}
+          width={420} height={870}
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box', background: dark ? '#1a1a1a' : 'transparent' }}>
+            <IOSDevice width={392} height={848} dark={dark}>
+              <div className="sn-ios-safe"><Screen dark={dark} platform="ios"/></div>
+            </IOSDevice>
+          </div>
+        </DCArtboard>
+      );
+
+      return (
+        <DesignCanvas title="Sinhron · Mobile" subtitle="Main screen — chat list. Premium warm aesthetic, cold-blue accent, E2EE invisible by design.">
+          <DCSection id="entry" title="Onboarding & return" subtitle="Entry to the app. No passwords, email, phone, or social logins — identity is BIP-39 phrase + linked devices. Never any locks or 'encrypted' badges.">
+            {phone('01 · Welcome', SnWelcome)}
+            {phone('01 · Welcome', SnWelcome, true)}
+            {phone('A1 · Server / invite', SnServerInvite)}
+            {phone('A2 · Profile', SnProfile)}
+            {phone('A3 · Recovery phrase', SnRecoveryPhrase)}
+            {phone('B1 · Link device (show)', SnLinkDeviceShow)}
+            {phone('B2 · Link device (scan)', SnLinkDeviceScan)}
+            {phone('B3 · Setting up', SnSettingUp)}
+            {phone('C1 · Restore from phrase', SnRestore)}
+            {phone('C2 · Empty chat list', SnEmptyChats)}
+            {phone('R1 · Biometric prompt', SnBiometricPrompt)}
+            {phone('R2 · PIN fallback', SnPinFallback)}
+          </DCSection>
+
+          <DCSection id="compose" title="Compose & add contact" subtitle="Where new chats begin. Compose opens from the FAB; Add contact handles both username search and QR exchange.">
+            {phone('Compose · picker', SnCompose)}
+            {phone('Add contact · by username', props => <SnAddContact {...props} mode="username"/>)}
+            {phone('Add contact · by QR', props => <SnAddContact {...props} mode="qr"/>)}
+          </DCSection>
+
+          <DCSection id="groups" title="Groups" subtitle="From creation to live conversation. Group chat reuses the bubble system with a sender-coloured name above the first message of each speaker run.">
+            {phone('Group · pick members', SnNewGroupMembers)}
+            {phone('Group · name & avatar', SnNewGroupName)}
+            {phone('Group chat', SnGroupChat)}
+            {phone('Group chat', SnGroupChat, true)}
+            {phone('Group info', SnGroupInfo)}
+          </DCSection>
+
+          <DCSection id="calls" title="Calls" subtitle="Always dark, full-bleed. Backdrop tinted from the contact's avatar palette so calls feel personal without showing a literal photo.">
+            {phone('Incoming call', SnIncomingCall)}
+            {phone('In-call · audio', SnInCallAudio)}
+            {phone('In-call · video', SnInCallVideo)}
+            {phone('Call ended', SnCallEnded)}
+          </DCSection>
+
+          <DCSection id="group-calls" title="Group calls" subtitle="For teams running their own Sinhron server. 2×2 for small calls, 3×3 for all-hands with raised-hand routing, spotlight when one person is presenting. Everything renders dark — same backdrop language as 1:1.">
+            {phone('Group call · 2×2', SnGroupCall2x2)}
+            {phone('Group call · 3×3 + raised hands', SnGroupCall3x3)}
+            {phone('Group call · spotlight', SnGroupCallSpotlight)}
+          </DCSection>
+
+          <DCSection id="loading" title="Loading skeletons" subtitle="Cold start of the app and the first open of any chat. Shell chrome (header, tab bar, composer) loads instant; only the data inside shimmers.">
+            {phone('Skeleton · chat list', SnSkeletonChatList)}
+            {phone('Skeleton · chat list · dark', SnSkeletonChatList, true)}
+            {phone('Skeleton · message history', SnSkeletonChatView)}
+          </DCSection>
+
+          <DCSection id="schedule" title="Schedule send" subtitle="Long-press send opens the picker. Sent at the chosen time even if the app is closed. Scheduled bubble has a dashed outline + clock chip so it never looks 'sent yet'.">
+            {phone('Schedule picker', SnSchedulePicker)}
+            {phone('Chat with scheduled', SnChatScheduled)}
+            {phone('Scheduled drawer', SnScheduledDrawer)}
+          </DCSection>
+
+          <DCSection id="lockscreen" title="Notification preview · lock screen" subtitle="The single place E2EE becomes visible to a civilian. Same iOS lock screen, two preview modes — toggled in Settings → Notifications. Hide-previews is what privacy-aware users land on by default.">
+            {phone('Lock · show previews', SnLockContent)}
+            {phone('Lock · hide previews', SnLockPrivate)}
+          </DCSection>
+
+          <DCSection id="server" title="Self-hosted server" subtitle="The screen self-hosters live in. Shows which instance you're connected to, what policy it advertises (retention, registration, group size), and the TLS provenance. One read-only detail view plus the destructive “change server” confirmation.">
+            {phone('Server detail', SnServerDetail)}
+            {phone('Server detail · dark', SnServerDetail, true)}
+            {phone('Change server', SnServerChange)}
+          </DCSection>
+
+          <DCSection id="active-call" title="Active call · in-app" subtitle="When a call is going and the user navigates away from the call screen, a persistent pill sits under the status bar. Three variants — group, 1:1, and incoming banner.">
+            {phone('Active call · group', SnActiveCallBar)}
+            {phone('Active call · 1:1', SnActiveCallBarSolo)}
+            {phone('Incoming · in-app banner', SnIncomingCallBanner)}
+          </DCSection>
+
+          <DCSection id="chat-events" title="In-chat system messages" subtitle="MLS-driven events surfaced as centered pills inside the bubble stream: Add / Remove / Rename / Photo change / Disappearing on · Missed call · Safety number changed · Group keys refreshed (silent epoch update).">
+            {phone('Group chat · events', SnChatEvents)}
+            {phone('Group chat · events · dark', SnChatEvents, true)}
+          </DCSection>
+
+          <DCSection id="message-request" title="Message request" subtitle="Inbound from a non-contact. Composer is hidden until accepted; the first ciphertext is dimmed with tap-to-reveal so a malicious first message can't flash on swipe-preview. Block / Delete / Accept.">
+            {phone('Message request', SnMessageRequest)}
+            {phone('Message request · dark', SnMessageRequest, true)}
+          </DCSection>
+
+          <DCSection id="disappearing" title="Disappearing messages · active" subtitle="Same chat layout but each bubble shows a small countdown ring next to the timestamp, and the header subtitle pivots from ‘online’ to the disappear TTL. Composer placeholder says “Disappears in 1 day…” so it never feels like a regular chat.">
+            {phone('Disappearing · 1 day', SnDisappearingActive)}
+            {phone('Disappearing · 1 day · dark', SnDisappearingActive, true)}
+          </DCSection>
+
+          <DCSection id="storage" title="Storage & data" subtitle="Settings → Storage & data. Stacked-bar usage breakdown, per-type cleanup, auto-download rules per network, and the destructive 'Clear chat history' entry. Maps to §6.7 / §11.3.">
+            {phone('Storage & data', SnStorageData)}
+            {phone('Storage & data · dark', SnStorageData, true)}
+          </DCSection>
+
+          <DCSection id="destructive" title="Account & device deletion" subtitle="Two destructive flows: 'Remove this device' (soft — other devices keep working) and 'Delete account' (hard — identity key burned, MLS-Remove from every group, type-to-confirm gate).">
+            {phone('Remove this device', SnDeleteDevice)}
+            {phone('Delete account', SnDeleteAccount)}
+            {phone('Delete account · dark', SnDeleteAccount, true)}
+          </DCSection>
+
+          <DCSection id="offline" title="No internet / server unreachable" subtitle="Distinct from the slim Reconnecting toast. Cold-start with no connection — chat list visible but dimmed, authoritative banner up top, diagnostic card at the bottom. Two variants: no network vs server-only outage.">
+            {phone('You’re offline', SnNoInternet)}
+            {phone('Server unreachable', SnServerUnreachable)}
+            {phone('Server unreachable · dark', SnServerUnreachable, true)}
+          </DCSection>
+
+          <DCSection id="documents" title="Documents in chat" subtitle="Typed file bubble (PDF / ZIP / XLSX / DOCX / PNG). Four states: cloud (not yet downloaded), progress (download in flight with ring), open (cached and openable), and outgoing with caption. Plus a staged-attachment chip above the composer.">
+            {phone('Chat with documents', SnChatDocuments)}
+            {phone('Chat with documents · dark', SnChatDocuments, true)}
+          </DCSection>
+
+          <DCSection id="onboard-splash" title="First-launch splash" subtitle="Three swipe cards explaining the model before the user hits the Welcome screen. Shown once. Designed so a civilian reads the whole thing in 12 seconds: what Sinhron is, what it deliberately isn’t, and where the data lives.">
+            {phone('Splash 1 · private by default', SnOnboardSplash1)}
+            {phone('Splash 2 · no email/phone/pwd', SnOnboardSplash2)}
+            {phone('Splash 3 · self-hosted', SnOnboardSplash3)}
+          </DCSection>
+
+          <DCSection id="invite-link" title="Accept invite link" subtitle="Self-hoster invite-token flow from §6.1. Two paths: opening a deep link (server + inviter shown, TTL chip, accept-and-set-up); pasting a token manually (prefilled host, validation pill, QR alternative).">
+            {phone('Invite landing · deep link', SnInviteLandingNew)}
+            {phone('Invite landing · dark', SnInviteLandingNew, true)}
+            {phone('Paste invite token', SnInviteEnterToken)}
+          </DCSection>
+
+          <DCSection id="devices-manage" title="Linked devices · manage" subtitle="Deeper edit view. Each row shows fingerprint, OS, pair date, last-seen. Inline rename, individual revoke. ‘This device’ pinned at the top. Stale devices auto-expand with an amber chip and a Revoke action.">
+            {phone('Devices · manage', SnDevicesManage)}
+            {phone('Devices · manage · dark', SnDevicesManage, true)}
+          </DCSection>
+
+          <DCSection id="call-participants" title="Call participants · host actions" subtitle="Bottom-sheet over the 3×3 grid. Roster of 9 with mic / video / hand status dots. Tapping a row reveals host-only actions: Lower hand, Mute, Make co-host, Remove. Global controls in the footer: Mute everyone, Lock room.">
+            {phone('Call · participants', SnCallParticipants)}
+          </DCSection>
+
+          <DCSection id="perm-denied" title="Push permission denied" subtitle="Critical UX: user said ‘no’ to the system prompt and Sinhron now can’t deliver any push. Red banner with deep-link to system settings; local toggles dimmed but still visible; fallback section that documents what Sinhron does while denied (foreground WS, in-app banners).">
+            {phone('Notifications · denied', SnPermDeniedNotifications)}
+            {phone('Notifications · denied · dark', SnPermDeniedNotifications, true)}
+          </DCSection>
+
+          <DCSection id="verify" title="Safety number" subtitle="The one place E2EE becomes a visible, deliberate ritual. QR + 60-digit numeric of both parties' identity hashes. Surfaced only by users who dig into Contact info → Identity verified.">
+            {phone('Verify · not yet', SnSafetyNumber)}
+            {phone('Verify · verified', props => <SnSafetyNumber {...props} verified/>)}
+          </DCSection>
+
+          <DCSection id="settings-detail" title="Settings · sub-screens" subtitle="The pages behind each Settings index row. Linked devices, Recovery phrase reveal, App lock, Privacy, Profile edit, Disappearing-message picker, Notifications detail.">
+            {phone('Linked devices', SnLinkedDevices)}
+            {phone('Recovery · blurred', SnRecoveryReveal)}
+            {phone('Recovery · revealed', props => <SnRecoveryReveal {...props} revealed/>)}
+            {phone('App lock', SnAppLockSetup)}
+            {phone('Privacy & security', SnPrivacySecurity)}
+            {phone('Profile edit', SnProfileEdit)}
+            {phone('Disappearing messages', SnDisappearingPicker)}
+            {phone('Notifications', SnNotificationsDetail)}
+          </DCSection>
+
+          <DCSection id="msg-actions" title="Message actions" subtitle="What a user reaches on long-press of any bubble: react, reply, forward, copy, star, info, delete. Plus the receipt detail screen.">
+            {phone('Long-press menu', SnContextMenu)}
+            {phone('Long-press · dark', SnContextMenu, true)}
+            {phone('Forward sheet', SnForwardSheet)}
+            {phone('Message info', SnMessageInfo)}
+          </DCSection>
+
+          <DCSection id="media" title="Media" subtitle="Full-bleed viewer for photos & video, camera-before-send with editing tools, voice-recording-in-progress with live waveform and slide-to-cancel.">
+            {phone('Media viewer', SnMediaViewer)}
+            {phone('Camera before send', SnCameraSend)}
+            {phone('Voice recording', SnVoiceRecording)}
+          </DCSection>
+
+          <DCSection id="search" title="Search" subtitle="Global search across chats, messages and media — plus an in-chat strip with match-stepper.">
+            {phone('Global search', SnGlobalSearch)}
+            {phone('Search in chat', SnSearchInChat)}
+          </DCSection>
+
+          <DCSection id="states" title="States" subtitle="Edge-cases worth designing: archived, blocked, brand-new accounts, reconnecting toasts, and update prompts.">
+            {phone('Archived', SnArchived)}
+            {phone('Blocked', SnBlocked)}
+            {phone('Fresh inbox', SnFreshInbox)}
+            {phone('Reconnecting', SnReconnecting)}
+            {phone('Update available', SnUpdateAvailable)}
+          </DCSection>
+
+          <DCSection id="composer-pack" title="Composer pack" subtitle="The bits that make the chat feel like a real chat — reply-with-quote, @mention typeahead, emoji panel, and drafts in the chat list.">
+            {phone('Reply in composer', SnChatReply)}
+            {phone('Mention typeahead', SnChatMention)}
+            {phone('Sticker / emoji panel', SnChatStickers)}
+            {phone('Drafts in chat list', SnChatListDrafts)}
+          </DCSection>
+
+          <DCSection id="chat-completion" title="Chat completion" subtitle="Selection mode for multi-message actions, pinned messages (banner + gallery), and the four message error states.">
+            {phone('Selection mode', SnSelectionMode)}
+            {phone('Pinned banner', SnPinnedBanner)}
+            {phone('Pinned list', SnPinnedList)}
+            {phone('Message error states', SnErrorStates)}
+          </DCSection>
+
+          <DCSection id="trust-polish" title="Trust polish" subtitle="Sinhron-styled permission prompts (so first-run doesn't feel iOS-default) and the identity-changed warning — the rare but critical E2EE moment.">
+            {phone('Identity changed', SnIdentityChanged)}
+            {phone('Perm · Notifications', SnPermNotifications)}
+            {phone('Perm · Camera', SnPermCamera)}
+            {phone('Perm · Microphone', SnPermMic)}
+            {phone('Perm · Contacts', SnPermContacts)}
+          </DCSection>
+          <DCSection id="chats" title="Main · Chat list" subtitle="iOS and Android, light & dark. Same Sinhron design system inside each frame — only the platform chrome differs.">
+            <DCArtboard id="ios-light" label="iOS · Light" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box' }}>
+                <IOSChats dark={false}/>
+              </div>
+            </DCArtboard>
+
+            <DCArtboard id="ios-dark" label="iOS · Dark" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <IOSChats dark={true}/>
+              </div>
+            </DCArtboard>
+
+            <DCArtboard id="and-light" label="Android · Light" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box' }}>
+                <AndroidChats dark={false}/>
+              </div>
+            </DCArtboard>
+
+            <DCArtboard id="and-dark" label="Android · Dark" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <AndroidChats dark={true}/>
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="chat" title="Conversation · 1:1 chat" subtitle="Maria Chen — the chat behind the first row above. Text, photo, voice, reply, reactions, typing.">
+            <DCArtboard id="ios-chat-light" label="iOS · Light" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box' }}>
+                <IOSChat dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ios-chat-dark" label="iOS · Dark" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <IOSChat dark={true}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-chat-light" label="Android · Light" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box' }}>
+                <AndroidChat dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-chat-dark" label="Android · Dark" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <AndroidChat dark={true}/>
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="settings" title="Settings" subtitle="Where the E2EE story finally surfaces — privacy options, linked devices, recovery phrase, self-hosted server address. Built directly from the tech spec.">
+            <DCArtboard id="ios-settings-light" label="iOS · Light" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box' }}>
+                <IOSSettings dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ios-settings-dark" label="iOS · Dark" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <IOSSettings dark={true}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-settings-light" label="Android · Light" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box' }}>
+                <AndroidSettings dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-settings-dark" label="Android · Dark" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <AndroidSettings dark={true}/>
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="contact" title="Contact info" subtitle="Maria Chen's profile. This is the only place Sinhron talks about encryption — verified identity badge, short fingerprint, linked devices. Civilians who never tap here never see crypto.">
+            <DCArtboard id="ios-contact-light" label="iOS · Light" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box' }}>
+                <IOSContact dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="ios-contact-dark" label="iOS · Dark" width={420} height={870}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 14, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <IOSContact dark={true}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-contact-light" label="Android · Light" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box' }}>
+                <AndroidContact dark={false}/>
+              </div>
+            </DCArtboard>
+            <DCArtboard id="and-contact-dark" label="Android · Dark" width={420} height={890}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: 8, height: '100%', boxSizing: 'border-box', background: '#1a1a1a' }}>
+                <AndroidContact dark={true}/>
+              </div>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="system" title="Design system" subtitle="The tokens behind the screens above — type, color, the full glyph set, and every button state.">
+            <DCArtboard id="type" label="Typography" width={380} height={520}>
+              <SinhronTypeSpec dark={false}/>
+            </DCArtboard>
+
+            <DCArtboard id="color-light" label="Color · Light" width={380} height={520}>
+              <SinhronColorSpec dark={false}/>
+            </DCArtboard>
+
+            <DCArtboard id="color-dark" label="Color · Dark" width={380} height={520}>
+              <SinhronColorSpec dark={true}/>
+            </DCArtboard>
+
+            <DCArtboard id="anatomy" label="Row anatomy" width={520} height={520}>
+              <ChatListAnatomy dark={false}/>
+            </DCArtboard>
+
+            <DCArtboard id="icons-light" label="Icon set · 75 glyphs" width={620} height={1340}>
+              <SinhronIconSet dark={false}/>
+            </DCArtboard>
+
+            <DCArtboard id="icons-dark" label="Icon set · Dark" width={620} height={1340}>
+              <SinhronIconSet dark={true}/>
+            </DCArtboard>
+
+            <DCArtboard id="buttons-light" label="Button states" width={620} height={780}>
+              <SinhronButtonStates dark={false}/>
+            </DCArtboard>
+
+            <DCArtboard id="buttons-dark" label="Button states · Dark" width={620} height={780}>
+              <SinhronButtonStates dark={true}/>
+            </DCArtboard>
+          </DCSection>
+
+          <DCPostIt x={40} y={140}>
+            Hi! This is the main screen of <b>Sinhron</b> mobile. The product underneath is end-to-end encrypted, but the UI deliberately doesn't shout about it — no lock icons, no "encrypted" badges. A user who never opens Settings should feel like they're using a premium chat app, not a security tool. The E2EE story lives only in profile / safety-number screens.
+          </DCPostIt>
+
+          <DCPostIt x={40} y={400}>
+            Type: <b>Geist</b> with mono fallback for technical strings (fingerprints, IDs). Accent: a refined cool blue — close to Signal-trust, warmer than Material's primary. Avatars are gradient circles seeded by name, so the list has color rhythm without needing photos. Row trailing slot: unread pill / read-receipt / pin / mute / mention — never two at once.
+          </DCPostIt>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

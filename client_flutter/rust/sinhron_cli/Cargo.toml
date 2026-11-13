@@ -1,0 +1,49 @@
+# sinhron_cli — headless test harness / dev tool.
+#
+# Pure Rust binary, no FFI. Stress-test the full Sinhron protocol
+# (registration, KeyPackage publish, MLS group create, invite, send,
+# receive) without spinning up the Flutter app.
+#
+# Per spec §5.2 — this is "Stage D" of the goal ladder.
+#
+# Build: `cargo build -p sinhron_cli`
+# Run:   `./target/debug/sinhron-cli --help`
+
+[package]
+name = "sinhron_cli"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+publish = false
+
+[[bin]]
+name = "sinhron-cli"
+path = "src/main.rs"
+
+[dependencies]
+# Lower-layer crates — full re-use of the same code that runs in the
+# Flutter app, so CLI and app stay protocol-compatible by construction.
+sinhron_crypto = { path = "../sinhron_crypto" }
+sinhron_net = { path = "../sinhron_net" }
+sinhron_storage = { path = "../sinhron_storage" }
+sinhron_sync = { path = "../sinhron_sync" }
+
+# Async runtime — same LTS as everywhere else.
+tokio = { version = "=1.51.6", features = ["rt-multi-thread", "macros", "time", "fs"] }
+
+# CLI parsing. clap 4.x derives + colored help.
+clap = { version = "=4.5.20", features = ["derive"] }
+
+# Logging — env_logger is enough for a CLI; no structured log shipping.
+tracing = "=0.1.41"
+tracing-subscriber = { version = "=0.3.20", features = ["env-filter"] }
+
+# Misc utilities.
+anyhow = "=1.0.103"
+hex = "=0.4.3"
+base64 = "=0.22.1"
+# 8 random bytes for message_id suffixes.
+rand_core = { version = "=0.6.4", features = ["getrandom"] }
+# CC7 — UUIDv7 generation for call_id in call subcommands.
+uuid = { version = "=1.18.0", features = ["v7"] }
+

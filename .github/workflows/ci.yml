@@ -1,0 +1,314 @@
+# Tests on every push / pull request — the same commands as CLAUDE.md § Testing.
+# iOS builds and device checks are not here: they need a Mac / an iPhone.
+name: CI
+
+# Docs- and graph-only commits don't run it (2026-10-16: a day of small
+# pushes used up the account's Actions minutes; the Android job alone is
+# ~20 min). A commit that also touches code runs everything as before.
+#
+# 2026-10-18: 90 % of the month's minutes gone. A branch's first push has no
+# "before" commit, so .github/ci-changes.sh ran EVERYTHING (~47 min, Android
+# ~23) — for every new branch — and then the pull request ran again on the
+# same commit. Pushes now run only on main; a branch is checked once, by its
+# pull request, and only the areas it changed.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "graphify-out/**"
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "graphify-out/**"
+      - "**/*.md"
+  workflow_dispatch:
+
+# The jobs only read the code (audit 2026-11b, ci): without this line the
+# workflow token gets whatever the repository default is — possibly write.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  FLUTTER_VERSION: "3.41.5"
+
+# Runners pinned to Ubuntu 24.04: `ubuntu-latest` moves to Ubuntu 26 from
+# 2026-10-19 (actions/runner-images#14748); move deliberately, with a full run.
+jobs:
+  # Which areas this push touched (.github/ci-changes.sh) — each job below
+  # runs only for its own. "Run workflow" (manual) runs everything.
+  changes:
+    name: What changed
+    runs-on: ubuntu-24.04
+    outputs:
+      server: ${{ steps.f.outputs.server }}
+      installer: ${{ steps.f.outputs.installer }}
+      image: ${{ steps.f.outputs.image }}
+      client_rust: ${{ steps.f.outputs.client_rust }}
+      flutter: ${{ steps.f.outputs.flutter }}
+      frb: ${{ steps.f.outputs.frb }}
+      android: ${{ steps.f.outputs.android }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: f
+        env:
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          ALL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: bash .github/ci-changes.sh
+
+  server:
+    name: Server (Rust + PostgreSQL 16)
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sinhron
+          POSTGRES_PASSWORD: dev_only
+          POSTGRES_DB: sinhron
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sinhron" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgres://sinhron:dev_only@localhost:5432/sinhron
+      SINHRON_DB_URL: postgres://sinhron:dev_only@localhost:5432/sinhron
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      - name: cargo test (incl. DB tests)
+        # --locked: Cargo.lock out of step with Cargo.toml fails here instead
+        # of quietly pulling other versions (audit 2026-11b, rs-server:3).
+        run: cargo test --locked -- --include-ignored
+
+  installer:
+    name: Server installer (Ubuntu ${{ matrix.ubuntu }})
+    needs: changes
+    if: needs.changes.outputs.installer == 'true'
+    runs-on: ubuntu-${{ matrix.ubuntu }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ["22.04", "24.04"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck -s bash -e SC1091 server/install.sh server/scripts/install_test.sh
+      - name: unit tests (config, .env, NAT, DNS, stubbed dry run)
+        run: bash server/scripts/install_test.sh
+      # The release helpers (preflight / postcheck / rollback) against stubs.
+      - name: release scripts test
+        run: if [ -f server/scripts/release_test.sh ]; then bash server/scripts/release_test.sh; fi
+      - name: real dry run on this Ubuntu (system checks live, nothing changed)
+        run: |
+          printf 'SINHRON_DOMAIN=chat.example.com\nDAILY_BACKUP=no\n' > "$RUNNER_TEMP/sinhron.conf"
+          sudo NO_COLOR=1 bash server/install.sh --dry-run --yes --skip-dns-check --config "$RUNNER_TEMP/sinhron.conf"
+
+  docker-image:
+    # Builds the server image and starts it with the production compose
+    # file; `--wait` fails unless every started service turns healthy —
+    # catches a healthcheck that needs a tool the image lacks.
+    name: Server image (build + healthcheck)
+    needs: changes
+    if: needs.changes.outputs.image == 'true'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: server
+    env:
+      LIVEKIT_KEYS: "ci: ci-secret-not-used-anywhere-0123456789"
+      TURN_SHARED_SECRET: ci
+      TURN_URLS: turn:turn.localhost:3478
+      TURN_EXTERNAL_IP: 127.0.0.1
+      # deploy-deps:8 — a new install: the server logs in as its own role.
+      SINHRON_DB_APP_USER: sinhron_app
+      SINHRON_DB_APP_PASSWORD: ci-app-password
+    steps:
+      - uses: actions/checkout@v4
+      - name: build the server image
+        run: docker compose -f docker-compose.yml build sinhron-server
+      - name: start Postgres + server, wait for healthy
+        run: docker compose -f docker-compose.yml up -d --wait --wait-timeout 180 postgres sinhron-server
+      - name: the server's database role is no superuser and owns the tables
+        run: |
+          q() { docker compose -f docker-compose.yml exec -T postgres psql -U sinhron -d sinhron -Atc "$1"; }
+          test "$(q "SELECT rolsuper FROM pg_roles WHERE rolname = 'sinhron_app'")" = f
+          test "$(q "SELECT count(*) FROM pg_tables WHERE schemaname = 'public' AND tableowner <> 'sinhron_app'")" = 0
+          test "$(q "SELECT count(*) FROM pg_tables WHERE schemaname = 'public'")" -gt 10
+          # The installer runs it before every start: idempotent.
+          docker compose -f docker-compose.yml exec -T postgres sh /docker-entrypoint-initdb.d/10-app-role.sh
+      # Status 203 — Caddy serves neighbour sites from /etc/sinhron/caddy-sites
+      # over the shared `edge` network. Validate the Caddyfile with the folder
+      # empty / with an example / broken, then run Caddy with the real compose
+      # file (egress6 + edge) and check both our API and a neighbour through 443.
+      - name: build the Caddy image, validate the Caddyfile with neighbour sites
+        run: |
+          docker compose -f docker-compose.yml build caddy
+          scripts/caddy_sites_check.sh
+      - name: Caddy with an empty sites folder, then a neighbour site
+        run: |
+          sudo install -d -m 0755 /etc/sinhron/caddy-sites
+          docker network inspect edge >/dev/null 2>&1 || docker network create edge
+          docker run -d --name datascratch-web --network edge caddy:2.11.7-alpine \
+            caddy respond --listen :3000 --body datascratch-ok
+          docker compose -f docker-compose.yml up -d --wait --no-build caddy
+          docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' sinhron-caddy | tee /tmp/nets
+          grep -qw edge /tmp/nets && grep -qw server_egress6 /tmp/nets
+          curl -fsSk --retry 10 --retry-delay 2 --retry-all-errors https://localhost/_healthz | grep -q sinhron-server
+          curl -fsSk -D - -o /dev/null https://localhost/_healthz | grep -qi "content-security-policy: default-src 'none'"
+          printf 'notes.example.com {\n\ttls internal\n\treverse_proxy datascratch-web:3000\n}\n' |
+            sudo tee /etc/sinhron/caddy-sites/datascratch.caddy
+          docker exec sinhron-caddy caddy validate --config /etc/caddy/Caddyfile
+          docker exec sinhron-caddy caddy reload --config /etc/caddy/Caddyfile
+          curl -fsSk --retry 10 --retry-delay 2 --retry-all-errors \
+            --resolve notes.example.com:443:127.0.0.1 https://notes.example.com/ | grep -q datascratch-ok
+          # Neighbours don't get Sinhron's headers (their CSP is their job).
+          if curl -fsSk -D - -o /dev/null --resolve notes.example.com:443:127.0.0.1 https://notes.example.com/ |
+            grep -qi "default-src 'none'"; then echo "neighbour got Sinhron's CSP" >&2; exit 1; fi
+          curl -fsSk https://localhost/_healthz | grep -q sinhron-server
+      - name: show state and logs
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml ps
+          docker inspect -f '{{json .State.Health}}' sinhron-server || true
+          docker compose -f docker-compose.yml logs --tail 50 sinhron-server || true
+          docker compose -f docker-compose.yml logs --tail 50 caddy || true
+
+  client-rust:
+    name: Client Rust core
+    needs: changes
+    if: needs.changes.outputs.client_rust == 'true'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: client_flutter/rust
+    steps:
+      - uses: actions/checkout@v4
+      # sinhron_net/build.rs compiles proto/sinhron.proto with prost-build.
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: client_flutter/rust
+      - run: cargo test --locked --workspace # as the server job: the lock file is the truth
+
+  flutter:
+    name: Flutter (analyze + tests)
+    needs: changes
+    if: needs.changes.outputs.flutter == 'true'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: client_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile # pubspec.lock is the truth (audit 2026-11b, dart:2)
+      # rust_builder/cargokit is vendored build tooling with its own pubspec — not app code.
+      - run: flutter analyze lib test integration_test
+      # Golden pixel comparison is skipped off macOS (test/flutter_test_config.dart);
+      # every other assertion runs.
+      - run: flutter test
+
+  android:
+    # ADR-040 — the Android client builds: Gradle + Kotlin (Keystore, QR,
+    # UnifiedPush, calls, "always connected") + the Rust core through cargokit
+    # (NDK), R8 included. Release APK for arm64 only: a debug build makes
+    # cargokit compile the core for x86 / x64 too and fills the runner's
+    # disk (first run 2026-10-16). No release key in CI — Gradle signs with
+    # the debug key only because SINHRON_DEBUG_SIGNED=1 (build.gradle.kts).
+    name: Android (release APK, arm64)
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      # 16 GB runner: Gradle's 8 GB heap + 4 parallel rustc (OpenSSL,
+      # SQLCipher, OpenMLS) got the second run killed (exit 143).
+      CARGO_BUILD_JOBS: "2"
+    defaults:
+      run:
+        working-directory: client_flutter
+    steps:
+      # Room for the Rust core + Gradle: drop preinstalled toolchains we don't use.
+      - run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost && df -h /
+        working-directory: /
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('client_flutter/android/**/*.kts', 'client_flutter/pubspec.lock') }}
+      # The NDK Flutter 3.41 asks for (flutter.ndkVersion). The download
+      # once arrived broken ("Error on ZipFile unknown archive"): retry.
+      - name: NDK 28.2
+        run: |
+          NDK="$ANDROID_HOME/ndk/28.2.13676358"
+          for i in 1 2 3; do
+            [ -f "$NDK/source.properties" ] && break
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358" > /dev/null || sleep 15
+          done
+          test -f "$NDK/source.properties"
+      - run: flutter pub get --enforce-lockfile # pubspec.lock is the truth (audit 2026-11b, dart:2)
+      - run: sed -i 's/-Xmx8G -XX:MaxMetaspaceSize=4G/-Xmx3G -XX:MaxMetaspaceSize=1G/' android/gradle.properties && free -h
+      - run: flutter build apk --release --target-platform android-arm64
+        env:
+          SINHRON_DEBUG_SIGNED: "1" # no release key in CI (build.gradle.kts)
+      - run: ls -la build/app/outputs/flutter-apk/app-release.apk
+
+  frb-drift:
+    name: FFI bindings in sync (flutter_rust_bridge)
+    needs: changes
+    if: needs.changes.outputs.frb == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      # codegen runs `cargo expand`, which runs sinhron_net/build.rs (protoc).
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/flutter_rust_bridge_codegen
+          key: frb-codegen-2.11.1-${{ runner.os }}
+      - run: command -v flutter_rust_bridge_codegen || cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
+      - run: cd client_flutter && flutter pub get --enforce-lockfile
+      - run: bash client_flutter/scripts/check_frb_drift.sh

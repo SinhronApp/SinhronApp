@@ -1,0 +1,146 @@
+# Release builds on GitHub — no Mac needed (owner, 2026-11-13).
+# Actions → Release → Run workflow. Builds what is on the chosen branch
+# (normally main) with the same scripts as on the Mac:
+#   android — client_flutter/scripts/android_release.sh, signed with the
+#             release key → a GitHub release with the APKs + android.json;
+#             on the server: sudo bash server/scripts/fetch_android.sh <tag>
+#   ios     — client_flutter/scripts/testflight.sh → TestFlight (testers get
+#             it only when you release it there).
+# Secrets (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64  base64 of android-release.jks (the SAME key as before,
+#                            or phones can't update over the old app)
+#   ANDROID_KEY_PASSWORD     the text of android-release.pass
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 — App Store Connect API key (Admin role);
+#                            ASC_KEY_P8 = the whole text of AuthKey_….p8
+# Pull requests (and forks) never get these secrets: only this manual run does.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      android:
+        description: "Android (APK → GitHub release)"
+        type: boolean
+        default: true
+      ios:
+        description: "iPhone / iPad (→ TestFlight)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.41.5"
+
+jobs:
+  android:
+    if: inputs.android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: write # create the GitHub release
+    env:
+      CARGO_BUILD_JOBS: "2" # see ci.yml android job
+    defaults:
+      run:
+        working-directory: client_flutter
+    steps:
+      - run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost && df -h /
+        working-directory: /
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq protobuf-compiler
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - name: NDK 28.2
+        run: |
+          NDK="$ANDROID_HOME/ndk/28.2.13676358"
+          for i in 1 2 3; do
+            [ -f "$NDK/source.properties" ] && break
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358" > /dev/null || sleep 15
+          done
+          test -f "$NDK/source.properties"
+      - run: flutter pub get --enforce-lockfile
+      - run: sed -i 's/-Xmx8G -XX:MaxMetaspaceSize=4G/-Xmx3G -XX:MaxMetaspaceSize=1G/' android/gradle.properties
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          [ -n "$KEYSTORE" ] && [ -n "$PASS" ] || { echo "::error::Secrets ANDROID_KEYSTORE_BASE64 / ANDROID_KEY_PASSWORD are not set"; exit 1; }
+          umask 077 && mkdir -p "$RUNNER_TEMP/keys"
+          printf %s "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/keys/android-release.jks"
+          printf %s "$PASS" > "$RUNNER_TEMP/keys/android-release.pass"
+      - run: bash scripts/android_release.sh
+        env:
+          SINHRON_ANDROID_KEY_DIR: ${{ runner.temp }}/keys
+      - run: rm -rf "$RUNNER_TEMP/keys"
+        if: always()
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test -f build/android-release/android.json # missing = not signed with our key (script says why)
+          read -r VERSION BUILD < <(python3 -I -c 'import json,sys; m=json.load(open(sys.argv[1])); print(m["version"], m["build"])' build/android-release/android.json)
+          TAG="v$VERSION-$BUILD"
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "Sinhron $VERSION ($BUILD)" \
+            --notes "Android: on the server — sudo bash server/scripts/fetch_android.sh $TAG" \
+            build/android-release/*
+          echo "### Android $VERSION ($BUILD) — release $TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "On the server: \`sudo bash server/scripts/fetch_android.sh $TAG\`" >> "$GITHUB_STEP_SUMMARY"
+
+  ios:
+    if: inputs.ios
+    # Apple takes uploads built with the iOS 26 SDK (Xcode 26) only.
+    runs-on: macos-26
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: client_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install protobuf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+      - run: xcodebuild -version
+      # The Swift check that could only run on the Mac (release-0.12.0.md step 3).
+      - run: swiftc -O ios/Shared/PushShared.swift ios/SharedTests/main.swift -o "$RUNNER_TEMP/pushshared-test" && "$RUNNER_TEMP/pushshared-test"
+      - run: flutter pub get --enforce-lockfile
+      - name: App Store Connect key + a keychain for signing
+        env:
+          P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          [ -n "$P8" ] || { echo "::error::Secret ASC_KEY_P8 is not set"; exit 1; }
+          umask 077
+          printf '%s\n' "$P8" > "$RUNNER_TEMP/AuthKey.p8"
+          KC="$RUNNER_TEMP/build.keychain-db"
+          security create-keychain -p "" "$KC"
+          security set-keychain-settings -lut 7200 "$KC"
+          security unlock-keychain -p "" "$KC"
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          security default-keychain -s "$KC"
+      - run: bash scripts/testflight.sh
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      - run: rm -f "$RUNNER_TEMP/AuthKey.p8"
+        if: always()

@@ -1,0 +1,429 @@
+# Sinhron operator stack — full production-style deploy (WU A11 + CA1).
+#
+# Five services (+ optional pgbouncer, profile `pgbouncer`):
+#   • postgres        — PostgreSQL 16 with persistent volume
+#   • sinhron-server  — Rust API + WS endpoint, built from ../Dockerfile
+#   • caddy           — TLS front door on 80/443 (Let's Encrypt by
+#                       default; self-hosted CA per spec §6.1 — see
+#                       Caddyfile). Built with caddy-l4 so TCP 443 also
+#                       carries TURN-over-TLS (ADR-016).
+#   • livekit         — LiveKit SFU for 1:1 + group calls (spec §10).
+#                       E2EE via SFrame keys from MLS exporter.
+#   • coturn          — TURN/STUN server для NAT traversal. Runs with
+#                       network_mode: host (UDP relay range can't be
+#                       cleanly proxied by Docker bridge). Local dev on
+#                       Mac: docker-compose.dev.yml switches it back
+#                       to bridge.
+#
+# Usage (operator one-liner):
+#   cp .env.example .env  # then fill in the 3 hostnames, LIVEKIT_*, TURN_* etc.
+#   docker compose up -d
+#   curl https://your-host/_healthz
+#
+# Dev-only (Postgres only — server runs via `cargo run` locally):
+#   docker compose up -d postgres
+#
+# Calls-only smoke (just LiveKit + coturn):
+#   docker compose up -d livekit coturn
+
+# Container logs capped (security review 2026-11-02): Docker kept every
+# line forever — Caddy's and coturn's carry client IPs — and could fill
+# the disk. Three files of 10 MB per service.
+x-logging: &default-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Every service (security review 2026-11, deploy-deps:9): no raw sockets (no
+# service pings or sniffs), and no gaining privileges through setuid files
+# (except coturn — see there).
+x-hardening: &hardening
+  logging: *default-logging
+  cap_drop: [NET_RAW]
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  postgres:
+    <<: *hardening
+    image: postgres:16.15-alpine
+    container_name: sinhron-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sinhron
+      # DEV-ONLY default — overridden by .env in any non-local deploy.
+      POSTGRES_PASSWORD: ${SINHRON_DB_PASSWORD:-dev_only}
+      POSTGRES_DB: sinhron
+      # deploy-deps:8 — the server's own role (not this superuser): created
+      # with the database on a new install (scripts/db-init/), on an existing
+      # one by the installer or by hand (deploy-guide §10.4). Unset = the
+      # server still logs in as the superuser `sinhron`.
+      SINHRON_DB_APP_USER: ${SINHRON_DB_APP_USER:-}
+      SINHRON_DB_APP_PASSWORD: ${SINHRON_DB_APP_PASSWORD:-}
+    # Non-standard host port to avoid collision with any system Postgres
+    # the operator already runs (e.g. brew install postgresql@16).
+    # Loopback only — the DB must never be reachable from the internet
+    # (nor relayed to via TURN, which can reach the host's public IP).
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - sinhron_pgdata:/var/lib/postgresql/data
+      - ./scripts/db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sinhron -d sinhron"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  sinhron-server:
+    <<: *hardening
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sinhron/server:${SINHRON_VERSION:-0.1.0}
+    container_name: sinhron-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SINHRON_LISTEN: 0.0.0.0:8080
+      # ADR-086 — the server's own name: every signature the apps send
+      # names it, and the server takes only those (ADR-086).
+      SINHRON_PUBLIC_HOSTNAME: ${SINHRON_PUBLIC_HOSTNAME:-localhost}
+      # Queries go to Postgres directly, or through PgBouncer when the
+      # `pgbouncer` profile is on (SINHRON_DB_HOST=pgbouncer, see below).
+      # Migrations always go direct — PgBouncer's transaction pooling
+      # breaks the migrator's session-level advisory lock.
+      # deploy-deps:8 — as the server's own role; no superuser password here.
+      SINHRON_DB_URL: postgres://${SINHRON_DB_APP_USER:-sinhron}:${SINHRON_DB_APP_PASSWORD:-${SINHRON_DB_PASSWORD:-dev_only}}@${SINHRON_DB_HOST:-postgres}:5432/sinhron
+      SINHRON_DB_MIGRATE_URL: postgres://${SINHRON_DB_APP_USER:-sinhron}:${SINHRON_DB_APP_PASSWORD:-${SINHRON_DB_PASSWORD:-dev_only}}@postgres:5432/sinhron
+      SINHRON_MESSAGE_RETENTION_DAYS: ${SINHRON_MESSAGE_RETENTION_DAYS:-365}
+      RUST_LOG: ${RUST_LOG:-info}
+      # Tuning knobs (deploy-guide §3). Empty = the server's default —
+      # it treats an unparsable value as unset (tech-debt 2.17).
+      SINHRON_PG_MAX_CONNS: ${SINHRON_PG_MAX_CONNS:-}
+      SINHRON_PG_ACQUIRE_TIMEOUT_SECS: ${SINHRON_PG_ACQUIRE_TIMEOUT_SECS:-}
+      SINHRON_RETENTION_SWEEP_SECS: ${SINHRON_RETENTION_SWEEP_SECS:-}
+      SINHRON_WS_IDLE_TIMEOUT_SECS: ${SINHRON_WS_IDLE_TIMEOUT_SECS:-}
+      SINHRON_RATE_REGISTER: ${SINHRON_RATE_REGISTER:-}
+      SINHRON_RATE_KP_UPLOAD: ${SINHRON_RATE_KP_UPLOAD:-}
+      SINHRON_RATE_SUBMIT: ${SINHRON_RATE_SUBMIT:-}
+      SINHRON_RATE_MEDIA_UPLOAD: ${SINHRON_RATE_MEDIA_UPLOAD:-}
+      # ADR-071 — message requests (deliveries without an access key) and
+      # their pushes; old-app call invites still ring until set to 0.
+      SINHRON_RATE_REQUESTS: ${SINHRON_RATE_REQUESTS:-}
+      SINHRON_RATE_REQUEST_PUSH: ${SINHRON_RATE_REQUEST_PUSH:-}
+      SINHRON_RATE_REQUEST_PUSH_PAIR: ${SINHRON_RATE_REQUEST_PUSH_PAIR:-}
+      # Calls — /v1/call/token + /v1/call/turn (handlers/call.rs).
+      LIVEKIT_KEYS: ${LIVEKIT_KEYS:?LIVEKIT_KEYS must be set}
+      LIVEKIT_URL: wss://${SINHRON_LIVEKIT_HOSTNAME:-livekit.localhost}
+      TURN_SHARED_SECRET: ${TURN_SHARED_SECRET:?TURN_SHARED_SECRET must be set}
+      TURN_URLS: ${TURN_URLS:?TURN_URLS must be set}
+      TURN_TTL_SECS: ${TURN_TTL_SECS:-86400}
+      # Encrypted media blobs (ADR-017) — content-addressed files.
+      SINHRON_MEDIA_DIR: /var/lib/sinhron/media
+      SINHRON_MEDIA_MAX_BYTES: ${SINHRON_MEDIA_MAX_BYTES:-104857600}
+      # All stored media together (MEDIA-10, ADR-099): 50 GiB. Lower it on a small disk.
+      SINHRON_MEDIA_TOTAL_BYTES: ${SINHRON_MEDIA_TOTAL_BYTES:-53687091200}
+      # Push notifications (APNs) — off unless all three are set in .env.
+      # The .p8 key sits on the host in /etc/sinhron/apns (owned by uid
+      # 10001 — the container's user — mode 400; never in git or logs).
+      APNS_KEY_PATH: ${APNS_KEY_PATH:-}
+      APNS_KEY_ID: ${APNS_KEY_ID:-}
+      APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+      APNS_TOPIC: ${APNS_TOPIC:-com.sinhron.sinhron}
+      # Android push (ADR-040): hosts the server may POST UnifiedPush notes
+      # to — the own ntfy. Empty = off.
+      SINHRON_UNIFIEDPUSH_HOSTS: ${SINHRON_UNIFIEDPUSH_HOSTS:-}
+      # deploy-deps:16 — the server's publish token for the own ntfy (the
+      # first of the hosts above); the installer makes it once.
+      SINHRON_UNIFIEDPUSH_TOKEN: ${SINHRON_NTFY_TOKEN:-}
+      # ADR-057 — Google push (FCM) for Android: on when both files from the
+      # operator's Firebase project are in /etc/sinhron/fcm on the host
+      # (service-account.json — uid 10001, mode 400; google-services.json).
+      # Never in git. Missing → off, Android falls back as before.
+      SINHRON_FCM_SERVICE_ACCOUNT: ${SINHRON_FCM_SERVICE_ACCOUNT:-/etc/sinhron/fcm/service-account.json}
+      SINHRON_FCM_CLIENT_CONFIG: ${SINHRON_FCM_CLIENT_CONFIG:-/etc/sinhron/fcm/google-services.json}
+      # ADR-043 — invite links: install buttons on the /join page (https
+      # only; empty → "ask the person who invited you") and, for an
+      # operator's own app build, the app identifiers in the app-link files.
+      SINHRON_IOS_INSTALL_URL: ${SINHRON_IOS_INSTALL_URL:-}
+      SINHRON_ANDROID_INSTALL_URL: ${SINHRON_ANDROID_INSTALL_URL:-}
+      SINHRON_APPLE_APP_ID: ${SINHRON_APPLE_APP_ID:-}
+      SINHRON_ANDROID_PACKAGE: ${SINHRON_ANDROID_PACKAGE:-}
+      SINHRON_ANDROID_CERT_SHA256: ${SINHRON_ANDROID_CERT_SHA256:-}
+      # ADR-062 — Telegram sticker packs by link. The bot token from
+      # @BotFather sits on the host in /etc/sinhron/telegram/bot-token
+      # (owned by uid 10001, mode 400; never in git or logs). No file = off.
+      # SINHRON_TELEGRAM_API_URL: another Bot API endpoint when
+      # api.telegram.org is unreachable from this server.
+      SINHRON_TELEGRAM_API_URL: ${SINHRON_TELEGRAM_API_URL:-}
+      SINHRON_RATE_TG_PACKS: ${SINHRON_RATE_TG_PACKS:-}
+      SINHRON_RATE_TG_FILES: ${SINHRON_RATE_TG_FILES:-}
+      # ADR-077 — the server's administrators (their Sinhron addresses,
+      # comma-separated) get load alerts and reports in the app's "Server"
+      # chat. Empty = none: no notices, no IPs kept.
+      SINHRON_ADMIN_IDENTITIES: ${SINHRON_ADMIN_IDENTITIES:-}
+    volumes:
+      - sinhron_media:/var/lib/sinhron/media
+      - /etc/sinhron/apns:/etc/sinhron/apns:ro
+      - /etc/sinhron/fcm:/etc/sinhron/fcm:ro
+      - /etc/sinhron/telegram:/etc/sinhron/telegram:ro
+    # The IPv6 way out too (see caddy below): from the Russian VPS the
+    # Telegram Bot API answers only over IPv6 (checked 2026-10-18).
+    networks:
+      - default
+      - egress6
+    # Internal port only — Caddy reverse-proxies the public side. Don't
+    # expose 8080 directly in production.
+    expose:
+      - "8080"
+    healthcheck:
+      # The binary probes its own /_healthz (src/healthcheck.rs) — the
+      # debian-slim image has no wget/curl. Exec form, no shell needed.
+      test: ["CMD", "/app/sinhron-server", "--healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+  # Optional connection pooler (tech-debt 2.13) — for many concurrent
+  # users or several server replicas. Off by default; enable with
+  #   COMPOSE_PROFILES=pgbouncer
+  #   SINHRON_DB_HOST=pgbouncer
+  # in .env. Transaction pooling; PgBouncer ≥ 1.21 keeps sqlx's
+  # protocol-level prepared statements working (MAX_PREPARED_STATEMENTS).
+  # ADR-040 — UnifiedPush for Android without Google: the operator's own
+  # ntfy. Phones subscribe through the ntfy app; the server POSTs a tiny
+  # "new message" / "call" note (no content). Profile `ntfy` (installer:
+  # ENABLE_NTFY=yes). Caddy serves it on SINHRON_NTFY_HOSTNAME.
+  ntfy:
+    <<: *hardening
+    logging: *default-logging
+    image: binwiederhier/ntfy:v2.28.0
+    container_name: sinhron-ntfy
+    profiles: ["ntfy"]
+    restart: unless-stopped
+    command: serve
+    environment:
+      NTFY_BASE_URL: https://${SINHRON_NTFY_HOSTNAME:-ntfy.localhost}
+      NTFY_BEHIND_PROXY: "true"
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_CACHE_DURATION: 24h
+      # Topics are random per app install (UnifiedPush): phones subscribe
+      # without an account, nobody can list them. Publishing — only the
+      # Sinhron server, with its token (deploy-deps:16: anyone used this
+      # ntfy as a free relay). The `sinhron` user has a password nobody
+      # knows (the hash of a random one, thrown away): only the token works.
+      # The token comes from .env (installer); without it nothing publishes.
+      NTFY_AUTH_FILE: /var/cache/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: read-only
+      NTFY_AUTH_USERS: 'sinhron:$$2a$$10$$9QeLJ05t0JvJPnYNd.JJMeQ8ZykVmGEa0mwr7GpS2k9qNYVyUhn22:user'
+      NTFY_AUTH_ACCESS: 'sinhron:up*:write-only'
+      NTFY_AUTH_TOKENS: 'sinhron:${SINHRON_NTFY_TOKEN:-}:sinhron-server'
+      NTFY_ENABLE_LOGIN: "false"
+      NTFY_ATTACHMENT_CACHE_DIR: ""
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+    expose:
+      - "80"
+
+  pgbouncer:
+    <<: *hardening
+    image: edoburu/pgbouncer:v1.25.2-p0
+    container_name: sinhron-pgbouncer
+    profiles: ["pgbouncer"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${SINHRON_DB_APP_USER:-sinhron}
+      DB_PASSWORD: ${SINHRON_DB_APP_PASSWORD:-${SINHRON_DB_PASSWORD:-dev_only}}
+      DB_NAME: sinhron
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      MAX_PREPARED_STATEMENTS: "200"
+      # sqlx sends `extra_float_digits` at connect; PgBouncer refuses
+      # unknown startup parameters. The image defaults to ignoring it — set
+      # explicitly so another image or a changed default can't break it
+      # (found by a live run through PgBouncer 1.25.2, tech-debt 2.13).
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN:-1000}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_POOL_SIZE:-20}
+      ADMIN_USERS: ${SINHRON_DB_APP_USER:-sinhron}
+    # Internal only — never published.
+    expose:
+      - "5432"
+
+  caddy:
+    <<: *hardening
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    image: sinhron/caddy-l4:2.11.7-l4-0.1.2
+    container_name: sinhron-caddy
+    restart: unless-stopped
+    depends_on:
+      sinhron-server:
+        condition: service_started
+    environment:
+      SINHRON_PUBLIC_HOSTNAME: ${SINHRON_PUBLIC_HOSTNAME:-localhost}
+      SINHRON_LIVEKIT_HOSTNAME: ${SINHRON_LIVEKIT_HOSTNAME:-livekit.localhost}
+      SINHRON_TURN_HOSTNAME: ${SINHRON_TURN_HOSTNAME:-turn.localhost}
+      # ADR-040 — the own ntfy's name (installer: found in DNS). It wasn't
+      # passed before, so Caddy served ntfy only on ntfy.localhost and
+      # Android push never reached the phones (found 2026-10-18).
+      SINHRON_NTFY_HOSTNAME: ${SINHRON_NTFY_HOSTNAME:-ntfy.localhost}
+      # Certificate account: lets Caddy fall back to ZeroSSL when Let's
+      # Encrypt is unreachable (Caddyfile). Set ACME_EMAIL in .env to get
+      # expiry mail yourself.
+      ACME_EMAIL: ${ACME_EMAIL:-certs@${SINHRON_PUBLIC_HOSTNAME:-localhost}}
+      # coturn runs on the host network; reach it via the host gateway.
+      TURN_TCP_UPSTREAM: host.docker.internal:3478
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "80:80"
+      # TCP only: HTTPS (API, LiveKit signaling) + TURN-over-TLS, split
+      # by SNI. No HTTP/3 — UDP 443 isn't routed (see Caddyfile).
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Downloads (the Android APK) served at /download/ — see Caddyfile.
+      - ./download:/srv/download:ro
+      # Other sites on this server (status 203): one `<name>.caddy` per
+      # neighbour, imported at the end of the Caddyfile. install.sh creates
+      # the folder; empty is fine.
+      - /etc/sinhron/caddy-sites:/etc/caddy/sites:ro
+      - sinhron_caddy_data:/data
+      - sinhron_caddy_config:/config
+    # A second network with IPv6, for Caddy's way out: 2026-10-18 a
+    # Russian VPS couldn't reach Let's Encrypt over IPv4 (its Cloudflare
+    # address timed out) but could over IPv6 — no certificate came while
+    # Caddy had only the IPv4 default network. Without host IPv6 it falls
+    # back to IPv4 by itself.
+    # `edge` — shared with neighbour projects' containers (status 203), so
+    # their site blocks can reverse_proxy to them by name. Created by
+    # install.sh (`docker network create edge`) before `compose up`.
+    networks:
+      - default
+      - egress6
+      - edge
+
+  # ── LiveKit SFU (spec §10.1) ────────────────────────────────────────
+  #
+  # Pinned to v1.11.0 per PROJECT.md §4. Custom KeyProvider for SFrame
+  # is implemented client-side (Flutter `livekit_client` + Rust
+  # `sinhron_call`); server has no awareness of keys.
+  #
+  # Keys MUST be set via env LIVEKIT_KEYS — see .env.example. Refusing
+  # to start with empty keys is the safer default than baking a sample
+  # value here.
+  livekit:
+    <<: *hardening
+    image: livekit/livekit-server:v1.11.0
+    container_name: sinhron-livekit
+    restart: unless-stopped
+    # The keys come from the environment, which livekit-server reads
+    # itself — never on the command line, where `ps` on the host shows
+    # them to every local user (security review 2026-11, deploy-deps:7).
+    command: [--config, /etc/livekit.yaml]
+    environment:
+      LIVEKIT_KEYS: ${LIVEKIT_KEYS:?LIVEKIT_KEYS must be set}
+    # 7880 (signaling) is NOT published — clients reach it as
+    # wss://SINHRON_LIVEKIT_HOSTNAME through Caddy (TLS).
+    ports:
+      # 7881 — ICE/TCP fallback for UDP-blocking networks.
+      - "7881:7881"
+      # 7882 — all WebRTC media on one UDP port (livekit.yaml rtc.udp_port).
+      - "7882:7882/udp"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    healthcheck:
+      # LiveKit exposes a simple HTTP health endpoint on the signaling port.
+      # The image is Alpine-based (v1.11.0: alpine-minirootfs 3.23), so
+      # busybox wget is there — recheck when bumping the image.
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7880/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+  # ── coturn TURN/STUN (spec §10.2) ───────────────────────────────────
+  #
+  # Per spec §12, coturn requires `network_mode: host` for clean UDP
+  # port relay — Docker bridge can't forward arbitrary UDP port ranges.
+  # On Mac (Docker Desktop), host networking is partially emulated;
+  # local testing (same LAN) typically works without coturn at all
+  # because ICE host candidates resolve directly.
+  #
+  # TURN_SHARED_SECRET MUST be set via env. Server-side TURN credential
+  # mint (WU CA4) uses this secret to HMAC short-lived per-user creds.
+  coturn:
+    <<: *hardening
+    # Not no-new-privileges: the image runs turnserver as `nobody` with a
+    # file capability (setcap NET_BIND_SERVICE), and under no-new-privileges
+    # such an exec fails — coturn would not start.
+    security_opt: []
+    image: coturn/coturn:4.6.3-r3-alpine
+    container_name: sinhron-coturn
+    restart: unless-stopped
+    # `network_mode: host` is the documented coturn pattern (spec §12):
+    # the relay port range (turnserver.conf min/max-port) is opened on
+    # the host directly. Firewall: 3478 tcp+udp, 49152-49999 udp.
+    # TURN-over-TLS arrives via Caddy on 443 (plain TCP to 3478 here).
+    network_mode: host
+    # The secret goes into a private copy of turnserver.conf, not onto the
+    # command line (`ps` shows that to every local user — deploy-deps:7).
+    # `echo` is a shell builtin, so it never appears in a process list.
+    environment:
+      TURN_SHARED_SECRET: ${TURN_SHARED_SECRET:?TURN_SHARED_SECRET must be set}
+    entrypoint:
+      - sh
+      - -ec
+      - 'umask 077; { cat /etc/coturn/turnserver.conf; echo "static-auth-secret=$$TURN_SHARED_SECRET"; } >/tmp/turnserver.conf;
+        unset TURN_SHARED_SECRET; exec turnserver -c /tmp/turnserver.conf "$$@"'
+      - turnserver
+    command:
+      - --realm=${TURN_REALM:-sinhron}
+      # Address put into relay candidates. Plain public IP when it sits
+      # on the host's interface; "<public>/<private>" behind 1:1 NAT
+      # (Yandex Cloud, AWS EIP, …) — without it relaying silently fails.
+      - --external-ip=${TURN_EXTERNAL_IP:?TURN_EXTERNAL_IP must be set}
+      # Our `command:` replaces the image's default `--log-file=stdout`, so
+      # coturn logged to a file inside the container and
+      # `docker compose logs coturn` showed nothing (VPN calls, 2026-10-20).
+      - --log-file=stdout
+    volumes:
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
+    healthcheck:
+      # coturn doesn't expose an HTTP endpoint by default; check the
+      # process via `pgrep`. Robust enough — if turnserver crashes the
+      # container exits, and `restart: unless-stopped` handles it.
+      test: ["CMD-SHELL", "pgrep -x turnserver || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+networks:
+  egress6:
+    enable_ipv6: true
+  # Not this project's: other compose projects join it too (status 203).
+  edge:
+    external: true
+    name: edge
+
+volumes:
+  ntfy_cache:
+  sinhron_pgdata:
+    driver: local
+  # Ciphertext only — keys never reach the server. Back it up together
+  # with Postgres (media rows reference these files).
+  sinhron_media:
+    driver: local
+  sinhron_caddy_data:
+    driver: local
+  sinhron_caddy_config:
+    driver: local

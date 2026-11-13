@@ -1,0 +1,166 @@
+# Sinhron operator server — Phase 2 WU A1.
+#
+# Spec §7: Rust + Axum 0.8.9 + Tokio 1.47.3 LTS + sqlx 0.8.6 (PostgreSQL).
+# MSRV 1.75 (axum 0.8 requirement).
+#
+# This is a SEPARATE Cargo workspace from `client_flutter/rust/` per spec §5.2
+# ("эти крейты не конфликтуют, поскольку находятся в разных Cargo-workspace").
+# Reason: the client compiles for iOS arm64 with rusqlite + sqlcipher; the
+# server compiles for x86_64/arm64 Linux with sqlx + PostgreSQL. Sharing one
+# workspace would force unwanted features across targets.
+#
+# Versioning: exact pins per spec §18.9 (no `^`, no `~`, no range). The `=`
+# prefix forces Cargo to resolve to the precise version. Match the client
+# convention used in `client_flutter/rust/Cargo.toml`.
+
+[workspace]
+members = ["."]
+resolver = "2"
+
+[package]
+name = "sinhron_server"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"        # per spec §7 MSRV (axum 0.8 requirement)
+publish = false               # operator-private binary, never to crates.io
+
+[lib]
+name = "sinhron_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sinhron-server"
+path = "src/main.rs"
+
+[dependencies]
+# HTTP stack — Axum 0.8 family with native macros + JSON support + WS upgrade.
+axum = { version = "=0.8.9", features = ["ws"] }
+tower = "=0.5.2"
+tower-http = { version = "=0.6.6", features = ["trace", "request-id", "compression-gzip"] }
+futures-util = "=0.3.31"  # StreamExt / SinkExt for WS send + recv split
+
+# Async runtime — LTS 1.51.x (until March 2027); 1.51.6 closes
+# RUSTSEC-2026-0386 (audit deploy-deps:11)
+tokio = { version = "=1.51.6", features = ["rt-multi-thread", "macros", "net", "signal", "time", "fs", "io-util"] }
+# Streams media blob files to HTTP responses (handlers/media.rs).
+tokio-util = { version = "=0.7.18", features = ["io"] }
+
+# Structured logging — Axum + tower middleware integrate via tracing
+tracing = "=0.1.41"
+tracing-subscriber = { version = "=0.3.20", features = ["env-filter", "fmt", "json"] }
+
+# Serialization — for JSON request/response bodies and config files
+serde = { version = "=1.0.221", features = ["derive"] }
+serde_json = "=1.0.140"
+
+# Error plumbing — anyhow at the binary boundary, thiserror inside library code
+anyhow = "=1.0.103"
+thiserror = "=2.0.11"
+
+# PostgreSQL — sqlx 0.8.6 per spec §5.2. `runtime-tokio-rustls` keeps us off
+# native-tls (Linux operators ship slim Alpine/Debian images without
+# system OpenSSL). `macros` enabled but we avoid compile-time-checked
+# queries until SQLX_OFFLINE data is checked in.
+sqlx = { version = "=0.8.6", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "uuid",
+    "time",
+    "macros",
+    "migrate",
+] }
+
+# UUIDv7 for message_id per spec §7.4 (time-ordered, sortable, partition-key
+# friendly). v4 still useful for non-time-correlated IDs like user_pk.
+uuid = { version = "=1.18.0", features = ["v4", "v7", "serde"] }
+
+# Time crate (sqlx-friendly; chrono is the alternative — picked `time` for
+# zero RFC 5322 nonsense and better Display impls).
+time = { version = "=0.3.47", features = ["macros", "serde"] }
+
+# Ed25519 verification for registration proofs (§7.2 / §6.2). Same crate
+# the client uses — keeps the wire format byte-compatible.
+ed25519-dalek = "=2.1.1"
+
+# Hex encoding/decoding for wire-level pubkey + signature transport.
+hex = "=0.4.3"
+
+# SHA-256 — body hashing for timestamped action proofs.
+sha2 = "=0.10.9"
+
+# HMAC — used for LiveKit JWT signing (HS256) and coturn REST-API TURN
+# credential mint (HMAC-SHA1 per RFC 5766). Single crate, both algos.
+hmac = "=0.12.1"
+sha1 = "=0.10.6"
+
+# async-trait — for PushClient trait with async methods. Rust 2024 will
+# stabilize async-fn-in-trait fully but for 0.13 ecosystem compatibility
+# we still need the macro.
+async-trait = "=0.1.83"
+
+# Base64 — KeyPackage upload payload encoding (kp_bytes is binary; we
+# wrap it in base64 for JSON transport).
+base64 = "=0.22.1"
+
+# Constant-time compare of sealed-sender access-key hashes (tech-debt
+# 2.2). Already in the tree via ed25519-dalek; pinned to the same version.
+subtle = "=2.6.1"
+
+# Protobuf for the WS wire protocol per spec §7.3 (`Sec-WebSocket-Protocol:
+# sinhron.v1`). prost generates Rust types from `proto/*.proto`; the same
+# .proto file feeds the Dart client codegen via protoc + protoc_plugin.
+prost = "=0.13.5"
+
+# CSPRNG for the per-connection auth challenge nonce. tokio + sqlx ALREADY
+# pull rand transitively, but we depend on it explicitly so version bumps
+# in our crate are visible.
+rand = "=0.9.3"
+
+# Bytes type — protocol layer hands us efficient slice views.
+bytes = "=1.11.1"
+
+# T1.5 — rate limiter buckets shared across handler tasks. parking_lot's
+# `Mutex` is significantly faster than std for short critical sections,
+# and unlike `tokio::sync::Mutex` it doesn't need awaits (rate-check
+# is sub-microsecond).
+parking_lot = "=0.12.4"
+
+# T2.4 — Prometheus metrics. Older but battle-tested crate. We don't
+# need the `metrics` ecosystem macros — straight Counter/Gauge/Histogram
+# API is enough for our handful of metrics.
+prometheus = { version = "=0.14.0", default-features = false }
+once_cell = "=1.21.4"
+
+# Push notifications (overnight item 8): APNs speaks HTTP/2 over TLS and
+# authenticates with an ES256 JWT signed by the operator's .p8 key. Same
+# reqwest as the client crates (rustls + webpki roots, no system OpenSSL).
+reqwest = { version = "=0.12.24", default-features = false, features = ["json", "rustls-tls-webpki-roots", "http2"] }
+p256 = { version = "=0.13.2", features = ["ecdsa", "ecdh", "pkcs8", "pem"] }
+# ADR-040 — UnifiedPush bodies encrypted to the phone (Web Push, RFC 8291:
+# ECDH P-256 + HKDF-SHA256 + AES-128-GCM).
+hkdf = "=0.12.4"
+aes-gcm = "=0.10.3"
+# ADR-057 — Google push (FCM HTTP v1): the service account's RS256 JWT. Same
+# ring rustls already builds (reqwest's rustls-tls), so no new crate.
+ring = "=0.17.14"
+
+[build-dependencies]
+# Compile-time .proto → Rust codegen. Lives only in build.rs.
+prost-build = "=0.13.5"
+
+[dev-dependencies]
+# In-process request testing via `tower::ServiceExt::oneshot(Request)` — no
+# network round-trip needed. The body-util crate gives us `.collect()` to
+# buffer the response body for assertions.
+http-body-util = "=0.1.2"
+
+# WebSocket client for the `ws_client` example — exercises the live
+# server's /v1/sync end-to-end (auth handshake + heartbeat).
+tokio-tungstenite = "=0.29.0"
+url = "=2.5.8"
+
+[profile.release]
+# Smaller binary + faster cold-start for self-hosted operators.
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"

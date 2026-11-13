@@ -1,0 +1,67 @@
+# LiveKit SFU configuration — WU CA1.
+#
+# This file is mounted into livekit/livekit-server at /livekit.yaml.
+# Most production settings come through env vars set by docker-compose:
+#   - LIVEKIT_KEYS=<key>: <secret>   (REQUIRED — never hardcoded here)
+#
+# Ports: 7880 signaling (internal, wss:// via Caddy), 7881/tcp + 7882/udp
+# media (public).
+#
+# Reference: https://docs.livekit.io/realtime/self-hosting/distributed/
+#
+# Spec: §10.1 — LiveKit v1.11.0, SFU mode, custom KeyProvider for SFrame.
+
+port: 7880
+
+# Empty bind = listen on all interfaces inside the container.
+bind_addresses:
+  - ""
+
+rtc:
+  # TCP fallback for clients on UDP-blocking networks.
+  tcp_port: 7881
+
+  # All WebRTC media multiplexed on ONE UDP port — LiveKit's recommended
+  # setup under Docker: one firewall rule, one 1:1 port mapping in
+  # docker-compose.yml (7882/udp), no bridge-mode port-range forwarding.
+  udp_port: 7882
+
+  # Advertise the public IP in ICE candidates (discovered via STUN).
+  # Behind 1:1 NAT this still yields the public address. Clients that
+  # can't reach 7882/udp or 7881/tcp fall back to TURN (coturn), incl.
+  # turns:<SINHRON_TURN_HOSTNAME>:443 for 443-only networks.
+  use_external_ip: true
+
+  # ADR-041 — poor links. Congestion control is on by default; allow_pause
+  # (default false) lets the SFU pause a subscriber's VIDEO when their
+  # downlink can't carry it, so audio keeps flowing instead of everything
+  # stuttering. adaptiveStream/dynacast on the client handle the rest.
+  congestion_control:
+    enabled: true
+    allow_pause: true
+
+# ADR-041 — only the codecs our E2EE path covers. livekit_client 2.7.0
+# skips the SFrame cryptor for AV1 tracks (they would reach the SFU in
+# the clear) — AV1 stays off. H.265 (2026-10-16, ADR-045): sent where the
+# phone encodes it in hardware and everyone in the call can decode it
+# (iPhone ↔ iPhone, most Android), H.264 / VP8 otherwise; E2EE covers it
+# (livekit_client ≥ 2.5.3). The app learns this list from the call token
+# reply (`CALL_VIDEO_CODECS`, a test keeps them equal). RTX stays: it's
+# retransmission, vital on lossy links. Default list (v1.11.0) also had
+# pcmu/pcma/vp9/av1.
+room:
+  enabled_codecs:
+    - mime: audio/opus
+    - mime: audio/red
+    - mime: video/vp8
+    - mime: video/h264
+    - mime: video/h265
+    - mime: video/rtx
+
+# Default keyfile is empty — keys are exclusively injected via the
+# LIVEKIT_KEYS environment variable. This prevents accidentally
+# committing a real secret. The Docker entrypoint refuses to start
+# without keys configured.
+keys: {}
+
+log_level: info

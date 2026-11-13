@@ -1,0 +1,8 @@
+# Caddy + caddy-l4 (layer4 app) — the stock caddy image has no layer4,
+# which the Caddyfile needs to share TCP 443 between HTTPS and
+# TURN-over-TLS (ADR-016). Exact pins, same rule as Cargo/pubspec.
+FROM caddy:2.11.7-builder AS builder
+RUN xcaddy build v2.11.7 --with github.com/mholt/caddy-l4@v0.1.2
+
+FROM caddy:2.11.7-alpine
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Overnight item 8 — push notifications. Xcode switches this to
+	     "production" when it exports for TestFlight / the App Store. -->
+	<key>aps-environment</key>
+	<string>development</string>
+	<!-- ADR-043 — invite links https://<server>/join#… open in the app.
+	     The server serves /.well-known/apple-app-site-association; an
+	     operator with another domain adds it here and rebuilds. -->
+	<!-- ADR-056 — Keychain shared with the Notification Service Extension.
+	     The app's own group FIRST: items written without a group (the device
+	     key, ADR-021) keep landing there, out of the extension's reach; only
+	     push items go to com.sinhron.shared (ios/Shared/PushShared.swift). -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.sinhron.sinhron</string>
+		<string>$(AppIdentifierPrefix)com.sinhron.shared</string>
+	</array>
+	<!-- ADR-060 / ADR-061 — the App Group: the Share Extension leaves shared items
+	     in it; the screen-share broadcast extension keeps its socket in its container. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.sinhron.sinhron</string>
+	</array>
+	<!-- ADR-073 — the chat backup in the app's own iCloud Drive container
+	     (hidden from Files). Needs the iCloud capability with this container on
+	     the App ID (developer.apple.com → Identifiers → com.sinhron.sinhron). -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.com.sinhron.sinhron</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+	</array>
+	<key>com.apple.developer.ubiquity-container-identifiers</key>
+	<array>
+		<string>iCloud.com.sinhron.sinhron</string>
+	</array>
+	<!-- ADR-059 — webcredentials: the secret words can be saved to Passwords
+	     (filed under this domain; SinhronPasswordDomain in Info.plist). -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:chat.777400777.xyz</string>
+		<string>webcredentials:chat.777400777.xyz</string>
+	</array>
+</dict>
+</plist>

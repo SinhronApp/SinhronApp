@@ -1,0 +1,3 @@
+// ADR-061 — the extension's version must equal the app's: take Flutter's
+// build name / number like Runner does (no Pods here).
+#include "../Flutter/Generated.xcconfig"
