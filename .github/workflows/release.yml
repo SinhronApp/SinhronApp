@@ -108,8 +108,9 @@ jobs:
 
   ios:
     if: inputs.ios
-    # Apple takes uploads built with the iOS 26 SDK (Xcode 26) only.
-    runs-on: macos-26
+    # Apple takes uploads built with the iOS 26 SDK (Xcode 26) only; the
+    # macos-15 image carries Xcode 26 next to 16 — pick the newest.
+    runs-on: macos-15
     timeout-minutes: 120
     defaults:
       run:
@@ -124,7 +125,7 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
-      - run: xcodebuild -version
+      - run: sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)" && xcodebuild -version
       # The Swift check that could only run on the Mac (release-0.12.0.md step 3).
       - run: swiftc -O ios/Shared/PushShared.swift ios/SharedTests/main.swift -o "$RUNNER_TEMP/pushshared-test" && "$RUNNER_TEMP/pushshared-test"
       - run: flutter pub get --enforce-lockfile

@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-13 (264) · Первый запуск Release: две правки
+
+- Android упал сразу: `android_release.sh` читает номер прошлой сборки из `build/android-release/android.json`; на чистой
+  машине файла нет, `sed` возвращает 2, а `set -o pipefail` останавливает скрипт. Теперь `|| true`.
+- iPhone стоял в очереди: машины `macos-26` у GitHub нет. Теперь `macos-15` и самый новый Xcode 26 на ней
+  (`xcode-select`). Файлы: `client_flutter/scripts/android_release.sh`, `.github/workflows/release.yml`, `CLAUDE.md`,
+  `docs/code-map.md`. Проверено: `bash -n`, разбор YAML; дальше — повторный запуск Release.
+
+---
+
 ## 2026-11-13 (263) · Репозиторий переименован: `SinhronApp/SinhronApp`
 
 **Что.** Владелец исправил опечатку в имени (`SihnronApp` → `SinhronApp`). Новый адрес — в `server/install.sh`

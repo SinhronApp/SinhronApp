@@ -32,7 +32,7 @@ BUILD_NUMBER=${BUILD_NUMBER:-$(date -u +%Y%m%d%H)}
 # The build number is the hour (an Android versionCode must fit in an
 # int), so two builds in one hour got the same one and the app saw no
 # update (0.7.0 and 0.7.1, 2026-10-19). Never at or below the last build.
-last=$(sed -n 's/.*"build": *\([0-9]*\).*/\1/p' build/android-release/android.json 2>/dev/null | head -1)
+last=$(sed -n 's/.*"build": *\([0-9]*\).*/\1/p' build/android-release/android.json 2>/dev/null | head -1 || true) # no file on a clean machine (GitHub)
 if [[ -n $last && $BUILD_NUMBER -le $last ]]; then
   echo "Build $BUILD_NUMBER is not above the last one ($last) — using $((last + 1))"
   BUILD_NUMBER=$((last + 1))

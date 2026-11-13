@@ -61,7 +61,7 @@ starts PostgreSQL 16 and exports `DATABASE_URL`/`SINHRON_DB_URL`. Setup log: `/t
 - Client Rust: `cd client_flutter/rust && cargo test --workspace --no-fail-fast` (plain `cargo test` there runs only the root FFI crate — 3 tests instead of 142; without `--no-fail-fast` the run stops at the first failing network tests and the remaining suites don't run)
 - Flutter: `cd client_flutter && flutter test` — golden pixel comparison is skipped off macOS automatically (`test/flutter_test_config.dart`; snapshots are recorded on the Mac). `flutter analyze lib test integration_test` (not the whole tree: `rust_builder/cargokit` is vendored tooling).
 - CI (`.github/workflows/ci.yml`) runs all of the above plus the FFI drift check and a server-image job (`docker-image`: builds the image, `compose up --wait` postgres + sinhron-server — fails unless healthy) on every push. Enable the local pre-commit hook once per clone: `git config core.hooksPath .githooks`.
-- iOS: release builds on GitHub (Actions → Release, macos-26); simulator only on the Mac.
+- iOS: release builds on GitHub (Actions → Release, macos-15 + Xcode 26); simulator only on the Mac.
 
 On the Mac (shared with another person): never open windows — no iOS Simulator, `flutter run`, browser preview,
 or Docker Desktop launch. Bind servers to 127.0.0.1 (avoids firewall prompt). Run heavy builds with `nice -n 19`.
