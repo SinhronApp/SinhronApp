@@ -135,7 +135,26 @@ jobs:
         run: |
           [ -n "$P8" ] || { echo "::error::Secret ASC_KEY_P8 is not set"; exit 1; }
           umask 077
-          printf '%s\n' "$P8" > "$RUNNER_TEMP/AuthKey.p8"
+          # Copied by hand, the key often loses its BEGIN/END lines, gets
+          # typographic dashes or spaces — keep only the base64 body and
+          # rebuild the PEM; then check it before the 30-minute build.
+          printf '%s' "$P8" | python3 -I -c '
+          import base64, re, sys
+          t = sys.stdin.read()
+          m = re.search(r"BEGIN[^\n]*\n(.*?)\n[^\n]*END", t.replace("\r", ""), re.S)
+          body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(1) if m else t)
+          try:  # the whole .p8 file pasted as base64
+              inner = base64.b64decode(body).decode()
+              if "PRIVATE KEY" in inner:
+                  m = re.search(r"BEGIN[^\n]*\n(.*?)\n[^\n]*END", inner, re.S)
+                  body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(1))
+          except Exception:
+              pass
+          lines = [body[i:i + 64] for i in range(0, len(body), 64)]
+          print("-----BEGIN PRIVATE KEY-----", *lines, "-----END PRIVATE KEY-----", sep="\n")
+          ' > "$RUNNER_TEMP/AuthKey.p8"
+          openssl pkey -in "$RUNNER_TEMP/AuthKey.p8" -noout 2>/dev/null || {
+            echo "::error::ASC_KEY_P8 is not an App Store Connect key (.p8). Paste the whole text of AuthKey_<Key ID>.p8 again."; exit 1; }
           KC="$RUNNER_TEMP/build.keychain-db"
           security create-keychain -p "" "$KC"
           security set-keychain-settings -lut 7200 "$KC"

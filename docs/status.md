@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-11-13 (265) · Release iPhone: ключ App Store Connect в любом виде
+
+Второй запуск: Xcode 26, проверка Swift и CocoaPods прошли; `xcodebuild` отверг ключ (`invalidPEMDocument`) — секрет
+`ASC_KEY_P8` вставлен не в виде PEM. Шаг «App Store Connect key» в `.github/workflows/release.yml` теперь оставляет
+только тело base64 и собирает PEM заново (без строк BEGIN/END, с CRLF, длинными тире, пробелами, весь файл в base64),
+потом `openssl pkey` — понятная ошибка до сборки. Проверено локально на сгенерированном ключе P-256 во всех шести видах
+и на мусоре (отвергнут).
+
+---
+
 ## 2026-11-13 (264) · Первый запуск Release: две правки
 
 - Android упал сразу: `android_release.sh` читает номер прошлой сборки из `build/android-release/android.json`; на чистой
