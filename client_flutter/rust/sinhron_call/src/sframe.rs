@@ -120,10 +120,16 @@ impl Kid {
 ///
 /// `key.len()` == `CipherSuite::key_len()`; `salt.len()` ==
 /// `CipherSuite::nonce_len()`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct SframeKeyMaterial {
     pub key: Vec<u8>,
     pub salt: Vec<u8>,
+}
+
+impl std::fmt::Debug for SframeKeyMaterial {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SframeKeyMaterial").field("key_len", &self.key.len()).finish_non_exhaustive()
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -231,6 +237,13 @@ pub fn sframe_key_pair(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn key_material_debug_hides_key() {
+        let m = super::SframeKeyMaterial { key: vec![0xAB; 16], salt: vec![0xCD; 12] };
+        let s = format!("{m:?}");
+        assert!(!s.contains("171") && !s.contains("205"), "{s}");
+    }
+
     use super::*;
 
     /// A fixed 32-byte "exporter output" used across tests. In production

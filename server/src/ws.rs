@@ -265,7 +265,7 @@ async fn handle_socket(state: AppState, mut socket: WebSocket, ip: Option<std::n
         return;
     };
 
-    info!(user_pk = %user_pk, "ws session authenticated");
+    info!("ws session authenticated");
     // ADR-077 — the account's last IP, quoted when someone complains about
     // it (in memory only; nothing kept when there are no administrators).
     if let Some((_, person)) = &resolved {
@@ -360,7 +360,7 @@ async fn handle_socket(state: AppState, mut socket: WebSocket, ip: Option<std::n
     if !send_task.is_finished() {
         let _ = send_task.await;
     }
-    info!(user_pk = %user_pk, "ws session closed");
+    info!("ws session closed");
     // Status 182 (owner, 2026-10-19: "a call rings only the second time") —
     // an iPhone going to the background keeps its socket a few seconds: an
     // invite sent down it was "delivered", no push went, the app was
@@ -678,11 +678,6 @@ async fn handle_submit(
     // foundation; once HPKE wrapping arrives, the same flag still
     // governs server-side anonymization.
     let sealed = s.sealed_sender;
-    let log_sender = if sealed {
-        "<sealed>".to_string()
-    } else {
-        crate::short_key(&sender_user_pk.to_string())
-    };
 
     // ── Authorize: sender must be a member of the target group ──────
     // ADR-025 — through ANY of the person's active devices (the WS
@@ -939,12 +934,10 @@ async fn handle_submit(
 
     tx.commit().await?;
 
+    // No sender, no chat, no size in the log — only counts.
     info!(
         message_id = %message_id,
-        group = %crate::short_key(&hex::encode(&s.group_id)),
-        bytes = s.ciphertext.len(),
         recipients = recipient_user_pks.len(),
-        sender = %log_sender,
         sealed = sealed,
         "message persisted"
     );
@@ -1644,7 +1637,7 @@ pub(crate) async fn flush_pending_welcomes(
             .bind(&delivered_mine)
             .execute(pool)
             .await?;
-        info!(count = n, %user_pk, "flushed pending welcomes");
+        info!(count = n, "flushed pending welcomes");
     }
     Ok(())
 }
@@ -2330,7 +2323,6 @@ async fn handle_resume(
     .await?;
 
     info!(
-        user_pk = %self_user_pk,
         cursor = cursor,
         replayed = rows.len(),
         "resume replay"
@@ -2417,7 +2409,7 @@ pub(crate) async fn deliver_backlog(
     }
     let n = rows.len();
     let sent = push_rows(pool, sessions, user_pk, rows).await?;
-    info!(%user_pk, waiting = n, sent, "backlog delivered on login");
+    info!(waiting = n, sent, "backlog delivered on login");
     Ok(sent)
 }
 

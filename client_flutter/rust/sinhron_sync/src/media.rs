@@ -48,7 +48,7 @@ pub enum MediaError {
 
 /// Everything a recipient needs to fetch and open one blob. Carried in
 /// `envelope::MediaRef` on the wire.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct BlobRef {
     pub sha256: [u8; 32],
     pub key: [u8; KEY_LEN],
@@ -56,6 +56,12 @@ pub struct BlobRef {
     pub blob_size: u64,
     /// Size of the plaintext (for UI: "2.4 MB").
     pub plain_size: u64,
+}
+
+impl std::fmt::Debug for BlobRef {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BlobRef").field("blob_size", &self.blob_size).field("plain_size", &self.plain_size).finish_non_exhaustive()
+    }
 }
 
 impl BlobRef {

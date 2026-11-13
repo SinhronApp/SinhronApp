@@ -32,7 +32,7 @@ use crate::apns::{Apns, ApnsResult};
 use crate::unifiedpush::{UnifiedPush, UnifiedPushConfig};
 
 /// One phone's push token.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct PushTarget {
     pub device_pk: Vec<u8>,
     pub token: String,
@@ -45,6 +45,13 @@ pub struct PushTarget {
     /// The phone's own 32-byte key: ADR-056 call hints (APNs VoIP tokens),
     /// ADR-057 the key FCM bodies are sealed to (both kinds).
     pub call_hint_key: Option<Vec<u8>>,
+}
+
+/// Debug without the token and the keys (they must not reach a log).
+impl std::fmt::Debug for PushTarget {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "PushTarget({}, sandbox={}, lang={})", crate::short_key(&hex::encode(&self.device_pk)), self.sandbox, self.lang)
+    }
 }
 
 /// What the push says.
@@ -95,7 +102,14 @@ pub struct LoggingPush;
 #[async_trait]
 impl PushClient for LoggingPush {
     async fn send(&self, _target: &PushTarget, msg: &PushMessage) -> PushOutcome {
-        debug!(?msg, "push off — would notify");
+        // Only the kind: the message carries the caller's key, the call
+        // proof and the sealed preview.
+        let kind = match msg {
+            PushMessage::NewMessage { .. } => "message",
+            PushMessage::Request { .. } => "request",
+            PushMessage::IncomingCall { .. } => "call",
+        };
+        debug!(kind, "push off — would notify");
         PushOutcome::Sent
     }
 }
@@ -494,6 +508,21 @@ pub fn spawn_notify_android_live(pool: PgPool, push: Arc<dyn PushClient>, wake: 
 pub mod tests {
     use super::*;
     use std::sync::Mutex;
+
+    #[test]
+    fn debug_of_a_push_target_has_no_token_or_keys() {
+        let t = PushTarget {
+            device_pk: vec![0xab; 32],
+            token: "SECRETTOKEN".into(),
+            sandbox: false,
+            lang: "ru".into(),
+            webpush: Some((vec![0xcd; 65], vec![0xef; 16])),
+            call_hint_key: Some(vec![0x12; 32]),
+        };
+        let s = format!("{t:?}");
+        assert!(!s.contains("SECRETTOKEN") && !s.contains("cdcd") && !s.contains("efef") && !s.contains("1212"), "{s}");
+        assert!(!s.contains(&"ab".repeat(32)), "{s}");
+    }
 
     /// Records what would be sent; answers Gone for tokens starting "dead".
     #[derive(Default)]

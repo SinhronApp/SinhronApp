@@ -24,7 +24,8 @@ use crate::group::{GroupError, GroupHandle, IncomingMessage};
 use crate::identity::{IdentityError, MlsIdentity, CIPHERSUITE};
 use crate::provider::{ProviderError, SinhronProvider};
 
-#[derive(Debug, Clone, Default)]
+// Debug is written by hand below: the phrase and the device seed must never be printed.
+#[derive(Clone, Default)]
 pub struct SyncClientConfig {
     /// User's 24-word BIP-39 phrase — used to derive both the WS auth
     /// seed (handled by sinhron_net) and the MLS credential here.
@@ -41,6 +42,12 @@ pub struct SyncClientConfig {
     /// first/legacy device, whose MLS leaf is signed by the identity key.
     /// `Some`: a linked device with a certificate from the identity key.
     pub device_seed: Option<[u8; 32]>,
+}
+
+impl std::fmt::Debug for SyncClientConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SyncClientConfig").field("db_path", &self.db_path).finish_non_exhaustive()
+    }
 }
 
 pub struct SyncClient {
@@ -1096,6 +1103,18 @@ pub enum SyncError {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn config_debug_hides_phrase_and_seed() {
+        let cfg = super::SyncClientConfig {
+            phrase: "abandon ability able".into(),
+            db_path: None,
+            device_seed: Some([0xAB; 32]),
+        };
+        let s = format!("{cfg:?}");
+        assert!(!s.contains("abandon"), "{s}");
+        assert!(!s.contains("171"), "{s}");
+    }
+
     use super::*;
     use base64::prelude::*;
 

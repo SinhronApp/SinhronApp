@@ -242,12 +242,12 @@ fn client() -> Result<reqwest::Client, PreviewError> {
             }
         }))
         .build()
-        .map_err(|e| PreviewError::Fetch(e.to_string()))
+        .map_err(|e| PreviewError::Fetch(e.without_url().to_string()))
 }
 
 async fn read_capped(mut resp: reqwest::Response, cap: usize) -> Result<Vec<u8>, PreviewError> {
     let mut out = Vec::new();
-    while let Some(chunk) = resp.chunk().await.map_err(|e| PreviewError::Fetch(e.to_string()))? {
+    while let Some(chunk) = resp.chunk().await.map_err(|e| PreviewError::Fetch(e.without_url().to_string()))? {
         let room = cap.saturating_sub(out.len());
         out.extend_from_slice(&chunk[..chunk.len().min(room)]);
         if out.len() >= cap {
@@ -261,7 +261,7 @@ async fn read_capped(mut resp: reqwest::Response, cap: usize) -> Result<Vec<u8>,
 pub async fn fetch(url_in_message: &str) -> Result<FetchedPreview, PreviewError> {
     let url = validate_url(url_in_message)?;
     let http = client()?;
-    let resp = http.get(url).send().await.map_err(|e| PreviewError::Fetch(e.to_string()))?;
+    let resp = http.get(url).send().await.map_err(|e| PreviewError::Fetch(e.without_url().to_string()))?;
     if !resp.status().is_success() {
         return Err(PreviewError::Fetch(format!("status {}", resp.status())));
     }

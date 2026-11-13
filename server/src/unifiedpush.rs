@@ -29,11 +29,18 @@ use crate::apns::ApnsResult;
 /// Longest endpoint URL kept.
 pub const MAX_ENDPOINT_LEN: usize = 512;
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Default, PartialEq, Eq)]
 pub struct UnifiedPushConfig {
     pub hosts: Vec<String>,
     /// deploy-deps:16 — the publish token for the own ntfy (`hosts[0]`).
     pub token: Option<String>,
+}
+
+/// Debug without the publish token (it must not reach a log).
+impl std::fmt::Debug for UnifiedPushConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "UnifiedPushConfig({:?}, token set: {})", self.hosts, self.token.is_some())
+    }
 }
 
 impl UnifiedPushConfig {
@@ -160,6 +167,12 @@ impl UnifiedPush {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn debug_of_the_config_has_no_token() {
+        let c = UnifiedPushConfig { hosts: vec!["push.example.org".into()], token: Some("tk_SECRET".into()) };
+        assert!(!format!("{c:?}").contains("tk_SECRET"));
+    }
 
     #[test]
     fn only_https_endpoints_on_the_operators_hosts() {

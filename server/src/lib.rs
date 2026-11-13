@@ -264,7 +264,12 @@ pub fn build_app_with(state: AppState, telegram: Arc<handlers::telegram_stickers
         // log-correlation across many lines (parse it from `info!`
         // structured fields).
         .layer(PropagateRequestIdLayer::x_request_id())
-        .layer(TraceLayer::new_for_http())
+        // The span names the route template, never the real URI: paths and
+        // queries carry invite ids, device keys, identity keys and proofs.
+        .layer(TraceLayer::new_for_http().make_span_with(|r: &axum::http::Request<axum::body::Body>| {
+            let route = r.extensions().get::<axum::extract::MatchedPath>().map(|p| p.as_str()).unwrap_or("");
+            tracing::debug_span!("request", method = %r.method(), route)
+        }))
         .layer(SetRequestIdLayer::x_request_id(MakeRequestUuid))
         .with_state(state)
 }

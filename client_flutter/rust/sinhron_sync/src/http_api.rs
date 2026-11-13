@@ -228,7 +228,7 @@ impl HttpApi {
             .json(&req_body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
 
         // Risk #4 — capture server's `Date:` header for clock-drift
         // correction. Best-effort; no-op if header absent/unparseable.
@@ -238,7 +238,7 @@ impl HttpApi {
         let text = resp
             .text()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server {
                 status: status.as_u16(),
@@ -300,7 +300,7 @@ impl HttpApi {
             .json(&req_body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
 
         // Risk #4 — capture server's `Date:` header for clock-drift
         // correction. Best-effort; no-op if header absent/unparseable.
@@ -310,7 +310,7 @@ impl HttpApi {
         let text = resp
             .text()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server {
                 status: status.as_u16(),
@@ -360,12 +360,12 @@ impl HttpApi {
             .json(&body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
         let text = resp
             .text()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server {
                 status: status.as_u16(),
@@ -389,12 +389,12 @@ impl HttpApi {
             missing: Vec<String>,
         }
         let url = format!("{}/v1/keypackages/available?identities={}", self.base_url, identities_hex.join(","));
-        let resp = self.client.get(url).send().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let resp = self.client.get(url).send().await.map_err(transport)?;
         let status = resp.status();
         if status.as_u16() == 404 {
             return Ok(None);
         }
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -430,9 +430,9 @@ impl HttpApi {
             .get(url)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -465,7 +465,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -487,9 +487,9 @@ impl HttpApi {
             .get(format!("{}/v1/devices?identity_pubkey_hex={}", self.base_url, identity_pubkey_hex))
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -511,9 +511,9 @@ impl HttpApi {
             .get(format!("{}/v1/devices?identity_pubkey_hex={}&revoked=1", self.base_url, identity_pubkey_hex))
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -543,7 +543,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -577,10 +577,10 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -617,10 +617,10 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if status.as_u16() == 404 {
             return Ok(Vec::new());
         }
@@ -657,7 +657,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -685,7 +685,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -707,12 +707,12 @@ impl HttpApi {
             .get(format!("{}/v1/pairing/{}", self.base_url, hex::encode(id)))
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
         if status.as_u16() == 404 {
             return Ok(None);
         }
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -732,7 +732,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
         if !status.is_success() {
             let body = resp.text().await.unwrap_or_default();
@@ -753,7 +753,7 @@ impl HttpApi {
             .timeout(Duration::from_secs(20))
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
         if status.as_u16() == 404 {
             return Ok(None);
@@ -761,7 +761,7 @@ impl HttpApi {
         // A real answer is a few KB: a host that streams more is cut off
         // (security-review-2026-11 app-surface:3).
         let mut body = Vec::new();
-        while let Some(chunk) = resp.chunk().await.map_err(|e| HttpError::Transport(e.to_string()))? {
+        while let Some(chunk) = resp.chunk().await.map_err(transport)? {
             body.extend_from_slice(&chunk);
             if body.len() > 4 * crate::invite::SHORT_BLOB_MAX {
                 return Err(HttpError::Parse("invite answer too large".into()));
@@ -793,7 +793,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -819,7 +819,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -849,7 +849,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() && status.as_u16() != 404 && status.as_u16() != 405 {
@@ -919,7 +919,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if status == reqwest::StatusCode::FORBIDDEN || status == reqwest::StatusCode::NOT_FOUND {
@@ -970,7 +970,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -987,7 +987,7 @@ impl HttpApi {
             .json(req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -1048,7 +1048,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         let text = resp.text().await.unwrap_or_default();
@@ -1099,7 +1099,7 @@ impl HttpApi {
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         let text = resp.text().await.unwrap_or_default();
@@ -1156,15 +1156,15 @@ impl HttpApi {
         let client = with_proxy(reqwest::Client::builder())
             .pool_max_idle_per_host(0)
             .build()
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let resp = client
             .post(format!("{}/v1/sealed", self.base_url))
             .json(&req)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -1197,9 +1197,9 @@ impl HttpApi {
             .get(format!("{}/v1/sealed-keys?identities={}", self.base_url, identities_hex.join(",")))
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -1276,7 +1276,7 @@ impl HttpApi {
             .json(&req_body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
 
         record_drift_from_response(&resp);
 
@@ -1284,7 +1284,7 @@ impl HttpApi {
         let text = resp
             .text()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server {
                 status: status.as_u16(),
@@ -1327,10 +1327,10 @@ impl HttpApi {
             .json(&req_body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
-        let text = resp.text().await.map_err(|e| HttpError::Transport(e.to_string()))?;
+        let text = resp.text().await.map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server { status: status.as_u16(), body: text });
         }
@@ -1375,13 +1375,13 @@ impl HttpApi {
             .get(&url)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         let text = resp
             .text()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         if !status.is_success() {
             return Err(HttpError::Server {
                 status: status.as_u16(),
@@ -1452,7 +1452,7 @@ impl HttpApi {
                 Some(sent) = rx.recv() => on_sent(sent),
             }
         }
-        .map_err(|e| HttpError::Transport(e.to_string()))?;
+        .map_err(transport)?;
         while let Ok(sent) = rx.try_recv() {
             on_sent(sent);
         }
@@ -1493,7 +1493,7 @@ impl HttpApi {
             .body(body)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -1527,7 +1527,7 @@ impl HttpApi {
             .header("x-sinhron-proof", proof_hex)
             .send()
             .await
-            .map_err(|e| HttpError::Transport(e.to_string()))?;
+            .map_err(transport)?;
         record_drift_from_response(&resp);
         let status = resp.status();
         if !status.is_success() {
@@ -1546,7 +1546,7 @@ impl HttpApi {
             });
         }
         let mut blob = Vec::new();
-        while let Some(chunk) = resp.chunk().await.map_err(|e| HttpError::Transport(e.to_string()))? {
+        while let Some(chunk) = resp.chunk().await.map_err(transport)? {
             if blob.len() + chunk.len() > cap {
                 return Err(HttpError::Parse("media answer too large".into()));
             }
@@ -1668,7 +1668,7 @@ struct LiveResponse {
     live: bool,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct LivekitTokenResponse {
     pub token: String,
     pub livekit_url: String,
@@ -1681,12 +1681,25 @@ pub struct LivekitTokenResponse {
     pub video_codecs: Vec<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct TurnResponse {
     pub urls: Vec<String>,
     pub username: String,
     pub credential: String,
     pub ttl_secs: i64,
+}
+
+// Debug by hand: the LiveKit token and the TURN password are never printed.
+impl std::fmt::Debug for LivekitTokenResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LivekitTokenResponse").field("room", &self.room).field("ttl_secs", &self.ttl_secs).finish_non_exhaustive()
+    }
+}
+
+impl std::fmt::Debug for TurnResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TurnResponse").field("ttl_secs", &self.ttl_secs).finish_non_exhaustive()
+    }
 }
 
 fn sha256(bytes: &[u8]) -> [u8; 32] {
@@ -1849,6 +1862,13 @@ fn access_keys_proof_message(version: i32, adds: &[[u8; 32]], decisions: &[([u8;
     msg.push(b':');
     msg.extend_from_slice(&ts.to_be_bytes());
     msg
+}
+
+/// Transport error text without the request URL: reqwest appends
+/// "for url (...)", which carries the server address and, in some calls,
+/// contacts' identity keys, group ids or pairing ids.
+fn transport(e: reqwest::Error) -> HttpError {
+    HttpError::Transport(e.without_url().to_string())
 }
 
 #[derive(Debug, thiserror::Error)]

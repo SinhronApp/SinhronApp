@@ -97,7 +97,8 @@ impl ClientConfig {
 }
 
 /// The service account's fields we use.
-#[derive(Clone, Debug, serde::Deserialize)]
+// No Debug: `private_key` must not reach a log.
+#[derive(Clone, serde::Deserialize)]
 pub struct ServiceAccount {
     pub project_id: String,
     pub client_email: String,

@@ -198,11 +198,17 @@ const SHORT_NONCE_LEN: usize = 12;
 pub const SHORT_BLOB_MAX: usize = 4096;
 
 /// A short link's parts: where the blob is and the key that opens it.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct ShortLink {
     pub host: String,
     pub id: String,
     pub key: [u8; SHORT_KEY_LEN],
+}
+
+impl std::fmt::Debug for ShortLink {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ShortLink").field("host", &self.host).finish_non_exhaustive()
+    }
 }
 
 impl ShortLink {

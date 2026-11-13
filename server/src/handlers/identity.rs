@@ -272,7 +272,7 @@ pub async fn register(
     if already_existed {
         debug!(user_pk = %user_pk, "register: already exists");
     } else {
-        info!(user_pk = %user_pk, "register: new user");
+        info!("register: new user");
     }
 
     let status = if already_existed {
