@@ -1,3 +1,4 @@
+import 'dart:convert' show jsonDecode;
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -28,6 +29,15 @@ Future<void> loadAppFonts() async {
     }
     await loader.load();
   }
+  // The system icon font (CupertinoIcons) — without it every system icon
+  // is an empty box in the screen shots.
+  final packages = (jsonDecode(File('.dart_tool/package_config.json').readAsStringSync()) as Map)['packages'] as List;
+  final root = packages.firstWhere((p) => (p as Map)['name'] == 'cupertino_icons')['rootUri'] as String;
+  final icons = FontLoader('packages/cupertino_icons/CupertinoIcons')
+    ..addFont(
+      File.fromUri(Uri.parse('$root/assets/CupertinoIcons.ttf')).readAsBytes().then(ByteData.sublistView),
+    );
+  await icons.load();
 }
 
 /// Wrap a widget in [DsTheme] + [DefaultTextStyle] for tests. Sizes the

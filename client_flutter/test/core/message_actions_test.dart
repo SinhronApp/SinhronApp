@@ -112,6 +112,11 @@ class FakeMessageStore implements MessageStore {
   bool firstName = true;
   @override
   Future<bool> setGroupName(String chatId, String name, List<String> placeholders) async {
+    // No placeholders = a rename (storage: chat_set_group_name).
+    if (placeholders.isEmpty) {
+      renames.add('→$name');
+      return true;
+    }
     groupNames.add('$chatId=$name (${placeholders.join('|')})');
     return firstName;
   }
@@ -835,7 +840,7 @@ void main() {
       final a = t.read(messageActionsProvider);
       await a.renameGroup(chat, '  Дача 2 ');
       expect(sender.actions.single, {'t': 'group_name', 'name': 'Дача 2'});
-      expect(store.renames, ['Дача→Дача 2']);
+      expect(store.renames, ['→Дача 2']);
       expect(store.rows.single.body, 'group-renamed:me:Дача 2');
       await a.renameGroup(chat, 'Дача');
       expect(sender.actions.length, 1, reason: 'same name: nothing to do');
@@ -862,7 +867,7 @@ void main() {
       expect(await a.onIncomingAction(chat, 'group_name', jsonEncode({'name': 'Взлом'}), bob), isFalse);
       expect(store.renames, isEmpty);
       expect(await a.onIncomingAction(chat, 'group_name', jsonEncode({'name': 'Дом'}), anya), isTrue);
-      expect(store.renames, ['Дача→Дом']);
+      expect(store.renames, ['→Дом']);
       expect(store.rows.single.body, 'group-renamed:by:${shortKey(anya)}:Дом');
     });
 

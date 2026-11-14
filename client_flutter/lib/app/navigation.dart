@@ -104,7 +104,7 @@ import '../features/verify/verify_contact.dart';
 import '../l10n/l10n.dart';
 import '../widgets/ds_action_sheet.dart';
 import '../widgets/ds_page_route.dart';
-import '../widgets/ds_picker_sheet.dart';
+import '../features/chat_view/forward_sheet.dart';
 import '../widgets/ds_tab_bar.dart';
 import 'app.dart' show SinhronApp;
 
@@ -1514,20 +1514,18 @@ WidgetBuilder _wireCallsListBuilder() => (context) {
               _onMainTabChange(context, DsTabId.contacts);
               return;
             }
-            // Names only; a code only tells two people with the same name apart.
-            final labels = [
-              for (final c in people)
-                people.where((o) => o.name == c.name).length > 1 ? '${c.name} · ${shortKey(c.peerId)}' : c.name,
-            ];
-            final picked = await showDsPickerSheet(
-              context: context,
+            // The same list as "Forward to…": photos, scrolls with any
+            // number of people (it was a plain list of names).
+            final byId = {for (final c in chats) c.id: c};
+            final targets = [for (final p in people) ?byId[p.chatId!]];
+            final picked = await showForwardSheet(
+              context,
+              withPhotos(targets, ref.read(peerAvatarsProvider).value ?? const {}),
               title: context.l10n.callsNewCallTitle,
-              options: labels,
-              current: '',
             );
-            final i = picked == null ? -1 : labels.indexOf(picked);
-            if (i < 0 || !context.mounted) return;
-            _startLiveCall(context, chatId: people[i].chatId!, contactName: people[i].name, kind: CallKind.audio);
+            final chatId = picked?.id;
+            if (picked == null || chatId == null || !context.mounted) return;
+            _startLiveCall(context, chatId: chatId, contactName: picked.name, kind: CallKind.audio);
           },
           onCallBack: (chatId, video) {
             final call = calls.firstWhere((c) => c.chatId == chatId);

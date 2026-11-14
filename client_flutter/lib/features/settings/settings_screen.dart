@@ -42,7 +42,7 @@ import '../server_notices/server_notices.dart' show ServerNoticesSettingsRow;
 
 /// Shown under About. Must equal pubspec `version` (test/core/app_version_test.dart);
 /// raise it with every update the owner installs (CLAUDE.md § Versions).
-const kAppVersion = '0.13.0';
+const kAppVersion = '0.13.1';
 
 /// The build number of this upload (TestFlight / APK), passed by
 /// `scripts/testflight.sh` and `scripts/android_release.sh` as
@@ -167,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         SettingsRow(
                           key: const ValueKey('settings-privacy'),
-                          icon: SettingsRowIcon.shield,
+                          icon: SettingsRowIcon.privacy,
                           tint: SettingsRowTint.privacy,
                           label: context.l10n.privacyTitle,
                           subtitle: context.l10n.settingsPrivacyHint,
@@ -245,7 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Consumer(
                           builder: (context, ref, _) => SettingsRow(
                             key: const ValueKey('settings-chat-folders'),
-                            icon: SettingsRowIcon.chats,
+                            icon: SettingsRowIcon.folders,
                             tint: SettingsRowTint.chats,
                             label: context.l10n.chatFolders,
                             value: '${ref.watch(tabFoldersProvider).length}',
@@ -256,7 +256,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (widget.onArchiveTap != null)
                           SettingsRow(
                             key: const ValueKey('settings-archive'),
-                            icon: SettingsRowIcon.download,
+                            icon: SettingsRowIcon.archive,
                             tint: SettingsRowTint.download,
                             label: context.l10n.archivedChats,
                             subtitle: context.l10n.settingsArchiveHint,
@@ -289,7 +289,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (widget.onBackupTap != null)
                           SettingsRow(
                             key: const ValueKey('settings-backup'),
-                            icon: SettingsRowIcon.cache,
+                            icon: SettingsRowIcon.backup,
                             tint: SettingsRowTint.storage,
                             label: context.l10n.backupTitle,
                             subtitle: context.l10n.backupHint,
@@ -318,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           SettingsRow(
                             key: const ValueKey('settings-support'),
-                            icon: SettingsRowIcon.info,
+                            icon: SettingsRowIcon.help,
                             tint: SettingsRowTint.info,
                             label: context.l10n.legalSupportRow,
                             subtitle: context.l10n.settingsHelpHint,
@@ -327,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           if (widget.onReportProblemTap != null)
                             SettingsRow(
                               key: const ValueKey('settings-report-problem'),
-                              icon: SettingsRowIcon.document,
+                              icon: SettingsRowIcon.report,
                               tint: SettingsRowTint.info,
                               label: context.l10n.reportProblemTitle,
                               subtitle: context.l10n.reportProblemHint,
@@ -379,7 +379,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             final l = context.l10n;
                             return SettingsRow(
                               key: const ValueKey('settings-reconnect'),
-                              icon: SettingsRowIcon.server,
+                              icon: SettingsRowIcon.connection,
                               tint: SettingsRowTint.server,
                               label: status == NetStatus.connected ? l.connection : l.reconnect,
                               value: switch (status) {
@@ -401,7 +401,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               final proxy = ref.watch(socksProxyProvider).value ?? '';
                               return SettingsRow(
                                 key: const ValueKey('settings-proxy'),
-                                icon: SettingsRowIcon.shield,
+                                icon: SettingsRowIcon.proxy,
                                 tint: SettingsRowTint.server,
                                 label: context.l10n.proxyTitle,
                                 subtitle: context.l10n.settingsProxyHint,

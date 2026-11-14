@@ -17,6 +17,7 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../app/theme/tokens.dart';
@@ -335,7 +336,7 @@ class _QuickActionsRow extends StatelessWidget {
             Expanded(
               child: _QuickTile(
                 label: context.l10n.newGroup,
-                painter: _GroupGlyphPainter(color: fg),
+                glyph: CupertinoIcons.person_2,
                 onTap: onNewGroup,
               ),
             ),
@@ -344,7 +345,7 @@ class _QuickActionsRow extends StatelessWidget {
           Expanded(
             child: _QuickTile(
               label: context.l10n.inviteByQr,
-              painter: _QrShareGlyphPainter(color: fg),
+              glyph: CupertinoIcons.qrcode,
               onTap: onInviteQr,
             ),
           ),
@@ -352,7 +353,7 @@ class _QuickActionsRow extends StatelessWidget {
           Expanded(
             child: _QuickTile(
               label: context.l10n.scanQr,
-              painter: _QrScanGlyphPainter(color: fg),
+              glyph: CupertinoIcons.qrcode_viewfinder,
               onTap: onScanQr,
             ),
           ),
@@ -374,11 +375,15 @@ class _QuickActionsRow extends StatelessWidget {
 
 class _QuickTile extends StatelessWidget {
   final String label;
-  final CustomPainter painter;
+
+  /// A system icon, or our own drawing (the key — the system set has none).
+  final IconData? glyph;
+  final CustomPainter? painter;
   final VoidCallback? onTap;
   const _QuickTile({
     required this.label,
-    required this.painter,
+    this.glyph,
+    this.painter,
     this.onTap,
   });
 
@@ -399,7 +404,10 @@ class _QuickTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(width: 23, height: 23, child: CustomPaint(painter: painter)),
+            if (glyph != null)
+              Icon(glyph, size: 25, color: tokens.text2)
+            else
+              SizedBox(width: 23, height: 23, child: CustomPaint(painter: painter)),
             const SizedBox(height: 10),
             Text(
               label,
@@ -586,121 +594,3 @@ class _VerifiedSealPainter extends CustomPainter {
   bool shouldRepaint(_VerifiedSealPainter old) => old.color != color || old.onColor != onColor;
 }
 
-class _GroupGlyphPainter extends CustomPainter {
-  final Color color;
-  _GroupGlyphPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width / 24;
-    canvas.save();
-    canvas.scale(s);
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    // Two heads + shoulders
-    canvas.drawCircle(const Offset(9, 8), 3, stroke);
-    canvas.drawCircle(const Offset(16, 10), 2.4, stroke);
-    final shoulders1 = Path()
-      ..moveTo(3, 19)
-      ..cubicTo(3, 15.5, 5.7, 13, 9, 13)
-      ..cubicTo(12.3, 13, 15, 15.5, 15, 19);
-    canvas.drawPath(shoulders1, stroke);
-    final shoulders2 = Path()
-      ..moveTo(15, 19)
-      ..cubicTo(15, 16.5, 17.2, 14.5, 19, 14.5)
-      ..cubicTo(20, 14.5, 20.5, 14.7, 21, 15);
-    canvas.drawPath(shoulders2, stroke);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_GroupGlyphPainter old) => old.color != color;
-}
-
-class _QrShareGlyphPainter extends CustomPainter {
-  final Color color;
-  _QrShareGlyphPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width / 24;
-    canvas.save();
-    canvas.scale(s);
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.square
-      ..strokeJoin = StrokeJoin.miter;
-    final fill = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    void cornerSq(double x, double y) {
-      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(x, y, 6, 6), const Radius.circular(1)), stroke);
-      canvas.drawRect(Rect.fromLTWH(x + 2, y + 2, 2, 2), fill);
-    }
-
-    cornerSq(3, 3);
-    cornerSq(15, 3);
-    cornerSq(3, 15);
-    // Scattered dots
-    canvas.drawRect(const Rect.fromLTWH(15, 15, 2, 2), fill);
-    canvas.drawRect(const Rect.fromLTWH(19, 15, 2, 2), fill);
-    canvas.drawRect(const Rect.fromLTWH(15, 19, 2, 2), fill);
-    canvas.drawRect(const Rect.fromLTWH(19, 19, 2, 2), fill);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_QrShareGlyphPainter old) => old.color != color;
-}
-
-class _QrScanGlyphPainter extends CustomPainter {
-  final Color color;
-  _QrScanGlyphPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final s = size.width / 24;
-    canvas.save();
-    canvas.scale(s);
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    // Viewfinder brackets
-    final tl = Path()
-      ..moveTo(3, 8)
-      ..lineTo(3, 4)
-      ..lineTo(8, 4);
-    canvas.drawPath(tl, stroke);
-    final tr = Path()
-      ..moveTo(16, 4)
-      ..lineTo(21, 4)
-      ..lineTo(21, 8);
-    canvas.drawPath(tr, stroke);
-    final br = Path()
-      ..moveTo(21, 16)
-      ..lineTo(21, 20)
-      ..lineTo(16, 20);
-    canvas.drawPath(br, stroke);
-    final bl = Path()
-      ..moveTo(8, 20)
-      ..lineTo(3, 20)
-      ..lineTo(3, 16);
-    canvas.drawPath(bl, stroke);
-    // Scan line
-    canvas.drawLine(const Offset(5, 12), const Offset(19, 12), stroke);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_QrScanGlyphPainter old) => old.color != color;
-}

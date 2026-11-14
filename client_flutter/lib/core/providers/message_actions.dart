@@ -1097,7 +1097,7 @@ class MessageActions {
     final current = (_ref.read(chatsProvider).value ?? const []).where((c) => c.id == chatId).firstOrNull?.name ?? '';
     if (clean == current) return;
     await _sendAction(chatId, {'t': 'group_name', 'name': clean});
-    await _store.renameIf(chatId, current, clean);
+    await _store.setGroupName(chatId, clean, const []);
     await _systemLine(chatId, 'group-renamed:me:$clean');
     _ref.invalidate(chatsProvider);
     _changed(chatId);
@@ -1429,9 +1429,8 @@ class MessageActions {
           // ADR-035 — a real rename: only from whoever manages the group.
           final role = await _ref.read(groupRoleProvider(chatId).future);
           if (!role.canManage(peer)) return false;
-          final current =
-              (_ref.read(chatsProvider).value ?? const []).where((c) => c.id == chatId).firstOrNull?.name ?? '';
-          if (current == name || !await _store.renameIf(chatId, current, name)) return false;
+          // No placeholders = a rename (storage: chat_set_group_name).
+          if (!await _store.setGroupName(chatId, name, const [])) return false;
           await _systemLine(chatId, 'group-renamed:by:${_nameOf(peer)}:$name');
           _ref.invalidate(chatsProvider);
           changed = true;

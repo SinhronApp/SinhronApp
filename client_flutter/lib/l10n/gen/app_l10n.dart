@@ -4345,12 +4345,6 @@ abstract class AppL10n {
   /// **'On Sinhron since'**
   String get profileEditJoined;
 
-  /// No description provided for @profileEditWhoSees.
-  ///
-  /// In en, this message translates to:
-  /// **'Who can see your profile'**
-  String get profileEditWhoSees;
-
   /// No description provided for @profileEditSignOut.
   ///
   /// In en, this message translates to:

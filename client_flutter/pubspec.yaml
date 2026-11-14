@@ -1,7 +1,7 @@
 name: sinhron
 description: "Sinhron — premium E2EE messenger (UI prototype, Phase: pre-Core)"
 publish_to: 'none'
-version: 0.13.0+1
+version: 0.13.1+1
 
 environment:
   sdk: ^3.11.3
@@ -80,6 +80,11 @@ dependencies:
   screen_protector: 1.5.3
   # Round video messages (ADR-048): front-camera preview + recording.
   camera: 0.12.0+2
+  # 0.10.3+1 crashes the app when the camera is flipped while a round video
+  # is recording (setMaxPhotoDimensions on a disconnected photo output,
+  # 2026-11-14; fixed upstream only in 0.11.0+3, which also changes how
+  # video orientation is set). 0.10.3 has no such call.
+  camera_avfoundation: 0.10.3
   # Stickers (ADR-049): Lottie / Telegram .tgs animations (MIT, xvrh —
   # pure Dart renderer, no platform code) and .zip pack imports (MIT).
   # 3.6.1 is the newest lottie for Flutter 3.41 (3.4–3.5 need 3.44).

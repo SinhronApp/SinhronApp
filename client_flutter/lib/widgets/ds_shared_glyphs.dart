@@ -203,10 +203,12 @@ class DsKeyGlyphGlyph extends CustomPainter {
       ..strokeWidth = 1.8
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    canvas.drawCircle(const Offset(8, 14), 4, stroke);
-    canvas.drawLine(const Offset(11, 12), const Offset(20, 3), stroke);
-    canvas.drawLine(const Offset(16, 5), const Offset(19, 8), stroke);
-    canvas.drawLine(const Offset(14, 7), const Offset(17, 10), stroke);
+    // Round bow bottom-left, shaft to the top-right, two teeth on ONE side
+    // (until 2026-11-14 they ran across the shaft and read as a cross).
+    canvas.drawCircle(const Offset(8, 16), 4.5, stroke);
+    canvas.drawLine(const Offset(11.2, 12.8), const Offset(20, 4), stroke);
+    canvas.drawLine(const Offset(17.6, 6.4), const Offset(20.2, 9), stroke);
+    canvas.drawLine(const Offset(14.6, 9.4), const Offset(16.8, 11.6), stroke);
     canvas.restore();
   }
 

@@ -2117,19 +2117,28 @@ pub fn chat_rename_if(chat_id: &str, from: &str, to: &str) -> Result<bool, Stora
     })
 }
 
-/// ADR-034 — a group's name from a member: applies to a group chat, or to a
-/// chat that still has one of the [placeholders] (just joined — a group of
-/// two looks personal until its name arrives); it becomes a group. A
-/// personal chat that already has a name keeps it. Returns whether it changed.
+/// ADR-034 — a group's name from a member.
+/// With [placeholders]: the FIRST name — applies only to a chat that still
+/// has one of them (just joined; a group of two looks personal until its
+/// name arrives), and the chat becomes a group. Anyone in the group may
+/// say it. A chat that already has a real name keeps it.
+/// Without placeholders: a RENAME of a group chat — the caller has checked
+/// that it comes from whoever manages the group (ADR-035). Until
+/// 2026-11-14 one statement did both, so any member's `group_name`
+/// renamed the group for everyone, with no line in the chat.
+/// Returns whether the name changed.
 pub fn chat_set_group_name(chat_id: &str, name: &str, placeholders: &[String]) -> Result<bool, StorageError> {
     with_db(|conn| {
-        let mut n = conn.execute(
-            "UPDATE chats SET display_name = ?1 WHERE id = ?2 AND is_group = 1 AND display_name <> ?1",
-            params![name, chat_id],
-        )?;
+        if placeholders.is_empty() {
+            return Ok(conn.execute(
+                "UPDATE chats SET display_name = ?1 WHERE id = ?2 AND is_group = 1 AND display_name <> ?1",
+                params![name, chat_id],
+            )? > 0);
+        }
+        let mut n = 0;
         for p in placeholders {
             n += conn.execute(
-                "UPDATE chats SET display_name = ?1, is_group = 1 WHERE id = ?2 AND is_group = 0 AND display_name = ?3",
+                "UPDATE chats SET display_name = ?1, is_group = 1 WHERE id = ?2 AND display_name = ?3 AND display_name <> ?1",
                 params![name, chat_id, p],
             )?;
         }
@@ -2804,7 +2813,13 @@ mod tests {
         let ph = vec!["Group ab12".to_string()];
         assert!(chat_set_group_name("g", "Дача", &ph).unwrap());
         assert!(!chat_set_group_name("g", "Дача", &ph).unwrap(), "same name, no change");
-        assert!(chat_set_group_name("g", "Дача 2", &ph).unwrap(), "a group can be renamed");
+        assert!(!chat_set_group_name("g", "Дача 2", &ph).unwrap(), "a named group is not renamed as a first name");
+        assert!(chat_set_group_name("g", "Дача 2", &[]).unwrap(), "a rename (the caller checked who asks)");
+        assert!(!chat_set_group_name("g", "Дача 2", &[]).unwrap(), "same name, no change");
+        assert!(!chat_set_group_name("s", "Not Bob", &[]).unwrap(), "a rename never touches a personal chat");
+        // A device that joined late has the group with a placeholder name.
+        chat_upsert("g2", "Group ab12", true, false, false, 0, None, 1, "text", None, false, 1).unwrap();
+        assert!(chat_set_group_name("g2", "Дача", &ph).unwrap(), "a group's placeholder takes the first name");
         assert!(!chat_set_group_name("s", "Not Bob", &ph).unwrap(), "a personal chat keeps its name");
         assert_eq!(chat().display_name, "Bob");
         let _ = std::fs::remove_file(&path);

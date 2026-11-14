@@ -4064,7 +4064,10 @@ class _ReactionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = DsTheme.of(context);
     final mine = reaction.mine;
-    final fill = mine ? Color.lerp(tokens.elevated, tokens.accent, 0.16)! : tokens.elevated;
+    // The colour of an incoming bubble: a pill you can see on the page.
+    // (It was the page's own white in the light theme — only the bite it
+    // took out of the bubble showed, with the emoji hanging in the air.)
+    final fill = mine ? Color.lerp(tokens.bubbleIn, tokens.accent, 0.16)! : tokens.bubbleIn;
     final counted = reaction.count > 1;
     final chip = AnimatedContainer(
       duration: DsMotion.of(context, DsMotion.base),

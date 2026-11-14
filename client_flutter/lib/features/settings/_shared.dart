@@ -5,6 +5,7 @@
 //
 // Per design/app/settings.jsx + settings-detail.jsx.
 
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/widgets.dart';
 
 import '../../app/theme/motion.dart';
@@ -13,6 +14,7 @@ import '../../app/theme/tokens.dart';
 import '../../core/haptics.dart';
 import '../../widgets/ds_icon.dart';
 import '../../widgets/ds_pressable.dart';
+import '../../widgets/ds_shared_glyphs.dart';
 
 // ═════════════════════════════════════════════════════════════════════
 // Section: title + rounded card with hairline-divided rows + footer
@@ -391,7 +393,51 @@ enum SettingsRowIcon {
   voice,
   document,
   cache,
+  // One row — one picture (owner, 2026-11-14: "no doubles in Settings").
+  privacy,
+  folders,
+  archive,
+  backup,
+  help,
+  report,
+  connection,
+  proxy,
+  serverNotices,
 }
+
+/// System icons, one line weight for the whole list. The key stays our own
+/// drawing (the system set has none).
+IconData? settingsRowIconData(SettingsRowIcon i) => switch (i) {
+  SettingsRowIcon.user => CupertinoIcons.person,
+  SettingsRowIcon.shield => CupertinoIcons.shield,
+  SettingsRowIcon.devices => CupertinoIcons.device_laptop,
+  SettingsRowIcon.key => null,
+  SettingsRowIcon.lock => CupertinoIcons.lock,
+  SettingsRowIcon.bell => CupertinoIcons.bell,
+  SettingsRowIcon.chats => CupertinoIcons.chat_bubble,
+  SettingsRowIcon.paint => CupertinoIcons.paintbrush,
+  SettingsRowIcon.text => CupertinoIcons.globe,
+  SettingsRowIcon.storage => CupertinoIcons.chart_pie,
+  SettingsRowIcon.download => CupertinoIcons.arrow_down_circle,
+  SettingsRowIcon.server => CupertinoIcons.rectangle_stack,
+  SettingsRowIcon.info => CupertinoIcons.info_circle,
+  SettingsRowIcon.trash => CupertinoIcons.trash,
+  SettingsRowIcon.clock => CupertinoIcons.clock,
+  SettingsRowIcon.photos => CupertinoIcons.photo,
+  SettingsRowIcon.videos => CupertinoIcons.videocam,
+  SettingsRowIcon.voice => CupertinoIcons.mic,
+  SettingsRowIcon.document => CupertinoIcons.doc_text,
+  SettingsRowIcon.cache => CupertinoIcons.tray_full,
+  SettingsRowIcon.privacy => CupertinoIcons.hand_raised,
+  SettingsRowIcon.folders => CupertinoIcons.folder,
+  SettingsRowIcon.archive => CupertinoIcons.archivebox,
+  SettingsRowIcon.backup => CupertinoIcons.cloud_upload,
+  SettingsRowIcon.help => CupertinoIcons.question_circle,
+  SettingsRowIcon.report => CupertinoIcons.exclamationmark_bubble,
+  SettingsRowIcon.connection => CupertinoIcons.wifi,
+  SettingsRowIcon.proxy => CupertinoIcons.eye_slash,
+  SettingsRowIcon.serverNotices => CupertinoIcons.device_desktop,
+};
 
 enum SettingsRowTint {
   privacy, // green
@@ -426,7 +472,9 @@ SettingsTintColors resolveSettingsTint(SettingsRowTint tint, DsTokens tokens) {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Row icon painters (20pt viewBox=24, stroke 1.8)
+// Row icons — system glyphs (2026-11-14; were ~250 lines of hand-drawn
+// paths, several rows shared one picture and the key was drawn with its
+// teeth across the shaft).
 // ═════════════════════════════════════════════════════════════════════
 
 class SettingsRowIconPainter extends CustomPainter {
@@ -436,252 +484,27 @@ class SettingsRowIconPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final s = size.width / 24;
-    canvas.save();
-    canvas.scale(s);
-    final stroke = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    final fill = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    switch (shape) {
-      case SettingsRowIcon.user:
-        canvas.drawCircle(const Offset(12, 8), 4, stroke);
-        final p = Path()
-          ..moveTo(4, 21)
-          ..cubicTo(4, 17, 7.6, 14, 12, 14)
-          ..cubicTo(16.4, 14, 20, 17, 20, 21);
-        canvas.drawPath(p, stroke);
-      case SettingsRowIcon.shield:
-        final p = Path()
-          ..moveTo(12, 3)
-          ..lineTo(20, 6)
-          ..lineTo(20, 12)
-          ..cubicTo(20, 17, 16.5, 20, 12, 21)
-          ..cubicTo(7.5, 20, 4, 17, 4, 12)
-          ..lineTo(4, 6)
-          ..close();
-        canvas.drawPath(p, stroke);
-        final tick = Path()
-          ..moveTo(9, 12)
-          ..lineTo(11, 14)
-          ..lineTo(15, 10);
-        canvas.drawPath(tick, stroke);
-      case SettingsRowIcon.devices:
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(3, 5, 13, 10), const Radius.circular(1.6)),
-          stroke,
-        );
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(14, 9, 7, 11), const Radius.circular(1.4)),
-          stroke,
-        );
-        canvas.drawLine(const Offset(5, 18), const Offset(11, 18), stroke);
-      case SettingsRowIcon.key:
-        canvas.drawCircle(const Offset(8, 14), 4, stroke);
-        canvas.drawLine(const Offset(11, 12), const Offset(20, 3), stroke);
-        canvas.drawLine(const Offset(16, 5), const Offset(19, 8), stroke);
-        canvas.drawLine(const Offset(14, 7), const Offset(17, 10), stroke);
-      case SettingsRowIcon.lock:
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(4.5, 11, 15, 10), const Radius.circular(2.2)),
-          stroke,
-        );
-        final shackle = Path()
-          ..moveTo(8, 11)
-          ..lineTo(8, 8)
-          ..arcToPoint(const Offset(16, 8), radius: const Radius.circular(4))
-          ..lineTo(16, 11);
-        canvas.drawPath(shackle, stroke);
-      case SettingsRowIcon.bell:
-        final p = Path()
-          ..moveTo(5, 16)
-          ..lineTo(19, 16)
-          ..lineTo(17, 13)
-          ..lineTo(17, 9)
-          ..cubicTo(17, 6.24, 14.76, 4, 12, 4)
-          ..cubicTo(9.24, 4, 7, 6.24, 7, 9)
-          ..lineTo(7, 13)
-          ..close();
-        canvas.drawPath(p, stroke);
-        final clapper = Path()
-          ..moveTo(10, 19)
-          ..arcToPoint(const Offset(14, 19), radius: const Radius.circular(2));
-        canvas.drawPath(clapper, stroke);
-      case SettingsRowIcon.chats:
-        final p = Path()
-          ..moveTo(4, 6.5)
-          ..cubicTo(4, 5.12, 5.12, 4, 6.5, 4)
-          ..lineTo(17.5, 4)
-          ..cubicTo(18.88, 4, 20, 5.12, 20, 6.5)
-          ..lineTo(20, 14.5)
-          ..cubicTo(20, 15.88, 18.88, 17, 17.5, 17)
-          ..lineTo(10, 17)
-          ..lineTo(6, 20.5)
-          ..lineTo(6, 17)
-          ..lineTo(6.5, 17)
-          ..cubicTo(5.12, 17, 4, 15.88, 4, 14.5)
-          ..close();
-        canvas.drawPath(p, stroke);
-      case SettingsRowIcon.paint:
-        canvas.drawCircle(const Offset(12, 12), 9, stroke);
-        canvas.drawCircle(const Offset(7, 11), 1.2, fill);
-        canvas.drawCircle(const Offset(10, 7), 1.2, fill);
-        canvas.drawCircle(const Offset(15, 7), 1.2, fill);
-        canvas.drawCircle(const Offset(17.5, 11.5), 1.2, fill);
-        final dribble = Path()
-          ..moveTo(12, 21)
-          ..cubicTo(10.5, 21, 10, 20, 10.5, 19)
-          ..cubicTo(11, 18, 12, 17.5, 12, 16.5)
-          ..cubicTo(12, 15, 13.5, 14.5, 15, 15);
-        canvas.drawPath(dribble, stroke);
-      case SettingsRowIcon.text:
-        canvas.drawLine(const Offset(4, 6), const Offset(20, 6), stroke);
-        canvas.drawLine(const Offset(9, 6), const Offset(9, 20), stroke);
-        canvas.drawLine(const Offset(15, 12), const Offset(20, 12), stroke);
-        canvas.drawLine(const Offset(17, 12), const Offset(17, 20), stroke);
-      case SettingsRowIcon.storage:
-        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(3, 4, 18, 6), const Radius.circular(1.6)), stroke);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(3, 14, 18, 6), const Radius.circular(1.6)),
-          stroke,
-        );
-        canvas.drawCircle(const Offset(7, 7), 0.9, fill);
-        canvas.drawCircle(const Offset(7, 17), 0.9, fill);
-      case SettingsRowIcon.download:
-        final p = Path()
-          ..moveTo(12, 4)
-          ..lineTo(12, 16);
-        canvas.drawPath(p, stroke);
-        final arrow = Path()
-          ..moveTo(7, 11)
-          ..lineTo(12, 16)
-          ..lineTo(17, 11);
-        canvas.drawPath(arrow, stroke);
-        canvas.drawLine(const Offset(5, 20), const Offset(19, 20), stroke);
-      case SettingsRowIcon.server:
-        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(3, 5, 18, 6), const Radius.circular(1.6)), stroke);
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(3, 13, 18, 6), const Radius.circular(1.6)),
-          stroke,
-        );
-        canvas.drawCircle(const Offset(7, 8), 0.9, fill);
-        canvas.drawCircle(const Offset(7, 16), 0.9, fill);
-        canvas.drawLine(const Offset(11, 8), const Offset(18, 8), stroke);
-        canvas.drawLine(const Offset(11, 16), const Offset(18, 16), stroke);
-      case SettingsRowIcon.info:
-        canvas.drawCircle(const Offset(12, 12), 9, stroke);
-        canvas.drawLine(const Offset(12, 11), const Offset(12, 17), stroke);
-        canvas.drawCircle(const Offset(12, 7.5), 1.1, fill);
-      case SettingsRowIcon.trash:
-        // Lid + bin
-        canvas.drawLine(const Offset(3, 6), const Offset(21, 6), stroke);
-        final bin = Path()
-          ..moveTo(5, 6)
-          ..lineTo(6, 20)
-          ..cubicTo(6, 20.5, 6.5, 21, 7, 21)
-          ..lineTo(17, 21)
-          ..cubicTo(17.5, 21, 18, 20.5, 18, 20)
-          ..lineTo(19, 6);
-        canvas.drawPath(bin, stroke);
-        // Handle
-        final handle = Path()
-          ..moveTo(9, 6)
-          ..lineTo(9, 4)
-          ..lineTo(15, 4)
-          ..lineTo(15, 6);
-        canvas.drawPath(handle, stroke);
-        // Two vertical lines inside the bin
-        canvas.drawLine(const Offset(10, 10), const Offset(10, 17), stroke);
-        canvas.drawLine(const Offset(14, 10), const Offset(14, 17), stroke);
-      case SettingsRowIcon.clock:
-        canvas.drawCircle(const Offset(12, 12), 9, stroke);
-        canvas.drawLine(const Offset(12, 7), const Offset(12, 12), stroke);
-        canvas.drawLine(const Offset(12, 12), const Offset(16, 14), stroke);
-      case SettingsRowIcon.photos:
-        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(3, 5, 18, 14), const Radius.circular(2)), stroke);
-        canvas.drawCircle(const Offset(8, 10), 1.6, stroke);
-        final mountain = Path()
-          ..moveTo(3, 18)
-          ..lineTo(9, 12)
-          ..lineTo(13, 15)
-          ..lineTo(16, 12)
-          ..lineTo(21, 17);
-        canvas.drawPath(mountain, stroke);
-      case SettingsRowIcon.videos:
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(const Rect.fromLTWH(2.5, 6, 14, 12), const Radius.circular(2)),
-          stroke,
-        );
-        final play = Path()
-          ..moveTo(21.5, 7)
-          ..lineTo(16.5, 10)
-          ..lineTo(16.5, 14)
-          ..lineTo(21.5, 17)
-          ..close();
-        canvas.drawPath(play, stroke);
-      case SettingsRowIcon.voice:
-        // Waveform — 5 vertical bars of varying length, center-anchored.
-        const xs = <double>[4.5, 8, 11.5, 15, 18.5];
-        const tops = <double>[9.5, 7, 4, 8, 6];
-        const heights = <double>[4.5, 10, 16, 8, 12];
-        for (var i = 0; i < xs.length; i++) {
-          canvas.drawLine(Offset(xs[i], tops[i]), Offset(xs[i], tops[i] + heights[i]), stroke);
-        }
-      case SettingsRowIcon.document:
-        final p = Path()
-          ..moveTo(6, 3)
-          ..lineTo(14, 3)
-          ..lineTo(19, 8)
-          ..lineTo(19, 20)
-          ..cubicTo(19, 20.55, 18.55, 21, 18, 21)
-          ..lineTo(6, 21)
-          ..cubicTo(5.45, 21, 5, 20.55, 5, 20)
-          ..lineTo(5, 4)
-          ..cubicTo(5, 3.45, 5.45, 3, 6, 3)
-          ..close();
-        canvas.drawPath(p, stroke);
-        // Fold corner
-        final fold = Path()
-          ..moveTo(14, 3)
-          ..lineTo(14, 8)
-          ..lineTo(19, 8);
-        canvas.drawPath(fold, stroke);
-        // Text lines
-        canvas.drawLine(const Offset(8, 13), const Offset(16, 13), stroke);
-        canvas.drawLine(const Offset(8, 16), const Offset(16, 16), stroke);
-        canvas.drawLine(const Offset(8, 19), const Offset(13, 19), stroke);
-      case SettingsRowIcon.cache:
-        // Database cylinder
-        final top = Path()
-          ..moveTo(4, 6)
-          ..cubicTo(4, 4.9, 7.6, 4, 12, 4)
-          ..cubicTo(16.4, 4, 20, 4.9, 20, 6)
-          ..cubicTo(20, 7.1, 16.4, 8, 12, 8)
-          ..cubicTo(7.6, 8, 4, 7.1, 4, 6)
-          ..close();
-        canvas.drawPath(top, stroke);
-        final mid = Path()
-          ..moveTo(4, 6)
-          ..lineTo(4, 12)
-          ..cubicTo(4, 13.1, 7.6, 14, 12, 14)
-          ..cubicTo(16.4, 14, 20, 13.1, 20, 12)
-          ..lineTo(20, 6);
-        canvas.drawPath(mid, stroke);
-        final bot = Path()
-          ..moveTo(4, 12)
-          ..lineTo(4, 18)
-          ..cubicTo(4, 19.1, 7.6, 20, 12, 20)
-          ..cubicTo(16.4, 20, 20, 19.1, 20, 18)
-          ..lineTo(20, 12);
-        canvas.drawPath(bot, stroke);
+    final icon = settingsRowIconData(shape);
+    if (icon == null) {
+      DsKeyGlyphGlyph(color: color).paint(canvas, size);
+      return;
     }
-    canvas.restore();
+    final glyph = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          inherit: false,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          fontSize: size.shortestSide,
+          height: 1,
+          color: color,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    glyph.paint(canvas, Offset((size.width - glyph.width) / 2, (size.height - glyph.height) / 2));
+    glyph.dispose();
   }
 
   @override

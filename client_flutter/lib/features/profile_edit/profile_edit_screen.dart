@@ -198,10 +198,13 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                         title: context.l10n.privacySection,
                         children: [
                           SettingsRow(
-                            icon: SettingsRowIcon.shield,
+                            // Says what the screen behind it really holds (owner,
+                            // 2026-11-14: "Who sees your profile" led to a screen
+                            // with no such setting).
+                            icon: SettingsRowIcon.privacy,
                             tint: SettingsRowTint.privacy,
-                            label: context.l10n.profileEditWhoSees,
-                            value: context.l10n.privacyTitle,
+                            label: context.l10n.privacyTitle,
+                            subtitle: context.l10n.settingsPrivacyHint,
                             onTap: widget.onPrivacy,
                             isLast: true,
                           ),

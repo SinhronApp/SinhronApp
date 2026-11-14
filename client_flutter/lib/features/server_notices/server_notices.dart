@@ -52,7 +52,7 @@ class _ServerAvatar extends StatelessWidget {
         child: SizedBox(
           width: size * 0.48,
           height: size * 0.48,
-          child: CustomPaint(painter: SettingsRowIconPainter(shape: SettingsRowIcon.server, color: tokens.accent)),
+          child: CustomPaint(painter: SettingsRowIconPainter(shape: SettingsRowIcon.serverNotices, color: tokens.accent)),
         ),
       ),
     );

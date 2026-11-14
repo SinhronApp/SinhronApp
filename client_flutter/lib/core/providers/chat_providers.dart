@@ -147,10 +147,6 @@ Future<String> createMlsChat(
     welcomeB64: invite.welcomeB64,
   );
 
-  // ADR-025 — bring our own other devices into the new chat (pending
-  // Commit + Welcome to ourselves). Not awaited: it waits for server Acks.
-  unawaited(ref.read(netServiceProvider).syncDevices(groupIdsHex: [groupIdHex]));
-
   // 4. Local chat row — id = group_id_hex so encryption + fanout route
   //    consistently.
   final now = DateTime.now();
@@ -171,6 +167,11 @@ Future<String> createMlsChat(
   // Its person, from the start: "Message" finds this chat again before
   // their profile comes (owner, 2026-11-03 — it made a second one).
   await core.storageChatSetPeer(chatId: groupIdHex, peerId: recipientIdentityHex.toLowerCase());
+  // ADR-025 — bring our own other devices into the new chat (pending
+  // Commit + Welcome to ourselves). Not awaited: it waits for server Acks.
+  // After the chat row: the history it sends them carries the chat's name
+  // from that row (see createMlsGroup).
+  unawaited(ref.read(netServiceProvider).syncDevices(groupIdsHex: [groupIdHex]));
   ref.invalidate(chatsProvider);
   return groupIdHex;
 }
@@ -198,8 +199,6 @@ Future<String> createMlsGroup(
     memberIdentityHexes: memberIdentityHexes,
   );
   await _sendWelcomes(memberIdentityHexes, groupIdHex, invite.welcomeB64);
-  // ADR-025 — our own other devices join through device sync.
-  unawaited(ref.read(netServiceProvider).syncDevices(groupIdsHex: [groupIdHex]));
 
   final now = DateTime.now();
   await core.storageChatUpsert(
@@ -218,6 +217,12 @@ Future<String> createMlsGroup(
   );
   ref.invalidate(chatsProvider);
   await _sendGroupName(ref, groupIdHex, name);
+  // ADR-025 — our own other devices join through device sync. Only now:
+  // the history it hands them carries the group's name read from the chat
+  // row. Started before the row existed (until 2026-11-14) it sent an
+  // empty name, and my other device kept "Group ab12…" for good — the
+  // `group_name` above is from an epoch that device was not in.
+  unawaited(ref.read(netServiceProvider).syncDevices(groupIdsHex: [groupIdHex]));
   return groupIdHex;
 }
 

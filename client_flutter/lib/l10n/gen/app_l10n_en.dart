@@ -2513,9 +2513,6 @@ class AppL10nEn extends AppL10n {
   String get profileEditJoined => 'On Sinhron since';
 
   @override
-  String get profileEditWhoSees => 'Who can see your profile';
-
-  @override
   String get profileEditSignOut => 'Sign out on this device';
 
   @override

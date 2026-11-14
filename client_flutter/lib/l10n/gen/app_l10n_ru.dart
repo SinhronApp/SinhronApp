@@ -2562,9 +2562,6 @@ class AppL10nRu extends AppL10n {
   String get profileEditJoined => 'В Sinhron с';
 
   @override
-  String get profileEditWhoSees => 'Кто видит ваш профиль';
-
-  @override
   String get profileEditSignOut => 'Выйти на этом устройстве';
 
   @override
